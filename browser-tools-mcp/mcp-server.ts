@@ -339,6 +339,48 @@ server.tool("wipeLogs", "Wipe all browser logs from memory", async () => {
   });
 });
 
+// Add new tool for getting cookies
+server.tool("getCookies", "Get all cookies from the browser", async () => {
+  const response = await fetch(`http://127.0.0.1:${PORT}/cookies`);
+  const json = await response.json();
+  return {
+    content: [
+      {
+        type: "text",
+        text: JSON.stringify(json, null, 2),
+      },
+    ],
+  };
+});
+
+// Add new tool for getting localStorage
+server.tool("getLocalStorage", "Get all localStorage items", async () => {
+  const response = await fetch(`http://127.0.0.1:${PORT}/local-storage`);
+  const json = await response.json();
+  return {
+    content: [
+      {
+        type: "text",
+        text: JSON.stringify(json, null, 2),
+      },
+    ],
+  };
+});
+
+// Add new tool for getting sessionStorage
+server.tool("getSessionStorage", "Get all sessionStorage items", async () => {
+  const response = await fetch(`http://127.0.0.1:${PORT}/session-storage`);
+  const json = await response.json();
+  return {
+    content: [
+      {
+        type: "text",
+        text: JSON.stringify(json, null, 2),
+      },
+    ],
+  };
+});
+
 // Start receiving messages on stdio
 (async () => {
   try {

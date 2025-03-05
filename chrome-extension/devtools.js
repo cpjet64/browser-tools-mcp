@@ -752,9 +752,167 @@ async function setupWebSocket() {
     // Set flag to indicate this is an intentional closure
     intentionalClosure = true;
     try {
-      ws.close();
-    } catch (e) {
-      console.error("Error closing existing WebSocket:", e);
+      const message = JSON.parse(event.data);
+      console.log("Chrome Extension: Received WebSocket message:", message);
+
+      if (message.type === "take-screenshot") {
+        console.log("Chrome Extension: Taking screenshot...");
+        // Capture screenshot of the current tab
+        chrome.tabs.captureVisibleTab(null, { format: "png" }, (dataUrl) => {
+          if (chrome.runtime.lastError) {
+            console.error(
+              "Chrome Extension: Screenshot capture failed:",
+              chrome.runtime.lastError
+            );
+            ws.send(
+              JSON.stringify({
+                type: "screenshot-error",
+                error: chrome.runtime.lastError.message,
+                requestId: message.requestId,
+              })
+            );
+            return;
+          }
+
+          console.log("Chrome Extension: Screenshot captured successfully");
+          // Just send the screenshot data, let the server handle paths
+          const response = {
+            type: "screenshot-data",
+            data: dataUrl,
+            requestId: message.requestId,
+            // Only include path if it's configured in settings
+            ...(settings.screenshotPath && { path: settings.screenshotPath }),
+          };
+
+          console.log("Chrome Extension: Sending screenshot data response", {
+            ...response,
+            data: "[base64 data]",
+          });
+
+          ws.send(JSON.stringify(response));
+        });
+      } else if (message.type === "get-cookies") {
+        console.log("Chrome Extension: Getting cookies...");
+        // Get cookies from the current tab
+        chrome.devtools.inspectedWindow.eval(
+          `(function() {
+            // Check if document.cookie is empty
+            if (!document.cookie.trim()) {
+              return [];
+            }
+
+            // Split the cookie string and filter out any empty entries
+            return document.cookie.split(';')
+              .map(cookie => cookie.trim())
+              .filter(cookie => cookie) // Remove empty strings
+              .map(cookie => {
+                const equalsPos = cookie.indexOf('=');
+                // Handle cookies with no value (name only)
+                if (equalsPos === -1) {
+                  return { name: cookie, value: '' };
+                }
+                // Handle normal cookies with name=value
+                const name = cookie.substring(0, equalsPos);
+                const value = cookie.substring(equalsPos + 1);
+                return { name, value };
+              });
+          })()`,
+          (result, isException) => {
+            if (isException || !result) {
+              console.error("Chrome Extension: Error getting cookies:", isException);
+              ws.send(
+                JSON.stringify({
+                  type: "cookies-data",
+                  cookies: [],
+                  error: isException || "Failed to get cookies"
+                })
+              );
+              return;
+            }
+
+            console.log("Chrome Extension: Cookies retrieved successfully:", result);
+            ws.send(
+              JSON.stringify({
+                type: "cookies-data",
+                cookies: result
+              })
+            );
+          }
+        );
+      } else if (message.type === "get-local-storage") {
+        console.log("Chrome Extension: Getting localStorage...");
+        // Get localStorage from the current tab
+        chrome.devtools.inspectedWindow.eval(
+          `(function() {
+            const storage = {};
+            for (let i = 0; i < localStorage.length; i++) {
+              const key = localStorage.key(i);
+              storage[key] = localStorage.getItem(key);
+            }
+            return storage;
+          })()`,
+          (result, isException) => {
+            if (isException || !result) {
+              console.error("Chrome Extension: Error getting localStorage:", isException);
+              ws.send(
+                JSON.stringify({
+                  type: "local-storage-data",
+                  storage: {},
+                  error: isException || "Failed to get localStorage"
+                })
+              );
+              return;
+            }
+
+            console.log("Chrome Extension: localStorage retrieved successfully:", result);
+            ws.send(
+              JSON.stringify({
+                type: "local-storage-data",
+                storage: result
+              })
+            );
+          }
+        );
+      } else if (message.type === "get-session-storage") {
+        console.log("Chrome Extension: Getting sessionStorage...");
+        // Get sessionStorage from the current tab
+        chrome.devtools.inspectedWindow.eval(
+          `(function() {
+            const storage = {};
+            for (let i = 0; i < sessionStorage.length; i++) {
+              const key = sessionStorage.key(i);
+              storage[key] = sessionStorage.getItem(key);
+            }
+            return storage;
+          })()`,
+          (result, isException) => {
+            if (isException || !result) {
+              console.error("Chrome Extension: Error getting sessionStorage:", isException);
+              ws.send(
+                JSON.stringify({
+                  type: "session-storage-data",
+                  storage: {},
+                  error: isException || "Failed to get sessionStorage"
+                })
+              );
+              return;
+            }
+
+            console.log("Chrome Extension: sessionStorage retrieved successfully:", result);
+            ws.send(
+              JSON.stringify({
+                type: "session-storage-data",
+                storage: result
+              })
+            );
+          }
+        );
+      }
+    } catch (error) {
+      console.error(
+        "Chrome Extension: Error processing WebSocket message:",
+        error
+      );
     }
     ws = null;
     intentionalClosure = false; // Reset flag
