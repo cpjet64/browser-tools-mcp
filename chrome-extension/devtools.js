@@ -8,6 +8,7 @@ let settings = {
   maxLogSize: 20000,
   showRequestHeaders: false,
   showResponseHeaders: false,
+  showSensitive: false,
   screenshotPath: "", // Add new setting for screenshot path
   serverHost: "localhost", // Default server host
   serverPort: 3025, // Default server port
@@ -19,6 +20,189 @@ let attachDebuggerRetries = 0;
 const currentTabId = chrome.devtools.inspectedWindow.tabId;
 const MAX_ATTACH_RETRIES = 3;
 const ATTACH_RETRY_DELAY = 1000; // 1 second
+
+// Sensitive key patterns - these match keys that typically contain sensitive data
+const SENSITIVE_KEY_PATTERNS = [
+  // Authentication related
+  /auth/i,
+  /token/i,
+  /jwt/i,
+  /session/i,
+  /api[-_]?key/i,
+  /secret/i,
+  /password/i,
+  /pwd/i,
+  /pass/i,
+  /credential/i,
+  /oauth/i,
+  /refresh[-_]?token/i,
+  /access[-_]?token/i,
+  /private[-_]?key/i,
+
+  // Personal information
+  /ssn/i,
+  /social[-_]?security/i,
+  /dob/i,
+  /birth/i,
+  /phone/i,
+  /address/i,
+  /zip/i,
+  /postal/i,
+  /license/i,
+  /credit[-_]?card/i,
+  /card[-_]?number/i,
+  /cvv/i,
+  /ccv/i,
+
+  // Financial
+  /bank/i,
+  /account/i,
+  /payment/i,
+  /tax/i,
+  /salary/i,
+  /income/i,
+
+  // Health related
+  /medical/i,
+  /insurance/i,
+  /diagnos/i,
+
+  // Other common sensitive data keys
+  /private/i,
+  /confidential/i,
+  /secure/i,
+  /key/i,
+];
+
+// Value patterns that might indicate sensitive data regardless of key name
+const SENSITIVE_VALUE_PATTERNS = [
+  // JWT token pattern (three base64-encoded segments separated by periods)
+  /^ey[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/,
+
+  // API Keys (various formats)
+  /^[A-Za-z0-9_-]{16,128}$/, // generic api key
+  /^AKIA[0-9A-Z]{16}$/, // aws access key
+  /^[A-Za-z0-9/+=]{40}$/, // aws secret key
+  /^sk-[A-Za-z0-9]{32,}$/, // popular api keys
+  /^(sk|pk)_(test|live)_[A-Za-z0-9]{24,}$/, // stripe api key
+  /^AIza[0-9A-Za-z-_]{35}$/, // google api key
+  /^gh[pousr]_[A-Za-z0-9_]{36,255}$/, // github token
+
+  // General API key patterns
+  /^[A-Za-z0-9._-]{32,}$/,
+  /^[A-Za-z0-9]{8,}[-_][A-Za-z0-9]{4,}[-_][A-Za-z0-9]{4,}[-_][A-Za-z0-9]{4,}[-_][A-Za-z0-9]{12,}$/,
+
+  // OAuth token patterns
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+  /^bearer [A-Za-z0-9._-]+$/i, // oauth bearer token
+
+  // Credit card patterns (simplified, real implementation would use Luhn algorithm)
+  /^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|6(?:011|5[0-9]{2})[0-9]{12})$/,
+
+  // Social Security Number pattern (US)
+  /^\d{3}-\d{2}-\d{4}$/,
+
+  // Email addresses
+  /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+];
+
+// Add entropy calculation helper before isSensitiveValue function
+function calculateEntropy(str) {
+  // Create frequency map
+  const freq = new Map();
+  for (const char of str) {
+    freq.set(char, (freq.get(char) || 0) + 1);
+  }
+
+  // Calculate entropy using Shannon's formula
+  let entropy = 0;
+  const len = str.length;
+  for (const count of freq.values()) {
+    const p = count / len;
+    entropy -= p * Math.log2(p);
+  }
+
+  return entropy;
+}
+
+function isSensitiveValue(value) {
+  // Only check strings
+  if (typeof value !== "string") return false;
+
+  // Skip very short values
+  if (value.length < 8) return false;
+
+  // Check against regex patterns first
+  if (SENSITIVE_VALUE_PATTERNS.some((pattern) => pattern.test(value))) {
+    return true;
+  }
+
+  if (settings.aggressiveSensitive) {
+    // Entropy-based checks for different string lengths
+    const entropy = calculateEntropy(value);
+
+    // Adjust thresholds based on string length
+    if (value.length >= 32 && entropy > 4.2) {
+      // High entropy threshold for longer strings
+      // Likely to catch API keys, tokens, etc.
+      return true;
+    }
+
+    if (value.length >= 16 && entropy > 3.8) {
+      // Medium entropy threshold for medium-length strings
+      // Catches hashed values, shorter tokens
+      return true;
+    }
+
+    if (value.length >= 8 && entropy > 3.3) {
+      // Lower threshold for shorter strings
+      // Still catches most sensitive data while reducing false positives
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function isSensitiveKey(key) {
+  return SENSITIVE_KEY_PATTERNS.some((pattern) => pattern.test(key));
+}
+
+function filterSensitiveCookies(cookies) {
+  if (!Array.isArray(cookies)) return [];
+
+  return cookies.map((cookie) => {
+    if (!cookie || typeof cookie !== "object") return cookie;
+
+    const { name, value } = cookie;
+
+    if (isSensitiveKey(name) || isSensitiveValue(value)) {
+      return {
+        ...cookie,
+        value: "[SENSITIVE DATA REDACTED]",
+        sensitive: true,
+      };
+    }
+
+    return cookie;
+  });
+}
+
+function filterSensitiveStorage(storage) {
+  if (!storage || typeof storage !== "object") return {};
+
+  const result = {};
+
+  for (const [key, value] of Object.entries(storage)) {
+    if (isSensitiveKey(key) || isSensitiveValue(value)) {
+      result[key] = "[SENSITIVE DATA REDACTED]";
+    } else {
+      result[key] = value;
+    }
+  }
+
+  return result;
+}
 
 // Load saved settings on startup
 chrome.storage.local.get(["browserConnectorSettings"], (result) => {
@@ -313,6 +497,8 @@ async function sendToBrowserConnector(logData) {
       queryLimit: settings.queryLimit,
       showRequestHeaders: settings.showRequestHeaders,
       showResponseHeaders: settings.showResponseHeaders,
+      showSensitive: settings.showSensitive,
+      aggressiveSensitive: settings.aggressiveSensitive,
     },
   };
 
@@ -943,8 +1129,18 @@ async function setupWebSocket() {
                 "Chrome Extension: Cookies retrieved successfully:",
                 result
               );
+
               // Make sure cookies is an array, even if empty
-              const cookies = Array.isArray(result) ? result : [];
+              let cookies = Array.isArray(result) ? result : [];
+
+              // Filter sensitive data if showSensitive is false
+              if (!settings.showSensitive) {
+                console.log(
+                  "Chrome Extension: Filtering sensitive cookie data"
+                );
+                cookies = filterSensitiveCookies(cookies);
+              }
+
               ws.send(
                 JSON.stringify({
                   type: "cookies-data",
@@ -986,10 +1182,20 @@ async function setupWebSocket() {
                 "Chrome Extension: localStorage retrieved successfully:",
                 result
               );
+
+              // Filter sensitive data if showSensitive is false
+              let storageData = result;
+              if (!settings.showSensitive) {
+                console.log(
+                  "Chrome Extension: Filtering sensitive localStorage data"
+                );
+                storageData = filterSensitiveStorage(result);
+              }
+
               ws.send(
                 JSON.stringify({
                   type: "local-storage-data",
-                  storage: result,
+                  storage: storageData,
                   requestId: message.requestId,
                 })
               );
@@ -1027,10 +1233,20 @@ async function setupWebSocket() {
                 "Chrome Extension: sessionStorage retrieved successfully:",
                 result
               );
+
+              // Filter sensitive data if showSensitive is false
+              let storageData = result;
+              if (!settings.showSensitive) {
+                console.log(
+                  "Chrome Extension: Filtering sensitive sessionStorage data"
+                );
+                storageData = filterSensitiveStorage(result);
+              }
+
               ws.send(
                 JSON.stringify({
                   type: "session-storage-data",
-                  storage: result,
+                  storage: storageData,
                   requestId: message.requestId,
                 })
               );

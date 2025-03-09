@@ -142,6 +142,8 @@ let currentSettings = {
   queryLimit: 30000,
   showRequestHeaders: false,
   showResponseHeaders: false,
+  showSensitive: false,
+  aggressiveSensitive: false,
   model: "claude-3-sonnet",
   stringSizeLimit: 500,
   maxLogSize: 20000,

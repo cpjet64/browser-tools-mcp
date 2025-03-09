@@ -164,7 +164,7 @@
                 <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
         </div>
-        
+
         <div class="settings-content" id="advanced-settings-content">
             <div class="form-group">
                 <label for="log-limit">Log Limit (number of logs)</label>
@@ -199,9 +199,23 @@
                     Include Response Headers
                 </label>
             </div>
+
+            <div class="checkbox-group">
+                <label>
+                    <input type="checkbox" id="show-sensitive">
+                    Include Sensitive Data (Note: This will send all cookies, local storage and session storage data to the server, including potentially sensitive information)
+                </label>
+            </div>
+
+            <div class="checkbox-group">
+                <label>
+                    <input type="checkbox" id="aggressive-sensitive">
+                    Use Aggressive Sensitive Data Checks (Aggressive checks for sensitive data, may result in more false positives)
+                </label>
+            </div>
         </div>
     </div>
 
     <script src="panel.js"></script>
 </body>
-</html> 
+</html>

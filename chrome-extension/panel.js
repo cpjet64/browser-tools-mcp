@@ -5,6 +5,8 @@ let settings = {
   stringSizeLimit: 500,
   showRequestHeaders: false,
   showResponseHeaders: false,
+  showSensitive: false,
+  aggressiveSensitive: false,
   maxLogSize: 20000,
   screenshotPath: "",
   // Add server connection settings
@@ -165,12 +167,12 @@ function createConnectionBanner() {
   const banner = document.createElement("div");
   banner.id = "connection-banner";
   banner.style.cssText = `
-    padding: 6px 0px; 
+    padding: 6px 0px;
     margin-bottom: 4px;
-    width: 40%; 
-    display: flex; 
+    width: 40%;
+    display: flex;
     flex-direction: column;
-    align-items: flex-start; 
+    align-items: flex-start;
     background-color:rgba(0,0,0,0);
     border-radius: 11px;
     font-size: 11px;
@@ -225,13 +227,13 @@ function createConnectionBanner() {
   const indicator = document.createElement("div");
   indicator.id = "banner-status-indicator";
   indicator.style.cssText = `
-    width: 6px; 
-    height: 6px; 
+    width: 6px;
+    height: 6px;
     position: relative;
     top: 1px;
-    border-radius: 50%; 
-    background-color: #ccc; 
-    margin-right: 8px; 
+    border-radius: 50%;
+    background-color: #ccc;
+    margin-right: 8px;
     flex-shrink: 0;
     transition: background-color 0.3s ease;
   `;
@@ -313,6 +315,10 @@ const showRequestHeadersCheckbox = document.getElementById(
 const showResponseHeadersCheckbox = document.getElementById(
   "show-response-headers"
 );
+const showSensitiveCheckbox = document.getElementById("show-sensitive");
+const aggressiveSensitiveCheckbox = document.getElementById(
+  "aggressive-sensitive"
+);
 const maxLogSizeInput = document.getElementById("max-log-size");
 const screenshotPathInput = document.getElementById("screenshot-path");
 const captureScreenshotButton = document.getElementById("capture-screenshot");
@@ -347,6 +353,8 @@ function updateUIFromSettings() {
   stringSizeLimitInput.value = settings.stringSizeLimit;
   showRequestHeadersCheckbox.checked = settings.showRequestHeaders;
   showResponseHeadersCheckbox.checked = settings.showResponseHeaders;
+  showSensitiveCheckbox.checked = settings.showSensitive;
+  aggressiveSensitiveCheckbox.checked = settings.aggressiveSensitive;
   maxLogSizeInput.value = settings.maxLogSize;
   screenshotPathInput.value = settings.screenshotPath;
   serverHostInput.value = settings.serverHost;
@@ -386,6 +394,26 @@ showRequestHeadersCheckbox.addEventListener("change", (e) => {
 
 showResponseHeadersCheckbox.addEventListener("change", (e) => {
   settings.showResponseHeaders = e.target.checked;
+  saveSettings();
+});
+
+showSensitiveCheckbox.addEventListener("change", (e) => {
+  settings.showSensitive = e.target.checked;
+  // set aggressiveSensitive to false if showSensitive is false
+  if (settings.showSensitive && settings.aggressiveSensitive) {
+    settings.aggressiveSensitive = false;
+    aggressiveSensitiveCheckbox.checked = false;
+  }
+  saveSettings();
+});
+
+aggressiveSensitiveCheckbox.addEventListener("change", (e) => {
+  settings.aggressiveSensitive = e.target.checked;
+  // set showSensitive to true if aggressiveSensitive is true
+  if (settings.aggressiveSensitive && settings.showSensitive) {
+    settings.showSensitive = false;
+    showSensitiveCheckbox.checked = false;
+  }
   saveSettings();
 });
 
