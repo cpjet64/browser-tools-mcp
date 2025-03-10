@@ -175,7 +175,6 @@ function filterSensitiveCookies(cookies) {
       return {
         ...cookie,
         value: "[SENSITIVE DATA REDACTED]",
-        sensitive: true,
       };
     }
 
