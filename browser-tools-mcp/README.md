@@ -11,6 +11,13 @@ A Model Context Protocol (MCP) server that provides AI-powered browser tools int
 - Element selection and inspection
 - Browser storage access (cookies, localStorage, sessionStorage)
 - Real-time browser state monitoring
+- Accessibility, performance, SEO, and best practices audits
+
+## Prerequisites
+
+- Node.js 14 or higher
+- Browser Tools Server running
+- Chrome or Chromium browser installed (required for audit functionality)
 
 ## Installation
 
@@ -45,7 +52,8 @@ npx @agentdeskai/browser-tools-mcp
 - Screenshot capture
 - Element selection
 - Browser state analysis
-- Browser storage access
+- Accessibility and performance audits
+- Browser cookies, localStorage, and sessionStorage access
 
 ## MCP Functions
 
@@ -57,6 +65,10 @@ The server provides the following MCP functions:
 - `mcp_getNetworkSuccess` - Get successful network requests
 - `mcp_getNetworkLogs` - Get all network logs
 - `mcp_getSelectedElement` - Get the currently selected DOM element
+- `mcp_runAccessibilityAudit` - Run a WCAG-compliant accessibility audit
+- `mcp_runPerformanceAudit` - Run a performance audit
+- `mcp_runSEOAudit` - Run an SEO audit
+- `mcp_runBestPracticesAudit` - Run a best practices audit
 - `mcp_getCookies` - Get cookies from the current page
 - `mcp_getLocalStorage` - Get localStorage data
 - `mcp_getSessionStorage` - Get sessionStorage data

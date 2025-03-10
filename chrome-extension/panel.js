@@ -11,6 +11,7 @@ let settings = {
   // Add server connection settings
   serverHost: "localhost",
   serverPort: 3025,
+  allowAutoPaste: false, // Default auto-paste setting
 };
 
 // Track connection status
@@ -346,6 +347,9 @@ advancedSettingsHeader.addEventListener("click", () => {
   chevronIcon.classList.toggle("open");
 });
 
+// Get all inputs by ID
+const allowAutoPasteCheckbox = document.getElementById("allow-auto-paste");
+
 // Update UI from settings
 function updateUIFromSettings() {
   logLimitInput.value = settings.logLimit;
@@ -357,6 +361,7 @@ function updateUIFromSettings() {
   screenshotPathInput.value = settings.screenshotPath;
   serverHostInput.value = settings.serverHost;
   serverPortInput.value = settings.serverPort;
+  allowAutoPasteCheckbox.checked = settings.allowAutoPaste;
   hideAllRadio.checked = false;
   hideSensitiveRadio.checked = false;
   hideNothingRadio.checked = false;
@@ -456,6 +461,12 @@ serverPortInput.addEventListener("change", (e) => {
   saveSettings();
   // Automatically test connection when port is changed
   testConnection(settings.serverHost, settings.serverPort);
+});
+
+// Add event listener for auto-paste checkbox
+allowAutoPasteCheckbox.addEventListener("change", (e) => {
+  settings.allowAutoPaste = e.target.checked;
+  saveSettings();
 });
 
 // Function to cancel any ongoing discovery operations
