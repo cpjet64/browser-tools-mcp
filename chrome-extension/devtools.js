@@ -8,7 +8,7 @@ let settings = {
   maxLogSize: 20000,
   showRequestHeaders: false,
   showResponseHeaders: false,
-  showSensitive: false,
+  sensitiveDataMode: "hide-all", // hide-all, hide-sensitive, show-all
   screenshotPath: "", // Add new setting for screenshot path
   serverHost: "localhost", // Default server host
   serverPort: 3025, // Default server port
@@ -107,7 +107,7 @@ const SENSITIVE_VALUE_PATTERNS = [
 ];
 
 // Add entropy calculation helper before isSensitiveValue function
-function calculateEntropy(str) {
+function calculateNormalizedEntropy(str) {
   // Create frequency map
   const freq = new Map();
   for (const char of str) {
@@ -122,7 +122,13 @@ function calculateEntropy(str) {
     entropy -= p * Math.log2(p);
   }
 
-  return entropy;
+  // Calculate normalized entropy
+  const uniqueChars = new Set(str).size;
+  if (uniqueChars === 0) {
+    return 0;
+  }
+  const maxEntropy = Math.log2(uniqueChars);
+  return entropy / maxEntropy;
 }
 
 function isSensitiveValue(value) {
@@ -137,26 +143,11 @@ function isSensitiveValue(value) {
     return true;
   }
 
-  if (settings.aggressiveSensitive) {
-    // Entropy-based checks for different string lengths
-    const entropy = calculateEntropy(value);
-
-    // Adjust thresholds based on string length
-    if (value.length >= 32 && entropy > 4.2) {
-      // High entropy threshold for longer strings
-      // Likely to catch API keys, tokens, etc.
-      return true;
-    }
-
-    if (value.length >= 16 && entropy > 3.8) {
-      // Medium entropy threshold for medium-length strings
-      // Catches hashed values, shorter tokens
-      return true;
-    }
-
-    if (value.length >= 8 && entropy > 3.3) {
-      // Lower threshold for shorter strings
-      // Still catches most sensitive data while reducing false positives
+  // Entropy-based checks
+  if (value.length > 16) {
+    const normalizedEntropy = calculateNormalizedEntropy(value);
+    // Strings which achieve > 65% of their maximum possible entropy are likely to contain sensitive data
+    if (normalizedEntropy > 0.65) {
       return true;
     }
   }
@@ -176,7 +167,11 @@ function filterSensitiveCookies(cookies) {
 
     const { name, value } = cookie;
 
-    if (isSensitiveKey(name) || isSensitiveValue(value)) {
+    if (
+      settings.sensitiveDataMode === "hide-all" ||
+      (settings.sensitiveDataMode === "hide-sensitive" &&
+        (isSensitiveKey(name) || isSensitiveValue(value)))
+    ) {
       return {
         ...cookie,
         value: "[SENSITIVE DATA REDACTED]",
@@ -194,7 +189,11 @@ function filterSensitiveStorage(storage) {
   const result = {};
 
   for (const [key, value] of Object.entries(storage)) {
-    if (isSensitiveKey(key) || isSensitiveValue(value)) {
+    if (
+      settings.sensitiveDataMode === "hide-all" ||
+      (settings.sensitiveDataMode === "hide-sensitive" &&
+        (isSensitiveKey(key) || isSensitiveValue(value)))
+    ) {
       result[key] = "[SENSITIVE DATA REDACTED]";
     } else {
       result[key] = value;
@@ -497,8 +496,7 @@ async function sendToBrowserConnector(logData) {
       queryLimit: settings.queryLimit,
       showRequestHeaders: settings.showRequestHeaders,
       showResponseHeaders: settings.showResponseHeaders,
-      showSensitive: settings.showSensitive,
-      aggressiveSensitive: settings.aggressiveSensitive,
+      sensitiveDataMode: settings.sensitiveDataMode,
     },
   };
 
@@ -1134,7 +1132,7 @@ async function setupWebSocket() {
               let cookies = Array.isArray(result) ? result : [];
 
               // Filter sensitive data if showSensitive is false
-              if (!settings.showSensitive) {
+              if (settings.sensitiveDataMode !== "show-all") {
                 console.log(
                   "Chrome Extension: Filtering sensitive cookie data"
                 );
@@ -1185,7 +1183,7 @@ async function setupWebSocket() {
 
               // Filter sensitive data if showSensitive is false
               let storageData = result;
-              if (!settings.showSensitive) {
+              if (settings.sensitiveDataMode !== "show-all") {
                 console.log(
                   "Chrome Extension: Filtering sensitive localStorage data"
                 );
@@ -1236,7 +1234,7 @@ async function setupWebSocket() {
 
               // Filter sensitive data if showSensitive is false
               let storageData = result;
-              if (!settings.showSensitive) {
+              if (settings.sensitiveDataMode !== "show-all") {
                 console.log(
                   "Chrome Extension: Filtering sensitive sessionStorage data"
                 );

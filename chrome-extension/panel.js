@@ -5,8 +5,7 @@ let settings = {
   stringSizeLimit: 500,
   showRequestHeaders: false,
   showResponseHeaders: false,
-  showSensitive: false,
-  aggressiveSensitive: false,
+  sensitiveDataMode: "hide-all", // Options: hide-all, hide-sensitive, hide-nothing
   maxLogSize: 20000,
   screenshotPath: "",
   // Add server connection settings
@@ -315,10 +314,6 @@ const showRequestHeadersCheckbox = document.getElementById(
 const showResponseHeadersCheckbox = document.getElementById(
   "show-response-headers"
 );
-const showSensitiveCheckbox = document.getElementById("show-sensitive");
-const aggressiveSensitiveCheckbox = document.getElementById(
-  "aggressive-sensitive"
-);
 const maxLogSizeInput = document.getElementById("max-log-size");
 const screenshotPathInput = document.getElementById("screenshot-path");
 const captureScreenshotButton = document.getElementById("capture-screenshot");
@@ -331,6 +326,11 @@ const testConnectionButton = document.getElementById("test-connection");
 const connectionStatusDiv = document.getElementById("connection-status");
 const statusIcon = document.getElementById("status-icon");
 const statusText = document.getElementById("status-text");
+
+// Sensitive data UI elements
+const hideAllRadio = document.getElementById("hide-all-data");
+const hideSensitiveRadio = document.getElementById("hide-sensitive-data");
+const hideNothingRadio = document.getElementById("hide-nothing");
 
 // Initialize collapsible advanced settings
 const advancedSettingsHeader = document.getElementById(
@@ -353,12 +353,27 @@ function updateUIFromSettings() {
   stringSizeLimitInput.value = settings.stringSizeLimit;
   showRequestHeadersCheckbox.checked = settings.showRequestHeaders;
   showResponseHeadersCheckbox.checked = settings.showResponseHeaders;
-  showSensitiveCheckbox.checked = settings.showSensitive;
-  aggressiveSensitiveCheckbox.checked = settings.aggressiveSensitive;
   maxLogSizeInput.value = settings.maxLogSize;
   screenshotPathInput.value = settings.screenshotPath;
   serverHostInput.value = settings.serverHost;
   serverPortInput.value = settings.serverPort;
+  hideAllRadio.checked = false;
+  hideSensitiveRadio.checked = false;
+  hideNothingRadio.checked = false;
+  switch (settings.sensitiveDataMode) {
+    case "hide-all":
+      hideAllRadio.checked = true;
+      break;
+    case "hide-sensitive":
+      hideSensitiveRadio.checked = true;
+      break;
+    case "hide-nothing":
+      hideNothingRadio.checked = true;
+      break;
+    default:
+      // Default to most secure option if setting is invalid
+      hideAllRadio.checked = true;
+  }
 }
 
 // Save settings
@@ -397,24 +412,25 @@ showResponseHeadersCheckbox.addEventListener("change", (e) => {
   saveSettings();
 });
 
-showSensitiveCheckbox.addEventListener("change", (e) => {
-  settings.showSensitive = e.target.checked;
-  // set aggressiveSensitive to false if showSensitive is false
-  if (settings.showSensitive && settings.aggressiveSensitive) {
-    settings.aggressiveSensitive = false;
-    aggressiveSensitiveCheckbox.checked = false;
+hideAllRadio.addEventListener("change", (e) => {
+  if (e.target.checked) {
+    settings.sensitiveDataMode = "hide-all";
+    saveSettings();
   }
-  saveSettings();
 });
 
-aggressiveSensitiveCheckbox.addEventListener("change", (e) => {
-  settings.aggressiveSensitive = e.target.checked;
-  // set showSensitive to true if aggressiveSensitive is true
-  if (settings.aggressiveSensitive && settings.showSensitive) {
-    settings.showSensitive = false;
-    showSensitiveCheckbox.checked = false;
+hideSensitiveRadio.addEventListener("change", (e) => {
+  if (e.target.checked) {
+    settings.sensitiveDataMode = "hide-sensitive";
+    saveSettings();
   }
-  saveSettings();
+});
+
+hideNothingRadio.addEventListener("change", (e) => {
+  if (e.target.checked) {
+    settings.sensitiveDataMode = "hide-nothing";
+    saveSettings();
+  }
 });
 
 maxLogSizeInput.addEventListener("change", (e) => {

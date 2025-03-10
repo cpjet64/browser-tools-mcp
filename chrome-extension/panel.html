@@ -110,6 +110,22 @@
         .action-button.danger:hover {
             background-color: #d32f2f;
         }
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .radio-option {
+            margin-bottom: 12px;
+        }
+        .radio-option label {
+            display: flex;
+            align-items: flex-start;
+        }
+        .radio-option input[type="radio"] {
+            margin-top: 3px;
+            margin-right: 8px;
+        }
     </style>
 </head>
 <body>
@@ -158,6 +174,32 @@
     </div>
 
     <div class="settings-section">
+        <h3>Sensitive Data Settings</h3>
+        <div class="radio-group">
+            <div class="radio-option">
+                <label for="hide-all-data">
+                    <input type="radio" name="sensitive-data" id="hide-all-data" value="hide-all" checked>
+                    Hide All Cookies and Storage (Maximum privacy, no data will be sent to the server)
+                </label>
+            </div>
+
+            <div class="radio-option">
+                <label for="hide-sensitive-data">
+                    <input type="radio" name="sensitive-data" id="hide-sensitive-data" value="hide-sensitive">
+                    Hide Only Sensitive Data (Sensitive cookies and storage will be filtered out, but other cookies and storage will be sent)
+                </label>
+            </div>
+
+            <div class="radio-option">
+                <label for="hide-nothing">
+                    <input type="radio" name="sensitive-data" id="hide-nothing" value="hide-nothing">
+                    Hide Nothing (All data will be sent to the server, including potentially sensitive information)
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-section">
         <div class="settings-header" id="advanced-settings-header">
             <h3>Advanced Settings</h3>
             <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -197,20 +239,6 @@
                 <label>
                     <input type="checkbox" id="show-response-headers">
                     Include Response Headers
-                </label>
-            </div>
-
-            <div class="checkbox-group">
-                <label>
-                    <input type="checkbox" id="show-sensitive">
-                    Include Sensitive Data (Note: This will send all cookies, local storage and session storage data to the server, including potentially sensitive information)
-                </label>
-            </div>
-
-            <div class="checkbox-group">
-                <label>
-                    <input type="checkbox" id="aggressive-sensitive">
-                    Use Aggressive Sensitive Data Checks (Aggressive checks for sensitive data, may result in more false positives)
                 </label>
             </div>
         </div>
