@@ -6,6 +6,10 @@ This application is a powerful browser monitoring and interaction tool that enab
 
 Read our [docs](https://browsertools.agentdesk.ai/) for the full installation, quickstart and contribution guides.
 
+## Roadmap
+
+Check out our project roadmap here: [Github Roadmap / Project Board](https://github.com/orgs/AgentDeskAI/projects/1/views/1)
+
 ## Updates
 
 v1.2.0 is out! Here's a quick breakdown of the update:
@@ -18,18 +22,32 @@ v1.2.0 is out! Here's a quick breakdown of the update:
 - Improved networking between BrowserTools server, extension and MCP server with host/port auto-discovery, auto-reconnect, and graceful shutdown mechanisms
 - Added ability to more easily exit out of the Browser Tools server with Ctrl+C
 
-  
+## Quickstart Guide
 
-Please make sure to update the version in your IDE / MCP client as so:
-`npx @agentdeskai/browser-tools-mcp@1.2.0`
+There are three components to run this MCP tool:
 
-Also make sure to download the latest version of the chrome extension here:
-[v1.2.0 BrowserToolsMCP Chrome Extension](https://github.com/AgentDeskAI/browser-tools-mcp/releases/download/v1.1.0/chrome-extension-v1-1-0.zip)
+1. Install our chrome extension from here: [v1.2.0 BrowserToolsMCP Chrome Extension](https://github.com/AgentDeskAI/browser-tools-mcp/releases/download/v1.2.0/BrowserTools-1.2.0-extension.zip)
+2. Install the MCP server from this command within your IDE: `npx @agentdeskai/browser-tools-mcp@latest`
+3. Open a new terminal and run this command: `npx @agentdeskai/browser-tools-server@latest`
 
-From there you can run the local node server as usual like so:
-`npx @agentdeskai/browser-tools-server`
+* Different IDEs have different configs but this command is generally a good starting point; please reference your IDEs docs for the proper config setup
 
-And once you've opened your chrome dev tools, logs should be getting sent to your server!
+IMPORTANT TIP - there are two servers you need to install. There's...
+- browser-tools-server (local nodejs server that's a middleware for gathering logs)
+and
+- browser-tools-mcp (MCP server that you install into your IDE that communicates w/ the extension + browser-tools-server)
+
+`npx @agentdeskai/browser-tools-mcp@latest` is what you put into your IDE
+`npx @agentdeskai/browser-tools-server@latest` is what you run in a new terminal window
+
+After those three steps, open up your chrome dev tools and then the BrowserToolsMCP panel.
+
+If you're still having issues try these steps:
+- Quit / close down your browser. Not just the window but all of Chrome itself. 
+- Restart the local node server (browser-tools-server)
+- Make sure you only have ONE instance of chrome dev tools panel open
+
+After that, it should work but if it doesn't let me know and I can share some more steps to gather logs/info about the issue!
 
 If you have any questions or issues, feel free to open an issue ticket! And if you have any ideas to make this better, feel free to reach out or open an issue ticket with an enhancement tag or reach out to me at [@tedx_ai on x](https://x.com/tedx_ai)
 
@@ -56,7 +74,7 @@ Coding agents like Cursor can run these audits against the current page seamless
 | **SEO**            | Evaluates on-page SEO factors (like metadata, headings, and link structure) and suggests improvements for better search visibility.      |
 | **Best Practices** | Checks for general best practices in web development.                                                                                    |
 | **NextJS Audit**   | Injects a prompt used to perform a NextJS audit.                                                                                         |
-| **Audit Mode**     | Runs all audting tools in a sequence.                                                                                                    |
+| **Audit Mode**     | Runs all auditing tools in a sequence.                                                                                                   |
 | **Debugger Mode**  | Runs all debugging tools in a sequence.                                                                                                  |
 
 ---
