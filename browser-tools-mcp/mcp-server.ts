@@ -4,6 +4,9 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import path from "path";
 import fs from "fs";
+// Using zod from the @modelcontextprotocol/sdk dependencies
+// This avoids adding zod as a direct dependency to package.json
+import { z } from "zod";
 
 // Create the MCP server
 const server = new McpServer({
@@ -315,6 +318,58 @@ server.tool(
           },
         ],
       };
+    });
+  }
+);
+
+server.tool(
+  "getHtmlBySelector",
+  "Get HTML elements matching a CSS selector",
+  { selector: z.string().describe("CSS selector to find elements (e.g., '.classname', '#id', 'div.container > p')") },
+  async ({ selector }) => {
+    return await withServerConnection(async () => {
+      try {
+        // Call the browser-connector endpoint
+        const response = await fetch(
+          `http://${discoveredHost}:${discoveredPort}/get-html-by-selector`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ selector })
+          }
+        );
+
+        const result = await response.json().catch(() => null);
+        if (result?.error) {
+          throw new Error(result.error);
+        }
+        if (!response.ok || result === null) {
+          throw new Error(`Server returned error: ${response.status}`);
+        }
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result.html || [], null, 2)
+            }
+          ]
+        };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error("Error getting HTML by selector:", errorMessage);
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Failed to get HTML by selector: ${errorMessage}`
+            }
+          ],
+          isError: true
+        };
+      }
     });
   }
 );

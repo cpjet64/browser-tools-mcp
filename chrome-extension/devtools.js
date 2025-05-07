@@ -1002,6 +1002,61 @@ async function setupWebSocket() {
 
             ws.send(JSON.stringify(response));
           });
+        } else if (message.type === "get-html-by-selector") {
+          console.log("Chrome Extension: Getting HTML by selector:", message.selector);
+          
+          // Execute script in the inspected window to find elements by selector
+          chrome.devtools.inspectedWindow.eval(
+            `(function() {
+              try {
+                // Find all elements matching the selector
+                const elements = document.querySelectorAll('${message.selector.replace(/'/g, "\\'")}');
+                
+                // Convert elements to array of HTML strings
+                return Array.from(elements).map(el => el.outerHTML);
+              } catch (error) {
+                // Handle invalid selector syntax
+                return { error: "Invalid selector: " + error.message };
+              }
+            })()`,
+            (result, isException) => {
+              if (isException || !result) {
+                console.error("Chrome Extension: Error getting HTML by selector:", isException || "No result");
+                ws.send(
+                  JSON.stringify({
+                    type: "selector-error",
+                    error: isException?.value || "Failed to execute selector query",
+                    requestId: message.requestId,
+                  })
+                );
+                return;
+              }
+              
+              // Check if result is an error object
+              if (result && result.error) {
+                console.error("Chrome Extension: Selector error:", result.error);
+                ws.send(
+                  JSON.stringify({
+                    type: "selector-error",
+                    error: result.error,
+                    requestId: message.requestId,
+                  })
+                );
+                return;
+              }
+              
+              console.log(`Chrome Extension: Found ${result.length} elements matching selector`);
+              
+              // Send back the HTML
+              ws.send(
+                JSON.stringify({
+                  type: "html-by-selector",
+                  html: result,
+                  requestId: message.requestId,
+                })
+              );
+            }
+          );
         } else if (message.type === "get-current-url") {
           console.log("Chrome Extension: Received request for current URL");
 

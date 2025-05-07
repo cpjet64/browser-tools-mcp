@@ -181,6 +181,14 @@ interface ScreenshotCallback {
 
 const screenshotCallbacks = new Map<string, ScreenshotCallback>();
 
+// Add new state for tracking selector requests
+interface SelectorCallback {
+  resolve: (value: string[]) => void;
+  reject: (reason: Error) => void;
+}
+
+const selectorCallbacks = new Map<string, SelectorCallback>();
+
 // Function to get available port starting with the given port
 async function getAvailablePort(
   startPort: number,
@@ -632,6 +640,18 @@ export class BrowserConnector {
       }
     );
 
+    // Register the get-html-by-selector endpoint
+    this.app.post(
+      "/get-html-by-selector",
+      async (req: express.Request, res: express.Response) => {
+        console.log(
+          "Browser Connector: Received request to /get-html-by-selector endpoint"
+        );
+        console.log("Browser Connector: Request body:", req.body);
+        await this.getHtmlBySelector(req, res);
+      }
+    );
+
     // Set up accessibility audit endpoint
     this.setupAccessibilityAudit();
 
@@ -741,7 +761,28 @@ export class BrowserConnector {
               );
               screenshotCallbacks.clear(); // Clear all callbacks
             }
-          } else {
+          }
+          // Handle selector response
+          if (data.type === "html-by-selector" && data.requestId) {
+            console.log("Received HTML by selector response");
+            const callback = selectorCallbacks.get(data.requestId);
+            if (callback) {
+              callback.resolve(data.html || []);
+              selectorCallbacks.delete(data.requestId);
+            } else {
+              console.log("No callback found for selector request:", data.requestId);
+            }
+          }
+          // Handle selector error
+          else if (data.type === "selector-error" && data.requestId) {
+            console.log("Received selector error:", data.error);
+            const callback = selectorCallbacks.get(data.requestId);
+            if (callback) {
+              callback.reject(new Error(data.error || "Failed to get HTML by selector"));
+              selectorCallbacks.delete(data.requestId);
+            }
+          }
+          else {
             console.log("Unhandled message type:", data.type);
           }
         } catch (error) {
@@ -1400,6 +1441,81 @@ export class BrowserConnector {
         });
       }
     });
+  }
+
+  // Add method to handle selector requests
+  private async getHtmlBySelector(req: express.Request, res: express.Response) {
+    if (!this.activeConnection) {
+      return res.status(503).json({ error: "Chrome extension not connected" });
+    }
+
+    const { selector } = req.body;
+    if (!selector) {
+      return res.status(400).json({ error: "No selector provided" });
+    }
+
+    try {
+      const requestId = Date.now().toString();
+      console.log("Browser Connector: Generated requestId for selector request:", requestId);
+
+      // Create promise that will resolve when we get the HTML data
+      const selectorPromise = new Promise<string[]>((resolve, reject) => {
+        console.log(
+          `Browser Connector: Setting up selector callback for requestId: ${requestId}`
+        );
+        // Store callback in map
+        selectorCallbacks.set(requestId, { resolve, reject });
+
+        // Set timeout to clean up if we don't get a response
+        setTimeout(() => {
+          if (selectorCallbacks.has(requestId)) {
+            console.log(
+              `Browser Connector: Selector request timed out for requestId: ${requestId}`
+            );
+            selectorCallbacks.delete(requestId);
+            reject(new Error("Selector request timed out - no response from Chrome extension"));
+          }
+        }, 10000); // 10 second timeout
+      });
+
+      // Send selector request to extension
+      const message = JSON.stringify({
+        type: "get-html-by-selector",
+        selector,
+        requestId,
+      });
+      console.log(
+        `Browser Connector: Sending WebSocket message to extension:`,
+        message
+      );
+      this.activeConnection.send(message);
+
+      // Wait for HTML data
+      console.log("Browser Connector: Waiting for selector response...");
+      const html = await selectorPromise;
+      console.log("Browser Connector: Received HTML response");
+
+      // If we got an empty array, add a helpful message
+      if (Array.isArray(html) && html.length === 0) {
+        console.log(`Browser Connector: No elements found for selector: ${selector}`);
+        return res.json({ 
+          html: [],
+          message: `No elements found matching selector: ${selector}`
+        });
+      }
+
+      res.json({ html });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("Browser Connector: Error getting HTML by selector:", errorMessage);
+      if (errorMessage.includes("Invalid selector")) {
+        return res.status(400).json({ error: errorMessage });
+      } else if (errorMessage.includes("timed out")) {
+        return res.status(504).json({ error: errorMessage });
+      } else {
+        return res.status(500).json({ error: errorMessage });
+      }
+    }
   }
 }
 
