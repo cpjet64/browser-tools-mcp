@@ -1,11 +1,14 @@
 {
-  "name": "@agentdeskai/browser-tools-server",
+  "name": "@munawwar-forks/browser-tools-server",
   "version": "1.2.0",
   "description": "A browser tools server for capturing and managing browser events, logs, and screenshots",
   "type": "module",
   "main": "dist/browser-connector.js",
   "bin": {
     "browser-tools-server": "./dist/browser-connector.js"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "tsc",

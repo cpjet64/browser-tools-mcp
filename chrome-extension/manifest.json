@@ -1,5 +1,5 @@
 {
-    "name": "BrowserTools MCP",
+    "name": "BrowserTools MCP Fork by Munawwar",
     "version": "1.2.0",
     "description": "MCP tool for AI code editors to capture data from a browser such as console logs, network requests, screenshots and more",
     "manifest_version": 3,
