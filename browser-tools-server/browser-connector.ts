@@ -640,15 +640,15 @@ export class BrowserConnector {
       }
     );
 
-    // Register the get-html-by-selector endpoint
+    // Register the inspect-elements-by-selector endpoint
     this.app.post(
-      "/get-html-by-selector",
+      "/inspect-elements-by-selector",
       async (req: express.Request, res: express.Response) => {
         console.log(
-          "Browser Connector: Received request to /get-html-by-selector endpoint"
+          "Browser Connector: Received request to /inspect-elements-by-selector endpoint"
         );
         console.log("Browser Connector: Request body:", req.body);
-        await this.getHtmlBySelector(req, res);
+        await this.inspectElementsBySelector(req, res);
       }
     );
 
@@ -1443,45 +1443,86 @@ export class BrowserConnector {
     });
   }
 
-  // Add method to handle selector requests
-  private async getHtmlBySelector(req: express.Request, res: express.Response) {
+  // Add method to handle elements with styles requests
+  private async inspectElementsBySelector(req: express.Request, res: express.Response) {
     if (!this.activeConnection) {
       return res.status(503).json({ error: "Chrome extension not connected" });
     }
 
-    const { selector } = req.body;
+    const { selector, resultLimit = 1, includeComputedStyles = [] } = req.body;
     if (!selector) {
       return res.status(400).json({ error: "No selector provided" });
     }
 
     try {
       const requestId = Date.now().toString();
-      console.log("Browser Connector: Generated requestId for selector request:", requestId);
+      console.log("Browser Connector: Generated requestId for elements with styles request:", requestId);
 
-      // Create promise that will resolve when we get the HTML data
-      const selectorPromise = new Promise<string[]>((resolve, reject) => {
+      // Create promise that will resolve when we get the elements and styles data
+      const elementsBySelectorPromise = new Promise<any>((resolve, reject) => {
         console.log(
-          `Browser Connector: Setting up selector callback for requestId: ${requestId}`
+          `Browser Connector: Setting up elements with styles callback for requestId: ${requestId}`
         );
+        
+        // Store callback in a map
+        const elementsBySelectorCallbacks = new Map<string, {
+          resolve: (value: any) => void;
+          reject: (reason: Error) => void;
+        }>();
+        
         // Store callback in map
-        selectorCallbacks.set(requestId, { resolve, reject });
+        elementsBySelectorCallbacks.set(requestId, { resolve, reject });
+
+        // Add a message listener for inspect-elements-by-selector response
+        const messageHandler = (event: WebSocket.MessageEvent) => {
+          try {
+            const response = JSON.parse(event.data as string);
+            
+            if (response.type === "inspect-elements-response" && response.requestId === requestId) {
+              console.log("Browser Connector: Received inspect-elements-by-selector response");
+              const callback = elementsBySelectorCallbacks.get(requestId);
+              if (callback) {
+                callback.resolve(response.data);
+                elementsBySelectorCallbacks.delete(requestId);
+                this.activeConnection?.removeEventListener("message", messageHandler);
+              }
+            }
+            else if (response.type === "inspect-elements-error" && response.requestId === requestId) {
+              console.error("Browser Connector: inspect-elements-by-selector error:", response.error);
+              const callback = elementsBySelectorCallbacks.get(requestId);
+              if (callback) {
+                callback.reject(new Error(response.error || "Failed to get inspect-elements-by-selector"));
+                elementsBySelectorCallbacks.delete(requestId);
+                this.activeConnection?.removeEventListener("message", messageHandler);
+              }
+            }
+          } catch (error) {
+            console.error("Error processing inspect-elements-by-selector response:", error);
+          }
+        };
+
+        // Add the message listener
+        this.activeConnection?.addEventListener("message", messageHandler);
 
         // Set timeout to clean up if we don't get a response
         setTimeout(() => {
-          if (selectorCallbacks.has(requestId)) {
+          if (elementsBySelectorCallbacks.has(requestId)) {
             console.log(
-              `Browser Connector: Selector request timed out for requestId: ${requestId}`
+              `Browser Connector: inspect-elements-by-selector request timed out for requestId: ${requestId}`
             );
-            selectorCallbacks.delete(requestId);
-            reject(new Error("Selector request timed out - no response from Chrome extension"));
+            elementsBySelectorCallbacks.delete(requestId);
+            this.activeConnection?.removeEventListener("message", messageHandler);
+            reject(new Error("inspect-elements-by-selector request timed out - no response from Chrome extension"));
           }
         }, 10000); // 10 second timeout
       });
 
-      // Send selector request to extension
+      // Send request to extension
       const message = JSON.stringify({
-        type: "get-html-by-selector",
+        type: "inspect-elements-by-selector",
         selector,
+        resultLimit,
+        includeComputedStyles,
         requestId,
       });
       console.log(
@@ -1490,24 +1531,15 @@ export class BrowserConnector {
       );
       this.activeConnection.send(message);
 
-      // Wait for HTML data
-      console.log("Browser Connector: Waiting for selector response...");
-      const html = await selectorPromise;
-      console.log("Browser Connector: Received HTML response");
+      // Wait for inspect-elements-by-selector data
+      console.log("Browser Connector: Waiting for inspect-elements-by-selector response...");
+      const elementsBySelector = await elementsBySelectorPromise;
+      console.log(`Browser Connector: Received inspect-elements-by-selector data with ${elementsBySelector.elements.length} elements`);
 
-      // If we got an empty array, add a helpful message
-      if (Array.isArray(html) && html.length === 0) {
-        console.log(`Browser Connector: No elements found for selector: ${selector}`);
-        return res.json({ 
-          html: [],
-          message: `No elements found matching selector: ${selector}`
-        });
-      }
-
-      res.json({ html });
+      res.json({ data: elementsBySelector });
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error("Browser Connector: Error getting HTML by selector:", errorMessage);
+      console.error("Browser Connector: Error inspecting elements by selector:", errorMessage);
       if (errorMessage.includes("Invalid selector")) {
         return res.status(400).json({ error: errorMessage });
       } else if (errorMessage.includes("timed out")) {

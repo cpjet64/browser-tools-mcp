@@ -68,38 +68,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     });
     return true; // Required to use sendResponse asynchronously
   }
-
-  if (message.type === "GET_HTML_BY_SELECTOR" && message.tabId && message.selector) {
-    chrome.scripting.executeScript(
-      {
-        target: { tabId: message.tabId },
-        func: (selector) => {
-          try {
-            return Array.from(document.querySelectorAll(selector)).map(el => el.outerHTML);
-          } catch (error) {
-            // Handle invalid selector syntax
-            return { error: `Invalid selector: ${error.message}` };
-          }
-        },
-        args: [message.selector],
-      },
-      (results) => {
-        if (chrome.runtime.lastError) {
-          sendResponse({ success: false, error: chrome.runtime.lastError.message });
-        } else {
-          const result = results[0]?.result;
-          // Check if the result is an error object
-          if (result && result.error) {
-            sendResponse({ success: false, error: result.error });
-          } else {
-            // results[0].result is the array of HTML strings
-            sendResponse({ success: true, html: result || [] });
-          }
-        }
-      }
-    );
-    return true; // Required for async sendResponse
-  }
 });
 
 // Validate server identity
