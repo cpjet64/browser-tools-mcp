@@ -1,0 +1,181 @@
+# GitHub Dependabot configuration for browser-tools-mcp multi-package repository
+# This configuration manages automated dependency updates across all packages
+# Documentation: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # ===================================================================
+  # NPM ECOSYSTEM - browser-tools-mcp package
+  # ===================================================================
+  - package-ecosystem: "npm"
+    directory: "/browser-tools-mcp"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    
+    # Assignee and reviewers configuration
+    assignees:
+      - "cpjet64"
+    reviewers:
+      - "cpjet64"
+    
+    # Commit message configuration with semantic prefixes
+    commit-message:
+      prefix: "deps(mcp)"
+      prefix-development: "deps-dev(mcp)"
+      include: "scope"
+    
+    # Labels for easy categorization
+    labels:
+      - "dependencies"
+      - "mcp-package"
+      - "automated"
+    
+    # Limit open pull requests to prevent spam
+    open-pull-requests-limit: 5
+    
+    # Group minor and patch updates to reduce noise
+    groups:
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    
+    # Allow both direct and indirect dependency updates
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    
+    # Ignore specific packages if needed (uncomment and modify as required)
+    # ignore:
+    #   - dependency-name: "package-name"
+    #     versions: ["1.x", "2.x"]
+
+  # ===================================================================
+  # NPM ECOSYSTEM - browser-tools-server package
+  # ===================================================================
+  - package-ecosystem: "npm"
+    directory: "/browser-tools-server"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:30"
+      timezone: "UTC"
+    
+    # Assignee and reviewers configuration
+    assignees:
+      - "cpjet64"
+    reviewers:
+      - "cpjet64"
+    
+    # Commit message configuration with semantic prefixes
+    commit-message:
+      prefix: "deps(server)"
+      prefix-development: "deps-dev(server)"
+      include: "scope"
+    
+    # Labels for easy categorization
+    labels:
+      - "dependencies"
+      - "server-package"
+      - "automated"
+    
+    # Limit open pull requests to prevent spam
+    open-pull-requests-limit: 5
+    
+    # Group minor and patch updates to reduce noise
+    groups:
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    
+    # Allow both direct and indirect dependency updates
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    
+    # Special attention to security-sensitive packages
+    # These will get individual PRs for major updates
+    ignore:
+      - dependency-name: "puppeteer-core"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "lighthouse"
+        update-types: ["version-update:semver-major"]
+
+  # ===================================================================
+  # GITHUB ACTIONS ECOSYSTEM (prepared for future workflows)
+  # ===================================================================
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "10:00"
+      timezone: "UTC"
+    
+    # Assignee and reviewers configuration
+    assignees:
+      - "cpjet64"
+    reviewers:
+      - "cpjet64"
+    
+    # Commit message configuration
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    
+    # Labels for GitHub Actions updates
+    labels:
+      - "github-actions"
+      - "ci-cd"
+      - "automated"
+    
+    # Limit open pull requests
+    open-pull-requests-limit: 3
+    
+    # Group all GitHub Actions updates together
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+# ===================================================================
+# SECURITY CONFIGURATION NOTES
+# ===================================================================
+# 
+# Dependabot automatically creates security updates for:
+# - Direct dependencies with known vulnerabilities
+# - Indirect dependencies with known vulnerabilities (when possible)
+# 
+# Security updates will bypass the normal schedule and grouping rules
+# and will be created immediately when vulnerabilities are detected.
+# 
+# For this repository, pay special attention to:
+# - express: Web framework with potential security implications
+# - node-fetch: HTTP client library
+# - ws: WebSocket library
+# - puppeteer-core: Browser automation (potential security risks)
+# - lighthouse: Audit tool with browser interaction
+# 
+# ===================================================================
+# MAINTENANCE NOTES
+# ===================================================================
+# 
+# 1. Review and merge dependency updates regularly
+# 2. Test thoroughly before merging, especially for:
+#    - Major version updates
+#    - Security-related packages
+#    - Browser automation dependencies
+# 
+# 3. Consider pinning critical dependencies if stability is paramount
+# 4. Monitor for breaking changes in MCP SDK updates
+# 5. Update this configuration as the repository structure evolves
+# 
+# ===================================================================
