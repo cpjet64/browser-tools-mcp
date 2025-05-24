@@ -1,0 +1,36 @@
+# CODEOWNERS file for browser-tools-mcp repository
+# This file defines who should review pull requests for different parts of the codebase
+# Documentation: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global fallback - cpjet64 owns everything by default
+* @cpjet64
+
+# Dependabot dependency updates
+# These patterns will automatically request cpjet64 as reviewer for Dependabot PRs
+package.json @cpjet64
+package-lock.json @cpjet64
+*/package.json @cpjet64
+*/package-lock.json @cpjet64
+
+# GitHub configuration files
+.github/ @cpjet64
+.github/dependabot.yml @cpjet64
+.github/CODEOWNERS @cpjet64
+
+# Documentation
+*.md @cpjet64
+docs/ @cpjet64
+
+# TypeScript configuration
+tsconfig.json @cpjet64
+*/tsconfig.json @cpjet64
+
+# Chrome extension
+chrome-extension/ @cpjet64
+
+# Browser tools packages
+browser-tools-mcp/ @cpjet64
+browser-tools-server/ @cpjet64
+
+# Lighthouse audit configurations
+browser-tools-server/lighthouse/ @cpjet64
