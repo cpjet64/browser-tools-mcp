@@ -1,0 +1,32 @@
+{
+  "name": "browser-tools-mcp-scripts",
+  "version": "1.0.0",
+  "description": "Diagnostic, setup, and platform-specific scripts for browser-tools-mcp",
+  "type": "module",
+  "scripts": {
+    "diagnose": "node diagnose.js",
+    "setup": "node setup.js",
+    "setup:verbose": "node setup.js --verbose",
+    "setup:quick": "node setup.js --skip-diagnostics",
+    "platform-setup": "node platform-setup.js",
+    "validate": "node validate-installation.js",
+    "full-setup": "npm run setup && npm run platform-setup && npm run validate"
+  },
+  "bin": {
+    "browser-tools-diagnose": "./diagnose.js",
+    "browser-tools-setup": "./setup.js",
+    "browser-tools-platform": "./platform-setup.js",
+    "browser-tools-validate": "./validate-installation.js"
+  },
+  "keywords": [
+    "browser-tools",
+    "mcp",
+    "diagnostics",
+    "setup",
+    "troubleshooting",
+    "platform-specific",
+    "validation"
+  ],
+  "author": "Browser Tools MCP",
+  "license": "MIT"
+}
