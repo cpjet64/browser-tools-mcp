@@ -1,0 +1,116 @@
+name: 🔄 Version Bump
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      commit_message:
+        description: 'Custom commit message (optional)'
+        required: false
+        type: string
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            browser-tools-mcp/package-lock.json
+            browser-tools-server/package-lock.json
+
+      - name: 🔧 Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: 📈 Bump MCP Server Version
+        id: bump-mcp
+        run: |
+          cd browser-tools-mcp
+          OLD_VERSION=$(node -p "require('./package.json').version")
+          npm version ${{ github.event.inputs.version_type }} --no-git-tag-version
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "old_version=$OLD_VERSION" >> $GITHUB_OUTPUT
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: 📈 Bump Server Version
+        run: |
+          cd browser-tools-server
+          npm version ${{ steps.bump-mcp.outputs.new_version }} --no-git-tag-version
+
+      - name: 📈 Bump Chrome Extension Version
+        run: |
+          cd chrome-extension
+          # Update manifest.json version
+          node -e "
+            const fs = require('fs');
+            const manifest = JSON.parse(fs.readFileSync('manifest.json', 'utf8'));
+            manifest.version = '${{ steps.bump-mcp.outputs.new_version }}';
+            fs.writeFileSync('manifest.json', JSON.stringify(manifest, null, 2) + '\n');
+          "
+
+      - name: 📝 Update README versions
+        run: |
+          NEW_VERSION="${{ steps.bump-mcp.outputs.new_version }}"
+          
+          # Update main README
+          sed -i "s/v[0-9]\+\.[0-9]\+\.[0-9]\+/v$NEW_VERSION/g" README.md
+          
+          # Update MCP README
+          sed -i "s/v[0-9]\+\.[0-9]\+\.[0-9]\+/v$NEW_VERSION/g" browser-tools-mcp/README.md
+          
+          # Update Chinese README
+          sed -i "s/v[0-9]\+\.[0-9]\+\.[0-9]\+/v$NEW_VERSION/g" docs/i18n/README_CN.md
+
+      - name: 📝 Generate Commit Message
+        id: commit-msg
+        run: |
+          if [ -n "${{ github.event.inputs.commit_message }}" ]; then
+            echo "message=${{ github.event.inputs.commit_message }}" >> $GITHUB_OUTPUT
+          else
+            echo "message=chore: bump version to v${{ steps.bump-mcp.outputs.new_version }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 💾 Commit Changes
+        run: |
+          git add .
+          git commit -m "${{ steps.commit-msg.outputs.message }}"
+          git push origin main
+
+      - name: 📊 Summary
+        run: |
+          echo "## 🔄 Version Bump Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Previous Version:** v${{ steps.bump-mcp.outputs.old_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**New Version:** v${{ steps.bump-mcp.outputs.new_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Bump Type:** ${{ github.event.inputs.version_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Updated Files:" >> $GITHUB_STEP_SUMMARY
+          echo "- \`browser-tools-mcp/package.json\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`browser-tools-server/package.json\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`chrome-extension/manifest.json\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`README.md\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`browser-tools-mcp/README.md\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`docs/i18n/README_CN.md\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🚀 **Next:** The release workflow will automatically trigger and create a new release!"
