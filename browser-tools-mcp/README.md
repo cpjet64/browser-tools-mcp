@@ -23,13 +23,13 @@ A Model Context Protocol (MCP) server that provides AI-powered browser tools int
 ## Installation
 
 ```bash
-npx @munawwar-forks/browser-tools-mcp
+npx @cpjet64/browser-tools-mcp
 ```
 
 Or install globally:
 
 ```bash
-npm install -g @munawwar-forks/browser-tools-mcp
+npm install -g @cpjet64/browser-tools-mcp
 ```
 
 ## Usage
@@ -37,18 +37,18 @@ npm install -g @munawwar-forks/browser-tools-mcp
 1. First, make sure the Browser Tools Server is running:
 
 ```bash
-npx @munawwar-forks/browser-tools-server
+npx @cpjet64/browser-tools-server
 ```
 
 2. Then start the MCP server:
 
 ```bash
-npx @munawwar-forks/browser-tools-mcp
+npx @cpjet64/browser-tools-mcp
 ```
 
 3. The MCP server will connect to the Browser Tools Server and provide the following capabilities:
 
-- Get HTML by selector 
+- Get HTML by selector
 - Console log retrieval
 - Network request monitoring
 - Screenshot capture

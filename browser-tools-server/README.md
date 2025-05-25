@@ -16,13 +16,13 @@ A powerful browser tools server for capturing and managing browser events, logs,
 ## Installation
 
 ```bash
-npx @agentdeskai/browser-tools-server
+npx @cpjet64/browser-tools-server
 ```
 
 Or install globally:
 
 ```bash
-npm install -g @agentdeskai/browser-tools-server
+npm install -g @cpjet64/browser-tools-server
 ```
 
 ## Usage
@@ -30,7 +30,7 @@ npm install -g @agentdeskai/browser-tools-server
 1. Start the server:
 
 ```bash
-npx @agentdeskai/browser-tools-server
+npx @cpjet64/browser-tools-server
 ```
 
 2. The server will start on port 3025 by default

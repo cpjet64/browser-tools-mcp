@@ -62,7 +62,7 @@ jobs:
           cd browser-tools-mcp
           CURRENT_VERSION=$(node -p "require('./package.json').version")
           echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
-          
+
           if [ -n "${{ github.event.inputs.custom_version }}" ]; then
             NEW_VERSION="${{ github.event.inputs.custom_version }}"
             echo "Using custom version: $NEW_VERSION"
@@ -73,22 +73,22 @@ jobs:
             # Reset the change
             git checkout package.json
           fi
-          
+
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "**Version Change:** $CURRENT_VERSION → $NEW_VERSION" >> $GITHUB_STEP_SUMMARY
 
       - name: 📈 Bump All Versions
         run: |
           NEW_VERSION="${{ steps.version.outputs.new_version }}"
-          
+
           # Update MCP Server
           cd browser-tools-mcp
           npm version $NEW_VERSION --no-git-tag-version
-          
+
           # Update Browser Tools Server
           cd ../browser-tools-server
           npm version $NEW_VERSION --no-git-tag-version
-          
+
           # Update Chrome Extension
           cd ../chrome-extension
           node -e "
@@ -97,7 +97,7 @@ jobs:
             manifest.version = '$NEW_VERSION';
             fs.writeFileSync('manifest.json', JSON.stringify(manifest, null, 2) + '\n');
           "
-          
+
           echo "✅ All versions updated to $NEW_VERSION"
 
       - name: 🔧 Install Dependencies
@@ -116,11 +116,11 @@ jobs:
           echo "🧪 Testing MCP Server..."
           cd browser-tools-mcp
           timeout 10s node dist/mcp-server.js || echo "✅ MCP Server test passed"
-          
+
           echo "🧪 Testing Browser Tools Server..."
           cd ../browser-tools-server
           timeout 5s node dist/browser-connector.js || echo "✅ Browser Tools Server test passed"
-          
+
           echo "🧪 Testing Chrome Extension..."
           cd ../chrome-extension
           node -e "
@@ -133,15 +133,15 @@ jobs:
       - name: 📝 Update Documentation
         run: |
           NEW_VERSION="${{ steps.version.outputs.new_version }}"
-          
+
           # Update main README
           sed -i "s/v[0-9]\+\.[0-9]\+\.[0-9]\+/v$NEW_VERSION/g" README.md
-          
+
           # Update MCP README if it exists
           if [ -f "browser-tools-mcp/README.md" ]; then
             sed -i "s/v[0-9]\+\.[0-9]\+\.[0-9]\+/v$NEW_VERSION/g" browser-tools-mcp/README.md
           fi
-          
+
           # Update Chinese README if it exists
           if [ -f "docs/i18n/README_CN.md" ]; then
             sed -i "s/v[0-9]\+\.[0-9]\+\.[0-9]\+/v$NEW_VERSION/g" docs/i18n/README_CN.md
@@ -151,16 +151,8 @@ jobs:
         run: |
           NEW_VERSION="${{ steps.version.outputs.new_version }}"
           git add .
-          git commit -m "chore: release v$NEW_VERSION
+          git commit -m "chore: release v$NEW_VERSION - automated release with version bump, tests, and NPM publishing"
 
-🚀 Automated Release v$NEW_VERSION
-
-- Bump version from ${{ steps.version.outputs.current_version }} to $NEW_VERSION
-- Update all package.json files
-- Update Chrome extension manifest
-- Update documentation versions
-- Ready for NPM publishing and GitHub release"
-          
           git tag "v$NEW_VERSION"
           git push origin main
           git push origin "v$NEW_VERSION"
@@ -168,17 +160,17 @@ jobs:
       - name: 📦 Create Release Assets
         run: |
           NEW_VERSION="${{ steps.version.outputs.new_version }}"
-          
+
           # Create Chrome Extension Package
           cd chrome-extension
           zip -r ../browser-tools-chrome-extension-v$NEW_VERSION.zip . \
             -x "*.git*" "node_modules/*" "*.DS_Store*"
-          
+
           # Create NPM packages
           cd ../browser-tools-mcp
           npm pack
           mv *.tgz ../browser-tools-mcp-v$NEW_VERSION.tgz
-          
+
           cd ../browser-tools-server
           npm pack
           mv *.tgz ../browser-tools-server-v$NEW_VERSION.tgz
@@ -192,7 +184,7 @@ jobs:
           else
             CHANGELOG=$(git log --pretty=format:"- %s" --no-merges | head -20)
           fi
-          
+
           echo "changelog<<EOF" >> $GITHUB_OUTPUT
           echo "$CHANGELOG" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
@@ -204,43 +196,43 @@ jobs:
           name: "🚀 Browser Tools MCP v${{ steps.version.outputs.new_version }}"
           body: |
             # 🚀 Browser Tools MCP v${{ steps.version.outputs.new_version }}
-            
+
             ## 📋 What's New
-            
+
             ${{ steps.changelog.outputs.changelog }}
-            
+
             ## 📦 Installation
-            
+
             ### Quick Start
             ```bash
             # Install MCP Server
             npx @cpjet64/browser-tools-mcp@${{ steps.version.outputs.new_version }}
-            
+
             # Install Browser Tools Server
             npx @cpjet64/browser-tools-server@${{ steps.version.outputs.new_version }}
             ```
-            
+
             ### Chrome Extension
             1. Download `browser-tools-chrome-extension-v${{ steps.version.outputs.new_version }}.zip`
             2. Extract and load in Chrome → Extensions → Developer mode → Load unpacked
-            
+
             ## 🛠️ Features
-            
+
             - ✅ **17 MCP Tools** for browser automation
-            - ✅ **Storage Access** - cookies, localStorage, sessionStorage  
+            - ✅ **Storage Access** - cookies, localStorage, sessionStorage
             - ✅ **Element Inspection** - CSS selectors + computed styles
             - ✅ **Enhanced Screenshots** - works with separate DevTools
             - ✅ **Audit & Debug Modes** - comprehensive analysis
             - ✅ **Windows Compatibility** - full cross-platform support
             - ✅ **Multi-language Documentation** - English + Chinese
-            
+
             ## 🔧 Compatibility
-            
+
             - Node.js 18+ | Chrome/Chromium | Windows, macOS, Linux
             - MCP clients: Cursor, Claude Desktop, Cline, Zed
-            
+
             ---
-            
+
             📚 **Documentation**: [Browser Tools MCP](https://github.com/cpjet64/browser-tools-mcp)
             🐛 **Issues**: [Report bugs](https://github.com/cpjet64/browser-tools-mcp/issues)
           draft: false
@@ -257,7 +249,7 @@ jobs:
           echo "🚀 Publishing MCP Server to NPM..."
           cd browser-tools-mcp
           npm publish --access public
-          
+
           echo "🚀 Publishing Browser Tools Server to NPM..."
           cd ../browser-tools-server
           npm publish --access public
@@ -267,7 +259,7 @@ jobs:
       - name: 🎉 Release Complete
         run: |
           NEW_VERSION="${{ steps.version.outputs.new_version }}"
-          
+
           echo "## 🎉 Complete Release Successful!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Version:** v$NEW_VERSION" >> $GITHUB_STEP_SUMMARY
