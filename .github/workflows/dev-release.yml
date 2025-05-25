@@ -98,8 +98,6 @@ jobs:
           VERSION="${{ steps.version.outputs.new_version }}"
 
           cat > dev-release-notes.md << EOF
-          # 🧪 Browser Tools MCP v${VERSION} (Development Release)
-
           ## ⚠️ Development Release Warning
 
           This is a **development release** with the latest features and improvements. It may contain experimental functionality and could be unstable. For production use, please install the latest stable release with \`@latest\`.
