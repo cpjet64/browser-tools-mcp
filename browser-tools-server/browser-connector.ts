@@ -7,9 +7,14 @@ import { tokenizeAndEstimateCost } from "llm-cost";
 import { WebSocketServer, WebSocket } from "ws";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 import { IncomingMessage } from "http";
 import { Socket } from "net";
 import os from "os";
+
+// Get __dirname equivalent for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 import { exec } from "child_process";
 import {
   runPerformanceAudit,
@@ -554,11 +559,38 @@ app.get("/.port", (req, res) => {
 
 // Add new identity endpoint with a unique signature
 app.get("/.identity", (req, res) => {
+  // Read version from package.json
+  let version = "unknown";
+  try {
+    // Try multiple possible paths for package.json
+    const possiblePaths = [
+      path.join(__dirname, "..", "package.json"), // From dist folder
+      path.join(process.cwd(), "package.json"), // From current working directory
+      path.join(__dirname, "package.json"), // Same directory as this file
+    ];
+
+    for (const packagePath of possiblePaths) {
+      if (fs.existsSync(packagePath)) {
+        const packageJson = JSON.parse(fs.readFileSync(packagePath, "utf8"));
+        if (packageJson.name && packageJson.name.includes("browser-tools-server")) {
+          version = packageJson.version;
+          break;
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error reading package.json for version:", error);
+  }
+
   res.json({
     port: PORT,
     name: "browser-tools-server",
-    version: "1.2.0",
+    version: version,
     signature: "mcp-browser-connector-24x7",
+    uptime: process.uptime(),
+    nodeVersion: process.version,
+    platform: process.platform,
+    arch: process.arch,
   });
 });
 
@@ -1412,13 +1444,7 @@ export class BrowserConnector {
     endpoint: string,
     auditFunction: (url: string) => Promise<LighthouseReport>
   ) {
-    // Add server identity validation endpoint
-    this.app.get("/.identity", (req, res) => {
-      res.json({
-        signature: "mcp-browser-connector-24x7",
-        version: "1.2.0",
-      });
-    });
+    // Note: Identity endpoint is already set up globally, no need to duplicate it here
 
     this.app.post(endpoint, async (req: any, res: any) => {
       try {

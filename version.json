@@ -1,0 +1,10 @@
+{
+  "version": "1.4.1",
+  "components": {
+    "extension": "1.4.1",
+    "server": "1.4.1",
+    "mcp": "1.4.1"
+  },
+  "buildDate": "2024-01-20",
+  "description": "Unified version configuration for Browser Tools MCP components"
+}

@@ -276,7 +276,10 @@ function updateConnectionBanner(connected, serverInfo) {
     // Connected state with server info
     indicator.style.backgroundColor = "#4CAF50"; // Green indicator
     statusText.style.color = "#ffffff"; // White text for contrast on black
-    statusText.textContent = `Connected to ${serverInfo.name} v${serverInfo.version} at ${settings.serverHost}:${settings.serverPort}`;
+
+    // Enhanced status text with more details
+    const uptimeText = serverInfo.uptime ? ` (${Math.floor(serverInfo.uptime)}s uptime)` : '';
+    statusText.textContent = `Connected to ${serverInfo.name} v${serverInfo.version} at ${settings.serverHost}:${settings.serverPort}${uptimeText}`;
 
     // Hide reconnect button when connected
     reconnectButton.style.display = "none";
@@ -347,6 +350,16 @@ const chevronIcon = advancedSettingsHeader.querySelector(".chevron");
 advancedSettingsHeader.addEventListener("click", () => {
   advancedSettingsContent.classList.toggle("visible");
   chevronIcon.classList.toggle("open");
+});
+
+// Initialize collapsible system information
+const systemInfoHeader = document.getElementById("system-info-header");
+const systemInfoContent = document.getElementById("system-info-content");
+const systemInfoChevron = systemInfoHeader.querySelector(".chevron");
+
+systemInfoHeader.addEventListener("click", () => {
+  systemInfoContent.classList.toggle("visible");
+  systemInfoChevron.classList.toggle("open");
 });
 
 // Get all inputs by ID
@@ -1046,3 +1059,154 @@ wipeLogsButton.addEventListener("click", () => {
       }, 2000);
     });
 });
+
+// System Information functionality
+const refreshSystemInfoButton = document.getElementById("refresh-system-info");
+const runVersionCheckButton = document.getElementById("run-version-check");
+
+// Get system info elements
+const extensionVersionElement = document.getElementById("extension-version");
+const serverVersionElement = document.getElementById("server-version");
+const mcpVersionElement = document.getElementById("mcp-version");
+const serverStatusElement = document.getElementById("server-status");
+const websocketStatusElement = document.getElementById("websocket-status");
+const extensionStatusElement = document.getElementById("extension-status");
+
+// Function to get extension version
+function getExtensionVersion() {
+  return chrome.runtime.getManifest().version;
+}
+
+// Function to get server version and info
+async function getServerInfo() {
+  try {
+    const response = await fetch(`http://${settings.serverHost}:${settings.serverPort}/.identity`, {
+      signal: AbortSignal.timeout(3000)
+    });
+
+    if (response.ok) {
+      const identity = await response.json();
+      if (identity.signature === "mcp-browser-connector-24x7") {
+        return {
+          version: identity.version,
+          name: identity.name,
+          uptime: identity.uptime,
+          nodeVersion: identity.nodeVersion,
+          platform: identity.platform,
+          arch: identity.arch,
+          connected: true
+        };
+      }
+    }
+    return { connected: false, error: "Invalid server signature" };
+  } catch (error) {
+    return { connected: false, error: error.message };
+  }
+}
+
+// Function to check WebSocket connectivity
+function checkWebSocketConnectivity() {
+  // Send a message to background script to check WebSocket status
+  chrome.runtime.sendMessage({ type: "CHECK_WEBSOCKET_STATUS" }, (response) => {
+    if (response && response.connected) {
+      websocketStatusElement.innerHTML = '<span style="color: #4CAF50;">✓ Connected</span>';
+    } else {
+      websocketStatusElement.innerHTML = '<span style="color: #F44336;">✗ Disconnected</span>';
+    }
+  });
+}
+
+// Function to update system information
+async function updateSystemInfo() {
+  // Update extension version
+  const extensionVersion = getExtensionVersion();
+  extensionVersionElement.textContent = `Extension: v${extensionVersion}`;
+
+  // Update server info
+  serverVersionElement.textContent = "Server: Checking...";
+  serverStatusElement.innerHTML = '<span style="color: #FFC107;">Checking...</span>';
+
+  const serverInfo = await getServerInfo();
+  if (serverInfo.connected) {
+    serverVersionElement.textContent = `Server: v${serverInfo.version}`;
+    serverStatusElement.innerHTML = `<span style="color: #4CAF50;">✓ Connected</span>`;
+
+    // Add additional server info as tooltip or expandable section
+    const serverDetails = `
+      Name: ${serverInfo.name}
+      Uptime: ${Math.floor(serverInfo.uptime || 0)}s
+      Node: ${serverInfo.nodeVersion || 'unknown'}
+      Platform: ${serverInfo.platform || 'unknown'}
+      Arch: ${serverInfo.arch || 'unknown'}
+    `;
+    serverVersionElement.title = serverDetails;
+  } else {
+    serverVersionElement.textContent = "Server: Unavailable";
+    serverStatusElement.innerHTML = `<span style="color: #F44336;">✗ ${serverInfo.error}</span>`;
+  }
+
+  // Check WebSocket connectivity
+  checkWebSocketConnectivity();
+
+  // MCP version is harder to get from the extension, so we'll show a placeholder
+  mcpVersionElement.textContent = "MCP: Use 'Run Version Check' for details";
+}
+
+// Function to run comprehensive version check
+async function runVersionCheck() {
+  runVersionCheckButton.textContent = "Running...";
+  runVersionCheckButton.disabled = true;
+
+  try {
+    // This would ideally call the MCP server's version check tool
+    // For now, we'll show the available information
+    const extensionVersion = getExtensionVersion();
+    const serverInfo = await getServerInfo();
+
+    let report = "=== Version Compatibility Report ===\n\n";
+    report += `Extension: v${extensionVersion}\n`;
+
+    if (serverInfo.connected) {
+      report += `Server: v${serverInfo.version}\n`;
+      report += `Server Details:\n`;
+      report += `  - Name: ${serverInfo.name}\n`;
+      report += `  - Uptime: ${Math.floor(serverInfo.uptime || 0)} seconds\n`;
+      report += `  - Node.js: ${serverInfo.nodeVersion}\n`;
+      report += `  - Platform: ${serverInfo.platform}\n`;
+      report += `  - Architecture: ${serverInfo.arch}\n\n`;
+
+      // Simple version compatibility check
+      const extParts = extensionVersion.split('.').map(Number);
+      const serverParts = serverInfo.version.split('.').map(Number);
+
+      if (extParts[0] === serverParts[0] && Math.abs(extParts[1] - serverParts[1]) <= 1) {
+        report += "✅ Compatibility: Components appear compatible\n";
+      } else {
+        report += "⚠️  Compatibility: Version mismatch detected\n";
+        report += "   Consider updating components to matching versions\n";
+      }
+    } else {
+      report += `Server: Unavailable (${serverInfo.error})\n`;
+      report += "❌ Compatibility: Cannot verify - server not accessible\n";
+    }
+
+    report += "\nMCP Server: Use MCP client tools for detailed version info\n";
+
+    // Show report in a simple alert for now
+    // In a more sophisticated implementation, this could be shown in a modal
+    alert(report);
+
+  } catch (error) {
+    alert(`Version check failed: ${error.message}`);
+  } finally {
+    runVersionCheckButton.textContent = "Run Version Check";
+    runVersionCheckButton.disabled = false;
+  }
+}
+
+// Event listeners for system info buttons
+refreshSystemInfoButton.addEventListener("click", updateSystemInfo);
+runVersionCheckButton.addEventListener("click", runVersionCheck);
+
+// Initialize system info on load
+updateSystemInfo();

@@ -1,3 +1,6 @@
+// Track WebSocket connection status
+let websocketConnected = false;
+
 // Listen for messages from the devtools panel
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "GET_CURRENT_URL" && message.tabId) {
@@ -9,6 +12,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse({ success: false, error: error.message });
       });
     return true; // Required to use sendResponse asynchronously
+  }
+
+  // Handle WebSocket status check
+  if (message.type === "CHECK_WEBSOCKET_STATUS") {
+    sendResponse({ connected: websocketConnected });
+    return true;
   }
 
   // Handle explicit request to update the server with the URL
@@ -481,3 +490,52 @@ function captureAndSendScreenshot(message, settings, sendResponse) {
     });
   });
 }
+
+// Function to check WebSocket connectivity by attempting to connect
+async function checkWebSocketConnectivity(host, port) {
+  return new Promise((resolve) => {
+    try {
+      const ws = new WebSocket(`ws://${host}:${port}/extension-ws`);
+
+      const timeout = setTimeout(() => {
+        ws.close();
+        resolve(false);
+      }, 3000); // 3 second timeout
+
+      ws.onopen = () => {
+        clearTimeout(timeout);
+        websocketConnected = true;
+        ws.close();
+        resolve(true);
+      };
+
+      ws.onerror = () => {
+        clearTimeout(timeout);
+        websocketConnected = false;
+        resolve(false);
+      };
+
+      ws.onclose = () => {
+        clearTimeout(timeout);
+        // Don't change websocketConnected here as it might be a normal close
+        resolve(websocketConnected);
+      };
+    } catch (error) {
+      websocketConnected = false;
+      resolve(false);
+    }
+  });
+}
+
+// Periodically check WebSocket connectivity
+setInterval(async () => {
+  chrome.storage.local.get(["browserConnectorSettings"], async (result) => {
+    const settings = result.browserConnectorSettings || {
+      serverHost: "localhost",
+      serverPort: 3025,
+    };
+
+    const connected = await checkWebSocketConnectivity(settings.serverHost, settings.serverPort);
+    websocketConnected = connected;
+  });
+}, 10000); // Check every 10 seconds
