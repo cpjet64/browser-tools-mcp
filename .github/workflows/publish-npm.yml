@@ -10,7 +10,7 @@ on:
         required: true
         type: string
       dry_run:
-        description: 'Dry run (don\'t actually publish)'
+        description: 'Dry run (do not actually publish)'
         required: false
         default: false
         type: boolean
@@ -75,18 +75,18 @@ jobs:
         run: |
           echo "## 📦 Publishing Information" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           cd browser-tools-mcp
           MCP_VERSION=$(node -p "require('./package.json').version")
           MCP_NAME=$(node -p "require('./package.json').name")
           echo "**MCP Package:** \`$MCP_NAME@$MCP_VERSION\`" >> $GITHUB_STEP_SUMMARY
-          
+
           cd ../browser-tools-server
           SERVER_VERSION=$(node -p "require('./package.json').version")
           SERVER_NAME=$(node -p "require('./package.json').name")
           echo "**Server Package:** \`$SERVER_NAME@$SERVER_VERSION\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             echo "🧪 **Mode:** Dry Run (no actual publishing)" >> $GITHUB_STEP_SUMMARY
           else
@@ -124,16 +124,16 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## 🎉 Publish Complete!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ "${{ github.event.inputs.dry_run }}" != "true" ]; then
             cd browser-tools-mcp
             MCP_VERSION=$(node -p "require('./package.json').version")
             MCP_NAME=$(node -p "require('./package.json').name")
-            
+
             cd ../browser-tools-server
             SERVER_VERSION=$(node -p "require('./package.json').version")
             SERVER_NAME=$(node -p "require('./package.json').name")
-            
+
             echo "### 📦 Published Packages:" >> $GITHUB_STEP_SUMMARY
             echo "- [\`$MCP_NAME@$MCP_VERSION\`](https://www.npmjs.com/package/$MCP_NAME)" >> $GITHUB_STEP_SUMMARY
             echo "- [\`$SERVER_NAME@$SERVER_VERSION\`](https://www.npmjs.com/package/$SERVER_NAME)" >> $GITHUB_STEP_SUMMARY
