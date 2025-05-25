@@ -1,22 +1,22 @@
 {
-    "name": "BrowserTools MCP Fork by cpjet64",
-    "version": "1.3.2",
-    "description": "MCP tool for AI code editors to capture data from a browser such as console logs, network requests, screenshots and more",
-    "manifest_version": 3,
-    "devtools_page": "devtools.html",
-    "permissions": [
-      "activeTab",
-      "debugger",
-      "storage",
-      "tabs",
-      "tabCapture",
-      "windows",
-      "cookies"
-    ],
-    "host_permissions": [
-      "<all_urls>"
-    ],
-    "background": {
-      "service_worker": "background.js"
-    }
+  "name": "BrowserTools MCP Fork by cpjet64",
+  "version": "1.3.3",
+  "description": "MCP tool for AI code editors to capture data from a browser such as console logs, network requests, screenshots and more",
+  "manifest_version": 3,
+  "devtools_page": "devtools.html",
+  "permissions": [
+    "activeTab",
+    "debugger",
+    "storage",
+    "tabs",
+    "tabCapture",
+    "windows",
+    "cookies"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
 }

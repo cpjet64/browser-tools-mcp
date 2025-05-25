@@ -14,7 +14,7 @@
 
 ## 更新
 
-v1.2.0 已发布！以下是主要更新内容：
+v1.3.3 已发布！以下是主要更新内容：
 - 现在可以在Chrome开发工具面板中启用"Allow Auto-Paste into Cursor"功能。截图将自动粘贴到Cursor中（请确保在Cursor的Agent输入字段中聚焦/点击，否则可能无法工作！）
 - 通过Lighthouse集成了SEO、性能、可访问性和最佳实践分析工具套件
 - 实现了一个针对NextJS应用的特定提示，以改善SEO
@@ -28,7 +28,7 @@ v1.2.0 已发布！以下是主要更新内容：
 
 运行这个MCP工具需要三个组件：
 
-1. 从这里安装我们的Chrome扩展程序：[v1.2.0 BrowserToolsMCP Chrome Extension](https://github.com/AgentDeskAI/browser-tools-mcp/releases/download/v1.2.0/BrowserTools-1.2.0-extension.zip)
+1. 从这里安装我们的Chrome扩展程序：[v1.3.3 BrowserToolsMCP Chrome Extension](https://github.com/AgentDeskAI/browser-tools-mcp/releases/download/v1.3.3/BrowserTools-1.2.0-extension.zip)
 2. 在IDE中运行此命令安装MCP服务器：`npx @agentdeskai/browser-tools-mcp@latest`
 3. 在新终端中运行此命令：`npx @agentdeskai/browser-tools-server@latest`
 

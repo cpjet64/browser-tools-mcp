@@ -10,7 +10,7 @@ English | [简体中文](./docs/i18n/README_CN.md)
 
 This is an **enhanced fork** of the original BrowserTools MCP with significant improvements and new features. It's a powerful browser monitoring and interaction tool that enables AI-powered applications via Anthropic's Model Context Protocol (MCP) to capture and analyze browser data through a Chrome extension.
 
-## 🚀 What's New in This Fork (v1.3.0)
+## 🚀 What's New in This Fork (v1.3.3)
 
 This fork includes **ALL community contributions** and major enhancements:
 
@@ -351,4 +351,4 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-**Made with ❤️ by cpjet64** | **Enhanced Fork** | **v1.3.0**
+**Made with ❤️ by cpjet64** | **Enhanced Fork** | **v1.3.3**
