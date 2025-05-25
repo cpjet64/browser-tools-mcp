@@ -2,7 +2,7 @@
 
 /**
  * Installation Validation Script for Browser Tools MCP
- * 
+ *
  * Comprehensive validation of the entire Browser Tools MCP setup
  * including dependencies, builds, configuration, and functionality.
  */
@@ -86,7 +86,7 @@ class InstallationValidator {
       await this.validateBuilds();
       await this.validateConfiguration();
       await this.validateFunctionality();
-      
+
       this.generateFinalReport();
     } catch (error) {
       this.log(`Validation failed: ${error.message}`, 'red', ICONS.error);
@@ -100,7 +100,7 @@ class InstallationValidator {
     // Node.js version
     const nodeVersion = process.version;
     const majorVersion = parseInt(nodeVersion.slice(1).split('.')[0]);
-    
+
     if (majorVersion >= 18) {
       this.recordResult('prerequisites', 'pass', `Node.js ${nodeVersion} meets requirements (>=18)`);
     } else {
@@ -147,7 +147,7 @@ class InstallationValidator {
           'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
           process.env.LOCALAPPDATA + '\\Google\\Chrome\\Application\\chrome.exe'
         ];
-        
+
         for (const chromePath of chromePaths) {
           if (fs.existsSync(chromePath)) {
             chromeFound = true;
@@ -160,7 +160,7 @@ class InstallationValidator {
           '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
           '/Applications/Chromium.app/Contents/MacOS/Chromium'
         ];
-        
+
         for (const chromePath of chromePaths) {
           if (fs.existsSync(chromePath)) {
             chromeFound = true;
@@ -272,7 +272,7 @@ class InstallationValidator {
 
       // Check for security vulnerabilities
       try {
-        const auditResult = execSync(`cd ${packagePath} && npm audit --audit-level=high`, { 
+        const auditResult = execSync(`cd ${packagePath} && npm audit --audit-level=high`, {
           encoding: 'utf8',
           stdio: 'pipe'
         });
@@ -301,14 +301,14 @@ class InstallationValidator {
         const distContents = fs.readdirSync(distPath);
         if (distContents.length > 0) {
           this.recordResult('builds', 'pass', `${pkg.name} build artifacts present`);
-          
+
           // Check for main entry point
           const packageJsonPath = path.join(packagePath, 'package.json');
           if (fs.existsSync(packageJsonPath)) {
             const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
             const mainFile = packageJson.main || 'index.js';
             const mainPath = path.join(distPath, mainFile);
-            
+
             if (fs.existsSync(mainPath)) {
               this.recordResult('builds', 'pass', `${pkg.name} main entry point exists`);
             } else {
@@ -334,7 +334,7 @@ class InstallationValidator {
     if (fs.existsSync(manifestPath)) {
       try {
         const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-        
+
         if (manifest.manifest_version === 3) {
           this.recordResult('configuration', 'pass', 'Chrome extension uses Manifest V3');
         } else {
@@ -342,9 +342,9 @@ class InstallationValidator {
         }
 
         if (manifest.permissions && manifest.permissions.includes('debugger')) {
-          this.recordResult('configuration', 'pass', 'Chrome extension has debugger permission');
+          this.recordResult('configuration', 'pass', 'WebAI-MCP extension has debugger permission');
         } else {
-          this.recordResult('configuration', 'fail', 'Chrome extension missing debugger permission');
+          this.recordResult('configuration', 'fail', 'WebAI-MCP extension missing debugger permission');
         }
 
         if (manifest.devtools_page) {
@@ -378,7 +378,7 @@ class InstallationValidator {
     try {
       const diagnostic = new DiagnosticTool();
       await diagnostic.runDiagnostics();
-      
+
       if (diagnostic.issues.length === 0) {
         this.recordResult('functionality', 'pass', 'All diagnostic checks passed');
       } else {
@@ -401,7 +401,7 @@ class InstallationValidator {
       const response = await fetch('http://localhost:3025/.identity', {
         signal: AbortSignal.timeout(2000)
       });
-      
+
       if (response.ok) {
         const identity = await response.json();
         if (identity.signature === 'mcp-browser-connector-24x7') {
@@ -437,7 +437,7 @@ class InstallationValidator {
       const categoryName = category.charAt(0).toUpperCase() + category.slice(1);
       const status = results.failed > 0 ? 'red' : results.warnings > 0 ? 'yellow' : 'green';
       const icon = results.failed > 0 ? ICONS.error : results.warnings > 0 ? ICONS.warning : ICONS.success;
-      
+
       this.log(
         `${categoryName}: ${results.passed} passed, ${results.failed} failed, ${results.warnings} warnings`,
         status,

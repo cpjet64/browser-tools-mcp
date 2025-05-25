@@ -136,20 +136,20 @@ jobs:
       - name: 📦 Create Chrome Extension Package
         run: |
           cd chrome-extension
-          zip -r ../browser-tools-chrome-extension-v${{ needs.check-version.outputs.new_version }}.zip . \
+          zip -r ../webai-chrome-extension-v${{ needs.check-version.outputs.new_version }}.zip . \
             -x "*.git*" "node_modules/*" "*.DS_Store*"
 
       - name: 📦 Create MCP Server Package
         run: |
-          cd browser-tools-mcp
+          cd webai-mcp
           npm pack
-          mv *.tgz ../browser-tools-mcp-v${{ needs.check-version.outputs.new_version }}.tgz
+          mv *.tgz ../webai-mcp-v${{ needs.check-version.outputs.new_version }}.tgz
 
       - name: 📦 Create Server Package
         run: |
-          cd browser-tools-server
+          cd webai-server
           npm pack
-          mv *.tgz ../browser-tools-server-v${{ needs.check-version.outputs.new_version }}.tgz
+          mv *.tgz ../webai-server-v${{ needs.check-version.outputs.new_version }}.tgz
 
       - name: 📝 Generate Release Notes
         id: release-notes

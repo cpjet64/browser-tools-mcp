@@ -1,14 +1,14 @@
-# Browser Tools MCP
+# WebAI-MCP
 
 > Make your AI tools 10x more aware and capable of interacting with your browser
 
-[![Latest Release](https://img.shields.io/github/v/release/cpjet64/browser-tools-mcp?style=flat-square)](https://github.com/cpjet64/browser-tools-mcp/releases)
-[![NPM MCP Server](https://img.shields.io/npm/v/@cpjet64/browser-tools-mcp?style=flat-square&label=MCP%20Server)](https://www.npmjs.com/package/@cpjet64/browser-tools-mcp)
-[![NPM Browser Server](https://img.shields.io/npm/v/@cpjet64/browser-tools-server?style=flat-square&label=Browser%20Server)](https://www.npmjs.com/package/@cpjet64/browser-tools-server)
+[![Latest Release](https://img.shields.io/github/v/release/cpjet64/webai-mcp?style=flat-square)](https://github.com/cpjet64/webai-mcp/releases)
+[![NPM MCP Server](https://img.shields.io/npm/v/@cpjet64/webai-mcp?style=flat-square&label=MCP%20Server)](https://www.npmjs.com/package/@cpjet64/webai-mcp)
+[![NPM WebAI Server](https://img.shields.io/npm/v/@cpjet64/webai-server?style=flat-square&label=WebAI%20Server)](https://www.npmjs.com/package/@cpjet64/webai-server)
 
 English | [简体中文](./docs/i18n/README_CN.md)
 
-Browser Tools MCP is a comprehensive browser automation and monitoring solution that enables AI applications to capture and analyze browser data through a Chrome extension. It provides 20+ tools for screenshots, console logs, network monitoring, storage access, audits, and cross-platform auto-paste functionality.
+WebAI-MCP is a comprehensive browser automation and monitoring solution that enables AI applications to capture and analyze browser data through a Chrome extension. It provides 20+ tools for screenshots, console logs, network monitoring, storage access, audits, and cross-platform auto-paste functionality.
 
 ## ✨ Key Features
 
@@ -28,17 +28,17 @@ Browser Tools MCP is a comprehensive browser automation and monitoring solution 
 
 ```bash
 # 1. Install MCP Server (for your IDE)
-npx @cpjet64/browser-tools-mcp@latest
+npx @cpjet64/webai-mcp@latest
 
-# 2. Install Browser Tools Server (run in separate terminal)
-npx @cpjet64/browser-tools-server@latest
+# 2. Install WebAI Server (run in separate terminal)
+npx @cpjet64/webai-server@latest
 ```
 
 ### **Method 2: Download from Releases**
 
-1. **Chrome Extension**: Download from [Latest Release](https://github.com/cpjet64/browser-tools-mcp/releases/latest)
-2. **MCP Server**: `npx @cpjet64/browser-tools-mcp@latest`
-3. **Browser Server**: `npx @cpjet64/browser-tools-server@latest`
+1. **Chrome Extension**: Download from [Latest Release](https://github.com/cpjet64/webai-mcp/releases/latest)
+2. **MCP Server**: `npx @cpjet64/webai-mcp@latest`
+3. **WebAI Server**: `npx @cpjet64/webai-server@latest`
 
 ### **📋 Setup Steps**
 
@@ -425,28 +425,32 @@ Once installed, you can use natural language commands with your MCP client:
 - **Chinese Documentation**: [简体中文文档](./docs/i18n/README_CN.md)
 - **Original Docs**: [BrowserTools MCP Docs](https://browsertools.agentdesk.ai/)
 
-## 🔄 Migration from Original Repository
+## 🔄 Migration from Browser Tools MCP
 
-If you're currently using the original `AgentDeskAI/browser-tools-mcp`, here's how to migrate to this enhanced version:
+If you're currently using the original `browser-tools-mcp` or `AgentDeskAI/browser-tools-mcp`, here's how to migrate to WebAI-MCP:
 
 ### **📦 Package Migration**
 
 **1. Update MCP Server Package:**
 ```bash
 # Remove old package
+npm uninstall @cpjet64/browser-tools-mcp
+# OR if using original
 npm uninstall @munawwar-forks/browser-tools-mcp
 
 # Install new package
-npm install @cpjet64/browser-tools-mcp
+npm install @cpjet64/webai-mcp
 ```
 
-**2. Update Browser Server Package:**
+**2. Update WebAI Server Package:**
 ```bash
 # Remove old package
+npm uninstall @cpjet64/browser-tools-server
+# OR if using original
 npm uninstall @munawwar-forks/browser-tools-server
 
 # Install new package
-npm install @cpjet64/browser-tools-server
+npm install @cpjet64/webai-server
 ```
 
 ### **⚙️ Configuration Updates**
@@ -465,13 +469,13 @@ npm install @cpjet64/browser-tools-server
 }
 ```
 
-**After (This Fork):**
+**After (WebAI-MCP):**
 ```json
 {
   "mcpServers": {
-    "browser-tools": {
+    "webai": {
       "command": "npx",
-      "args": ["@cpjet64/browser-tools-mcp"]
+      "args": ["@cpjet64/webai-mcp"]
     }
   }
 }
@@ -480,14 +484,14 @@ npm install @cpjet64/browser-tools-server
 ### **🔧 Chrome Extension**
 
 **Option 1: Download from Releases (Recommended)**
-1. Download the latest `.zip` from [Releases](https://github.com/cpjet64/browser-tools-mcp/releases)
+1. Download the latest `.zip` from [Releases](https://github.com/cpjet64/webai-mcp/releases)
 2. Remove the old extension from Chrome
 3. Load the new extension using "Load unpacked"
 
 **Option 2: Build from Source**
 ```bash
-git clone https://github.com/cpjet64/browser-tools-mcp.git
-cd browser-tools-mcp/chrome-extension
+git clone https://github.com/cpjet64/webai-mcp.git
+cd webai-mcp/chrome-extension
 # Load the folder in Chrome Extensions → Developer mode → Load unpacked
 ```
 
@@ -504,8 +508,8 @@ cd browser-tools-mcp/chrome-extension
 
 After migration, test that everything works:
 ```bash
-# Start the new browser server
-npx @cpjet64/browser-tools-server
+# Start the new WebAI server
+npx @cpjet64/webai-server
 
 # Test in your MCP client
 "Take a screenshot"

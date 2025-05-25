@@ -37,17 +37,17 @@
 
 ```bash
 # 1. 安装MCP服务器（用于您的IDE）
-npx @cpjet64/browser-tools-mcp@latest
+npx @cpjet64/webai-mcp@latest
 
-# 2. 安装浏览器工具服务器（在单独的终端中运行）
-npx @cpjet64/browser-tools-server@latest
+# 2. 安装WebAI服务器（在单独的终端中运行）
+npx @cpjet64/webai-server@latest
 ```
 
 ### **方法2：从发布页面下载**
 
-1. **Chrome扩展**：从[最新发布](https://github.com/cpjet64/browser-tools-mcp/releases/latest)下载
-2. **MCP服务器**：`npx @cpjet64/browser-tools-mcp@latest`
-3. **浏览器服务器**：`npx @cpjet64/browser-tools-server@latest`
+1. **Chrome扩展**：从[最新发布](https://github.com/cpjet64/webai-mcp/releases/latest)下载
+2. **MCP服务器**：`npx @cpjet64/webai-mcp@latest`
+3. **WebAI服务器**：`npx @cpjet64/webai-server@latest`
 
 ### **📋 设置步骤**
 
@@ -69,19 +69,19 @@ npx @cpjet64/browser-tools-server@latest
 ### **💡 重要说明**
 
 **需要两个服务器**：
-- **`@cpjet64/browser-tools-mcp`** → 用于您的IDE的MCP服务器
-- **`@cpjet64/browser-tools-server`** → 本地中间件服务器
+- **`@cpjet64/webai-mcp`** → 用于您的IDE的MCP服务器
+- **`@cpjet64/webai-server`** → 本地中间件服务器
 
 **故障排除**：
 - 如果遇到问题，请关闭所有Chrome窗口并重新启动
-- 重新启动browser-tools-server
+- 重新启动webai-server
 - 确保只有一个开发工具面板打开
 
 完成上述步骤后，打开Chrome的开发工具并进入BrowserToolsMCP面板。
 
 如果仍然存在问题，请尝试以下步骤：
 - 关闭浏览器。不仅仅是当前窗口，而是整个Chrome。
-- 重新启动本地Node服务器（browser-tools-server）
+- 重新启动本地Node服务器（webai-server）
 - 确保您的浏览器中只有一个开发工具面板处于打开状态。
 
 如果有任何问题或建议，欢迎随时提交issue！如果您有任何改进的想法，也可以提交带有enhancement标签的issue，或者通过[@tedx_ai on x](https://x.com/tedx_ai)与我联系。

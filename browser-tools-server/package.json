@@ -1,11 +1,11 @@
 {
-  "name": "@cpjet64/browser-tools-server",
+  "name": "@cpjet64/webai-server",
   "version": "1.4.1-dev.5",
-  "description": "A browser tools server for capturing and managing browser events, logs, and screenshots",
+  "description": "WebAI server for capturing and managing browser events, logs, and screenshots",
   "type": "module",
   "main": "dist/browser-connector.js",
   "bin": {
-    "browser-tools-server": "./dist/browser-connector.js"
+    "webai-server": "./dist/browser-connector.js"
   },
   "publishConfig": {
     "access": "public"
@@ -16,8 +16,9 @@
     "prepublishOnly": "npm run build"
   },
   "keywords": [
+    "webai",
     "browser",
-    "tools",
+    "automation",
     "debugging",
     "logging",
     "screenshots",

@@ -1,17 +1,17 @@
 {
-  "name": "@cpjet64/browser-tools-mcp",
+  "name": "@cpjet64/webai-mcp",
   "version": "1.4.1-dev.5",
-  "description": "MCP (Model Context Protocol) server for browser tools integration",
+  "description": "MCP (Model Context Protocol) server for WebAI browser integration",
   "main": "dist/mcp-server.js",
   "bin": {
-    "browser-tools-mcp": "dist/mcp-server.js"
+    "webai-mcp": "dist/mcp-server.js"
   },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
     "inspect": "tsc && npx @modelcontextprotocol/inspector node -- dist/mcp-server.js",
-    "inspect-live": "npx @modelcontextprotocol/inspector npx -- @cpjet64/browser-tools-mcp",
+    "inspect-live": "npx @modelcontextprotocol/inspector npx -- @cpjet64/webai-mcp",
     "build": "tsc",
     "start": "tsc && node dist/mcp-server.js",
     "prepublishOnly": "npm run build",
@@ -20,12 +20,12 @@
   "keywords": [
     "mcp",
     "model-context-protocol",
+    "webai",
     "browser",
-    "tools",
-    "debugging",
     "ai",
     "chrome",
-    "extension"
+    "extension",
+    "automation"
   ],
   "author": "AgentDesk AI",
   "license": "MIT",

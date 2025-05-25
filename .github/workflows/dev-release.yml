@@ -56,8 +56,8 @@ jobs:
           NEW_VERSION=$(node -p "require('./package.json').version")
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
-          # Update browser-tools-mcp to same version
-          cd ../browser-tools-mcp
+          # Update webai-mcp to same version
+          cd ../webai-mcp
           npm version $NEW_VERSION --no-git-tag-version
 
           # Update chrome extension manifest version
@@ -72,31 +72,31 @@ jobs:
       - name: Create Chrome Extension Package
         run: |
           cd chrome-extension
-          zip -r ../browser-tools-chrome-extension-v${{ steps.version.outputs.new_version }}.zip . \
+          zip -r ../webai-chrome-extension-v${{ steps.version.outputs.new_version }}.zip . \
             -x "*.git*" "node_modules/*" "*.DS_Store*"
 
       - name: Create MCP Server Package
         run: |
-          cd browser-tools-mcp
+          cd webai-mcp
           npm pack
-          mv *.tgz ../browser-tools-mcp-v${{ steps.version.outputs.new_version }}.tgz
+          mv *.tgz ../webai-mcp-v${{ steps.version.outputs.new_version }}.tgz
 
       - name: Create Server Package
         run: |
-          cd browser-tools-server
+          cd webai-server
           npm pack
-          mv *.tgz ../browser-tools-server-v${{ steps.version.outputs.new_version }}.tgz
+          mv *.tgz ../webai-server-v${{ steps.version.outputs.new_version }}.tgz
 
-      - name: Publish browser-tools-server to NPM (dev tag)
+      - name: Publish webai-server to NPM (dev tag)
         run: |
-          cd browser-tools-server
+          cd webai-server
           npm publish --tag dev
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY }}
 
-      - name: Publish browser-tools-mcp to NPM (dev tag)
+      - name: Publish webai-mcp to NPM (dev tag)
         run: |
-          cd browser-tools-mcp
+          cd webai-mcp
           npm publish --tag dev
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY }}

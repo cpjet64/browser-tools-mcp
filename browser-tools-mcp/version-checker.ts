@@ -76,8 +76,8 @@ export class VersionChecker {
     try {
       // Try multiple possible paths for the MCP server package.json
       const possiblePaths = [
-        path.join(process.cwd(), 'package.json'), // Current directory (when running from browser-tools-mcp)
-        path.join(process.cwd(), 'browser-tools-mcp', 'package.json'), // Parent directory structure
+        path.join(process.cwd(), 'package.json'), // Current directory (when running from webai-mcp)
+        path.join(process.cwd(), 'webai-mcp', 'package.json'), // Parent directory structure
         path.join(__dirname, '..', 'package.json'), // Relative to this file
       ];
 
@@ -177,8 +177,8 @@ export class VersionChecker {
         try {
           if (fs.existsSync(manifestPath)) {
             const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-            // Verify this is the browser tools extension
-            if (manifest.name && manifest.name.includes('BrowserTools')) {
+            // Verify this is the WebAI-MCP extension
+            if (manifest.name && (manifest.name.includes('WebAI-MCP') || manifest.name.includes('BrowserTools'))) {
               return {
                 component: 'Chrome Extension',
                 version: manifest.version,

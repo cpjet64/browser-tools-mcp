@@ -1,6 +1,6 @@
 /**
  * Enhanced Error Handler for Browser Tools MCP
- * 
+ *
  * Provides intelligent error analysis, user-friendly messages,
  * and actionable troubleshooting suggestions.
  */
@@ -39,22 +39,22 @@ export class ErrorHandler {
     ENOTFOUND: /ENOTFOUND|getaddrinfo ENOTFOUND/i,
     TIMEOUT: /timeout|ETIMEDOUT/i,
     NETWORK_ERROR: /network error|fetch failed/i,
-    
+
     // Server errors
     SERVER_NOT_FOUND: /Failed to discover|No server found|server not found/i,
     WRONG_SIGNATURE: /wrong signature|not the Browser Tools server/i,
     SERVER_ERROR: /Server returned [45]\d\d/i,
-    
+
     // Platform errors
     SPAWN_ENOENT: /spawn.*ENOENT/i,
     PERMISSION_DENIED: /EACCES|permission denied/i,
     PATH_NOT_FOUND: /cannot find|not found.*path/i,
-    
+
     // Chrome/Browser errors
     CHROME_NOT_FOUND: /Chrome.*not found|No Chrome installations/i,
     EXTENSION_ERROR: /extension.*error|manifest.*invalid/i,
     DEBUGGER_ERROR: /debugger.*failed|attach.*failed/i,
-    
+
     // Build errors
     BUILD_FAILED: /build failed|compilation error/i,
     MISSING_DEPS: /Cannot find module|MODULE_NOT_FOUND/i,
@@ -63,7 +63,7 @@ export class ErrorHandler {
   static analyzeError(error: Error | string, context: ErrorContext): EnhancedError {
     const errorMessage = typeof error === 'string' ? error : error.message;
     const errorType = this.categorizeError(errorMessage);
-    
+
     return {
       type: errorType,
       message: errorMessage,
@@ -81,36 +81,36 @@ export class ErrorHandler {
         this.ERROR_PATTERNS.NETWORK_ERROR.test(errorMessage)) {
       return 'connection';
     }
-    
+
     if (this.ERROR_PATTERNS.SERVER_NOT_FOUND.test(errorMessage) ||
         this.ERROR_PATTERNS.WRONG_SIGNATURE.test(errorMessage) ||
         this.ERROR_PATTERNS.SERVER_ERROR.test(errorMessage)) {
       return 'server';
     }
-    
+
     if (this.ERROR_PATTERNS.SPAWN_ENOENT.test(errorMessage) ||
         this.ERROR_PATTERNS.PERMISSION_DENIED.test(errorMessage) ||
         this.ERROR_PATTERNS.PATH_NOT_FOUND.test(errorMessage)) {
       return 'platform';
     }
-    
+
     if (this.ERROR_PATTERNS.CHROME_NOT_FOUND.test(errorMessage) ||
         this.ERROR_PATTERNS.EXTENSION_ERROR.test(errorMessage) ||
         this.ERROR_PATTERNS.DEBUGGER_ERROR.test(errorMessage)) {
       return 'client';
     }
-    
+
     if (this.ERROR_PATTERNS.BUILD_FAILED.test(errorMessage) ||
         this.ERROR_PATTERNS.MISSING_DEPS.test(errorMessage)) {
       return 'configuration';
     }
-    
+
     return 'unknown';
   }
 
   private static generateUserMessage(
-    type: EnhancedError['type'], 
-    errorMessage: string, 
+    type: EnhancedError['type'],
+    errorMessage: string,
     context: ErrorContext
   ): string {
     switch (type) {
@@ -122,7 +122,7 @@ export class ErrorHandler {
           return `Connection to Browser Tools Server timed out. The server may be overloaded or unreachable.`;
         }
         return `Network connection failed while trying to reach the Browser Tools Server.`;
-        
+
       case 'server':
         if (this.ERROR_PATTERNS.SERVER_NOT_FOUND.test(errorMessage)) {
           return `Browser Tools Server not found. Please start the server before using MCP tools.`;
@@ -131,7 +131,7 @@ export class ErrorHandler {
           return `Found a server at ${context.host}:${context.port}, but it's not the Browser Tools Server. Another application may be using this port.`;
         }
         return `Browser Tools Server encountered an error while processing your request.`;
-        
+
       case 'platform':
         if (this.ERROR_PATTERNS.SPAWN_ENOENT.test(errorMessage)) {
           return `Cannot find required executable. This usually means Node.js, NPM, or NPX is not properly installed or not in your system PATH.`;
@@ -140,7 +140,7 @@ export class ErrorHandler {
           return `Permission denied. You may need to run with elevated privileges or check file permissions.`;
         }
         return `Platform-specific error detected. This may be related to your operating system configuration.`;
-        
+
       case 'client':
         if (this.ERROR_PATTERNS.CHROME_NOT_FOUND.test(errorMessage)) {
           return `Chrome browser not found. Browser Tools requires Chrome or a Chromium-based browser to be installed.`;
@@ -149,7 +149,7 @@ export class ErrorHandler {
           return `Chrome extension error. The Browser Tools Chrome extension may not be properly installed or configured.`;
         }
         return `Browser-related error. Please check your Chrome installation and extension setup.`;
-        
+
       case 'configuration':
         if (this.ERROR_PATTERNS.BUILD_FAILED.test(errorMessage)) {
           return `Build process failed. The Browser Tools packages may not be properly built.`;
@@ -158,19 +158,19 @@ export class ErrorHandler {
           return `Missing dependencies. Some required packages are not installed.`;
         }
         return `Configuration error. Please check your Browser Tools setup.`;
-        
+
       default:
         return `An unexpected error occurred: ${errorMessage}`;
     }
   }
 
   private static generateSolutions(
-    type: EnhancedError['type'], 
-    errorMessage: string, 
+    type: EnhancedError['type'],
+    errorMessage: string,
     context: ErrorContext
   ): ErrorSolution[] {
     const solutions: ErrorSolution[] = [];
-    
+
     switch (type) {
       case 'connection':
         solutions.push({
@@ -179,7 +179,7 @@ export class ErrorHandler {
           commands: ['npx @cpjet64/browser-tools-server'],
           priority: 'high'
         });
-        
+
         if (context.port && context.port !== 3025) {
           solutions.push({
             title: 'Check Port Configuration',
@@ -188,7 +188,7 @@ export class ErrorHandler {
             priority: 'medium'
           });
         }
-        
+
         solutions.push({
           title: 'Run Diagnostics',
           description: 'Use the diagnostic tool to identify connection issues.',
@@ -196,7 +196,7 @@ export class ErrorHandler {
           priority: 'medium'
         });
         break;
-        
+
       case 'server':
         solutions.push({
           title: 'Restart Browser Tools Server',
@@ -207,7 +207,7 @@ export class ErrorHandler {
           ],
           priority: 'high'
         });
-        
+
         solutions.push({
           title: 'Check for Port Conflicts',
           description: 'Another application might be using the default port.',
@@ -215,7 +215,7 @@ export class ErrorHandler {
           priority: 'medium'
         });
         break;
-        
+
       case 'platform':
         if (this.ERROR_PATTERNS.SPAWN_ENOENT.test(errorMessage)) {
           solutions.push({
@@ -224,7 +224,7 @@ export class ErrorHandler {
             commands: ['node --version', 'npm --version', 'which node', 'which npm'],
             priority: 'high'
           });
-          
+
           solutions.push({
             title: 'Reinstall Node.js',
             description: 'Download and reinstall Node.js from the official website.',
@@ -232,7 +232,7 @@ export class ErrorHandler {
             priority: 'medium'
           });
         }
-        
+
         if (this.ERROR_PATTERNS.PERMISSION_DENIED.test(errorMessage)) {
           solutions.push({
             title: 'Fix Permissions',
@@ -245,7 +245,7 @@ export class ErrorHandler {
           });
         }
         break;
-        
+
       case 'client':
         if (this.ERROR_PATTERNS.CHROME_NOT_FOUND.test(errorMessage)) {
           solutions.push({
@@ -255,7 +255,7 @@ export class ErrorHandler {
             priority: 'high'
           });
         }
-        
+
         solutions.push({
           title: 'Install Chrome Extension',
           description: 'Load the Browser Tools extension in Chrome Developer mode.',
@@ -267,18 +267,18 @@ export class ErrorHandler {
           priority: 'high'
         });
         break;
-        
+
       case 'configuration':
         solutions.push({
           title: 'Rebuild Packages',
-          description: 'Clean and rebuild all Browser Tools packages.',
+          description: 'Clean and rebuild all WebAI-MCP packages.',
           commands: [
-            'cd browser-tools-mcp && npm install && npm run build',
-            'cd browser-tools-server && npm install && npm run build'
+            'cd webai-mcp && npm install && npm run build',
+            'cd webai-server && npm install && npm run build'
           ],
           priority: 'high'
         });
-        
+
         solutions.push({
           title: 'Run Setup Script',
           description: 'Use the automated setup tool to fix configuration issues.',
@@ -286,7 +286,7 @@ export class ErrorHandler {
           priority: 'medium'
         });
         break;
-        
+
       default:
         solutions.push({
           title: 'Run Full Diagnostics',
@@ -295,7 +295,7 @@ export class ErrorHandler {
           priority: 'high'
         });
     }
-    
+
     // Always add general troubleshooting
     solutions.push({
       title: 'Get Help',
@@ -306,7 +306,7 @@ export class ErrorHandler {
       ],
       priority: 'low'
     });
-    
+
     return solutions;
   }
 
@@ -315,31 +315,31 @@ export class ErrorHandler {
     if (type === 'connection') {
       return true;
     }
-    
+
     // Server errors might be retryable
     if (type === 'server' && !this.ERROR_PATTERNS.WRONG_SIGNATURE.test(errorMessage)) {
       return true;
     }
-    
+
     // Platform and configuration errors usually require manual intervention
     return false;
   }
 
   static formatErrorForUser(enhancedError: EnhancedError): string {
     let output = `❌ ${enhancedError.userMessage}\n\n`;
-    
+
     if (enhancedError.solutions.length > 0) {
       output += '🔧 **Suggested Solutions:**\n\n';
-      
+
       const highPriority = enhancedError.solutions.filter(s => s.priority === 'high');
       const mediumPriority = enhancedError.solutions.filter(s => s.priority === 'medium');
       const lowPriority = enhancedError.solutions.filter(s => s.priority === 'low');
-      
+
       [...highPriority, ...mediumPriority, ...lowPriority].forEach((solution, index) => {
         const priority = solution.priority === 'high' ? '🔥' : solution.priority === 'medium' ? '⚠️' : 'ℹ️';
         output += `${priority} **${solution.title}**\n`;
         output += `   ${solution.description}\n`;
-        
+
         if (solution.commands && solution.commands.length > 0) {
           output += '   ```bash\n';
           solution.commands.forEach(cmd => {
@@ -347,21 +347,21 @@ export class ErrorHandler {
           });
           output += '   ```\n';
         }
-        
+
         if (solution.links && solution.links.length > 0) {
           solution.links.forEach(link => {
             output += `   📎 ${link}\n`;
           });
         }
-        
+
         output += '\n';
       });
     }
-    
+
     if (enhancedError.isRetryable) {
       output += '🔄 This error may be temporary. You can try the operation again after applying the suggested solutions.\n';
     }
-    
+
     return output;
   }
 }
