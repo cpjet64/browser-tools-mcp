@@ -1109,9 +1109,9 @@ function checkWebSocketConnectivity() {
   // Send a message to background script to check WebSocket status
   chrome.runtime.sendMessage({ type: "CHECK_WEBSOCKET_STATUS" }, (response) => {
     if (response && response.connected) {
-      websocketStatusElement.innerHTML = '<span style="color: #4CAF50;">✓ Connected</span>';
+      websocketStatusElement.innerHTML = '<span style="color: #4CAF50;">&check; Connected</span>';
     } else {
-      websocketStatusElement.innerHTML = '<span style="color: #F44336;">✗ Disconnected</span>';
+      websocketStatusElement.innerHTML = '<span style="color: #F44336;">&cross; Disconnected</span>';
     }
   });
 }
@@ -1129,7 +1129,7 @@ async function updateSystemInfo() {
   const serverInfo = await getServerInfo();
   if (serverInfo.connected) {
     serverVersionElement.textContent = `Server: v${serverInfo.version}`;
-    serverStatusElement.innerHTML = `<span style="color: #4CAF50;">✓ Connected</span>`;
+    serverStatusElement.innerHTML = `<span style="color: #4CAF50;">&check; Connected</span>`;
 
     // Add additional server info as tooltip or expandable section
     const serverDetails = `
@@ -1142,7 +1142,7 @@ async function updateSystemInfo() {
     serverVersionElement.title = serverDetails;
   } else {
     serverVersionElement.textContent = "Server: Unavailable";
-    serverStatusElement.innerHTML = `<span style="color: #F44336;">✗ ${serverInfo.error}</span>`;
+    serverStatusElement.innerHTML = `<span style="color: #F44336;">&cross; ${serverInfo.error}</span>`;
   }
 
   // Check WebSocket connectivity
@@ -1180,14 +1180,14 @@ async function runVersionCheck() {
       const serverParts = serverInfo.version.split('.').map(Number);
 
       if (extParts[0] === serverParts[0] && Math.abs(extParts[1] - serverParts[1]) <= 1) {
-        report += "✅ Compatibility: Components appear compatible\n";
+        report += "[OK] Compatibility: Components appear compatible\n";
       } else {
-        report += "⚠️  Compatibility: Version mismatch detected\n";
+        report += "[WARNING] Compatibility: Version mismatch detected\n";
         report += "   Consider updating components to matching versions\n";
       }
     } else {
       report += `Server: Unavailable (${serverInfo.error})\n`;
-      report += "❌ Compatibility: Cannot verify - server not accessible\n";
+      report += "[ERROR] Compatibility: Cannot verify - server not accessible\n";
     }
 
     report += "\nMCP Server: Use MCP client tools for detailed version info\n";
