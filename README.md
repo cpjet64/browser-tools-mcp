@@ -59,9 +59,48 @@ npx @cpjet64/browser-tools-server@latest
    - Download the `.zip` file from releases
    - Extract and load in Chrome → Extensions → Developer mode → Load unpacked
 
-2. **Configure Your IDE**:
-   - Add `npx @cpjet64/browser-tools-mcp@latest` to your MCP client configuration
-   - Different IDEs have different configs - check your IDE's MCP documentation
+2. **Configure Your MCP Client**:
+
+   **For Augment:**
+   1. Open Augment settings
+   2. Go to MCP Servers configuration
+   3. Add new server:
+      - **Name**: `browser-tools`
+      - **Command**: `npx -y @cpjet64/browser-tools-mcp@latest`
+      - **Environment Variables**: (none needed)
+   4. Save configuration
+
+   **For Cursor IDE:**
+   - Add to your `.cursor-settings` or MCP configuration:
+   ```json
+   {
+     "mcp": {
+       "servers": {
+         "browser-tools": {
+           "command": "npx",
+           "args": ["@cpjet64/browser-tools-mcp@latest"]
+         }
+       }
+     }
+   }
+   ```
+
+   **For Claude Desktop:**
+   - Add to your `claude_desktop_config.json`:
+   ```json
+   {
+     "mcpServers": {
+       "browser-tools": {
+         "command": "npx",
+         "args": ["@cpjet64/browser-tools-mcp@latest"]
+       }
+     }
+   }
+   ```
+
+   **For Other MCP Clients:**
+   - Use command: `npx @cpjet64/browser-tools-mcp@latest`
+   - Check your client's MCP documentation for specific configuration format
 
 3. **Start Browser Server**:
    - Open a new terminal and run: `npx @cpjet64/browser-tools-server@latest`
@@ -69,6 +108,19 @@ npx @cpjet64/browser-tools-server@latest
 4. **Open DevTools**:
    - Open Chrome DevTools → BrowserToolsMCP panel
    - Ensure connection is established
+
+5. **Test the Setup**:
+
+   **For Augment Users:**
+   - Try: *"Take a screenshot of this page"*
+   - Try: *"Run system diagnostics"* (new feature!)
+   - Try: *"Show me the console logs"*
+   - Try: *"Configure proxy settings"* (new feature!)
+
+   **For All MCP Clients:**
+   - Basic test: *"Take a screenshot"*
+   - Advanced test: *"Run an accessibility audit"*
+   - New features: *"Validate installation"*
 
 ### **💡 Important Notes**
 
@@ -342,6 +394,7 @@ Once installed, you can use natural language commands with your MCP client:
 ## 🔧 Compatibility
 
 ### **MCP Clients**
+- ✅ **Augment** - Full integration and testing
 - ✅ **Cursor IDE** - Primary integration
 - ✅ **Claude Desktop** - Full support
 - ✅ **Cline** - Compatible
