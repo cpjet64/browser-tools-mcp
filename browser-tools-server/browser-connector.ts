@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import express from "express";
+import express, { Request, Response, RequestHandler } from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import { tokenizeAndEstimateCost } from "llm-cost";
@@ -1934,7 +1934,7 @@ export class BrowserConnector {
   // Setup proxy configuration endpoints
   private setupProxyEndpoints(): void {
     // Get current proxy configuration
-    this.app.get("/proxy/config", (req, res) => {
+    const getProxyConfig: RequestHandler = (req: Request, res: Response) => {
       try {
         const config = proxyManager.getConfig();
         res.json({
@@ -1952,10 +1952,11 @@ export class BrowserConnector {
         const errorMessage = error instanceof Error ? error.message : String(error);
         res.status(500).json({ error: errorMessage });
       }
-    });
+    };
+    this.app.get("/proxy/config", getProxyConfig);
 
     // Update proxy configuration
-    this.app.post("/proxy/config", async (req, res) => {
+    const updateProxyConfig: RequestHandler = async (req: Request, res: Response): Promise<void> => {
       try {
         const newConfig = req.body as Partial<NetworkConfig>;
 
@@ -1963,9 +1964,10 @@ export class BrowserConnector {
         if (newConfig.proxy && newConfig.proxy.enabled) {
           const validation = await ProxyManager.validateProxyConfig(newConfig.proxy);
           if (!validation.valid) {
-            return res.status(400).json({
+            res.status(400).json({
               error: `Invalid proxy configuration: ${validation.error}`
             });
+            return;
           }
         }
 
@@ -1991,10 +1993,11 @@ export class BrowserConnector {
         const errorMessage = error instanceof Error ? error.message : String(error);
         res.status(500).json({ error: errorMessage });
       }
-    });
+    };
+    this.app.post("/proxy/config", updateProxyConfig);
 
     // Test proxy connectivity
-    this.app.post("/proxy/test", async (req, res) => {
+    const testProxyConnectivity: RequestHandler = async (req: Request, res: Response): Promise<void> => {
       try {
         const { testUrls } = req.body;
         const urls = testUrls || [
@@ -2021,10 +2024,11 @@ export class BrowserConnector {
         const errorMessage = error instanceof Error ? error.message : String(error);
         res.status(500).json({ error: errorMessage });
       }
-    });
+    };
+    this.app.post("/proxy/test", testProxyConnectivity);
 
     // Get proxy recommendations
-    this.app.get("/proxy/recommendations", (req, res) => {
+    const getProxyRecommendations: RequestHandler = (req: Request, res: Response) => {
       try {
         const recommendations = ProxyManager.getRecommendedSettings();
         res.json({
@@ -2035,10 +2039,11 @@ export class BrowserConnector {
         const errorMessage = error instanceof Error ? error.message : String(error);
         res.status(500).json({ error: errorMessage });
       }
-    });
+    };
+    this.app.get("/proxy/recommendations", getProxyRecommendations);
 
     // Auto-detect system proxy
-    this.app.post("/proxy/auto-detect", (req, res) => {
+    const autoDetectProxy: RequestHandler = (req: Request, res: Response) => {
       try {
         const systemProxy = ProxyManager.detectSystemProxy();
 
@@ -2062,10 +2067,11 @@ export class BrowserConnector {
         const errorMessage = error instanceof Error ? error.message : String(error);
         res.status(500).json({ error: errorMessage });
       }
-    });
+    };
+    this.app.post("/proxy/auto-detect", autoDetectProxy);
 
     // Reset proxy configuration
-    this.app.post("/proxy/reset", (req, res) => {
+    const resetProxyConfig: RequestHandler = (req: Request, res: Response) => {
       try {
         // Reset to environment-based configuration
         proxyManager = ProxyManager.createFromEnvironment();
@@ -2078,7 +2084,8 @@ export class BrowserConnector {
         const errorMessage = error instanceof Error ? error.message : String(error);
         res.status(500).json({ error: errorMessage });
       }
-    });
+    };
+    this.app.post("/proxy/reset", resetProxyConfig);
   }
 }
 
