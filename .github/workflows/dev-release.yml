@@ -13,37 +13,37 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
-      
+
       - name: Install dependencies - browser-tools-server
         run: |
           cd browser-tools-server
           npm ci
-      
+
       - name: Install dependencies - browser-tools-mcp
         run: |
           cd browser-tools-mcp
           npm ci
-      
+
       - name: Build packages
         run: |
           cd browser-tools-server
           npm run build
           cd ../browser-tools-mcp
           npm run build
-      
+
       - name: Get current version and increment dev version
         id: version
         run: |
           cd browser-tools-server
           CURRENT_VERSION=$(node -p "require('./package.json').version")
           echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
-          
+
           # Check if this is already a dev version
           if [[ $CURRENT_VERSION == *"-dev."* ]]; then
             # Increment the dev number
@@ -52,57 +52,131 @@ jobs:
             # Create first dev version
             npm version prerelease --preid=dev --no-git-tag-version
           fi
-          
+
           NEW_VERSION=$(node -p "require('./package.json').version")
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          
+
           # Update browser-tools-mcp to same version
           cd ../browser-tools-mcp
           npm version $NEW_VERSION --no-git-tag-version
-      
+
+      - name: Create Chrome Extension Package
+        run: |
+          cd chrome-extension
+          zip -r ../browser-tools-chrome-extension-v${{ steps.version.outputs.new_version }}.zip . \
+            -x "*.git*" "node_modules/*" "*.DS_Store*"
+
+      - name: Create MCP Server Package
+        run: |
+          cd browser-tools-mcp
+          npm pack
+          mv *.tgz ../browser-tools-mcp-v${{ steps.version.outputs.new_version }}.tgz
+
+      - name: Create Server Package
+        run: |
+          cd browser-tools-server
+          npm pack
+          mv *.tgz ../browser-tools-server-v${{ steps.version.outputs.new_version }}.tgz
+
       - name: Publish browser-tools-server to NPM (dev tag)
         run: |
           cd browser-tools-server
           npm publish --tag dev
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY }}
-      
+
       - name: Publish browser-tools-mcp to NPM (dev tag)
         run: |
           cd browser-tools-mcp
           npm publish --tag dev
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY }}
-      
+
+      - name: Generate Release Notes
+        id: release-notes
+        run: |
+          VERSION="${{ steps.version.outputs.new_version }}"
+
+          cat > dev-release-notes.md << EOF
+          # 🧪 Browser Tools MCP v${VERSION} (Development Release)
+
+          ## ⚠️ Development Release Warning
+
+          This is a **development release** with the latest features and improvements. It may contain experimental functionality and could be unstable. For production use, please install the latest stable release with \`@latest\`.
+
+          ## 📦 Installation
+
+          ### Quick Start (Development Version)
+          \`\`\`bash
+          # Install MCP Server (dev)
+          npx @cpjet64/browser-tools-mcp@dev
+
+          # Install Browser Tools Server (dev)
+          npx @cpjet64/browser-tools-server@dev
+          \`\`\`
+
+          ### Chrome Extension (Development)
+          1. Download \`browser-tools-chrome-extension-v${VERSION}.zip\`
+          2. Extract the zip file
+          3. Open Chrome → Extensions → Developer mode → Load unpacked
+          4. Select the extracted folder
+
+          ## 🆕 What's New in Development
+
+          - Latest development features
+          - Bug fixes and improvements
+          - Experimental functionality
+          - Enhanced cross-platform support
+
+          ## 🛠️ Features (Development Build)
+
+          - ✅ **20+ MCP Tools** for browser automation
+          - ✅ **Cross-Platform Auto-Paste** - Windows, macOS, Linux
+          - ✅ **Storage Access** - cookies, localStorage, sessionStorage
+          - ✅ **Element Inspection** - CSS selectors + computed styles
+          - ✅ **Enhanced Screenshots** - works with separate DevTools
+          - ✅ **Audit & Debug Modes** - comprehensive analysis
+          - ✅ **Automated Diagnostics** - system validation workflows
+          - ✅ **Network & Proxy Management** - complete network tools
+
+          ## 🔧 Compatibility
+
+          - Node.js 18+
+          - Chrome/Chromium browsers
+          - Windows, macOS, Linux
+          - MCP clients: Augment, Cursor, Claude Desktop, Cline, Zed
+
+          ## 📋 Development Notes
+
+          - This version includes the latest commits from the \`dev\` branch
+          - Features may change before stable release
+          - Report issues on GitHub for quick fixes
+          - Feedback welcome for new features
+
+          **Full Changelog**: https://github.com/cpjet64/browser-tools-mcp/compare/main...dev
+
+          ---
+
+          📚 **Documentation**: [Browser Tools MCP Docs](https://github.com/cpjet64/browser-tools-mcp)
+          🐛 **Issues**: [Report bugs](https://github.com/cpjet64/browser-tools-mcp/issues)
+          💬 **Discussions**: [Community](https://github.com/cpjet64/browser-tools-mcp/discussions)
+          EOF
+
       - name: Create dev release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ steps.version.outputs.new_version }}
-          release_name: Dev Release v${{ steps.version.outputs.new_version }}
-          body: |
-            🧪 **Development Release**
-            
-            This is a development release with the latest features and improvements.
-            
-            **⚠️ Warning**: Development releases may be unstable. Use `@latest` for production.
-            
-            **Installation:**
-            ```bash
-            npx @cpjet64/browser-tools-mcp@dev
-            npx @cpjet64/browser-tools-server@dev
-            ```
-            
-            **Changes since last stable release:**
-            - Latest development features
-            - Bug fixes and improvements
-            - Experimental functionality
-            
-            **Full Changelog**: https://github.com/cpjet64/browser-tools-mcp/compare/main...dev
+          name: "🧪 Browser Tools MCP v${{ steps.version.outputs.new_version }} (Dev)"
+          body_path: dev-release-notes.md
           draft: false
           prerelease: true
-      
+          files: |
+            browser-tools-chrome-extension-v${{ steps.version.outputs.new_version }}.zip
+            browser-tools-mcp-v${{ steps.version.outputs.new_version }}.tgz
+            browser-tools-server-v${{ steps.version.outputs.new_version }}.tgz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Commit version changes
         run: |
           git config --local user.email "action@github.com"
