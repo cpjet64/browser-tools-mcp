@@ -893,7 +893,7 @@ function captureAndSendElement() {
           top: rect.top,
           left: rect.left
         },
-        innerHTML: el.innerHTML.substring(0, 500)
+        innerHTML: el.innerHTML.substring(0, ${settings.stringSizeLimit})
       };
     })()`,
     (result, isException) => {
@@ -1149,24 +1149,71 @@ async function setupWebSocket() {
           // console.log("Chrome Extension: Received heartbeat response");
         } else if (message.type === "take-screenshot") {
           console.log("Chrome Extension: Taking screenshot...");
-          // Capture screenshot of the current tab
+
+          // Try to capture screenshot directly first
           chrome.tabs.captureVisibleTab(null, { format: "png" }, (dataUrl) => {
             if (chrome.runtime.lastError) {
-              console.error(
-                "Chrome Extension: Screenshot capture failed:",
-                chrome.runtime.lastError
+              console.log(
+                "Chrome Extension: Direct screenshot capture failed, delegating to background:",
+                chrome.runtime.lastError.message
               );
-              ws.send(
-                JSON.stringify({
-                  type: "screenshot-error",
-                  error: chrome.runtime.lastError.message,
-                  requestId: message.requestId,
-                })
+
+              // If direct capture fails (e.g., DevTools in separate window), delegate to background
+              chrome.runtime.sendMessage(
+                {
+                  type: "DELEGATE_SCREENSHOT",
+                  tabId: chrome.devtools.inspectedWindow.tabId,
+                },
+                (response) => {
+                  if (chrome.runtime.lastError) {
+                    console.error(
+                      "Chrome Extension: Background screenshot delegation failed:",
+                      chrome.runtime.lastError
+                    );
+                    ws.send(
+                      JSON.stringify({
+                        type: "screenshot-error",
+                        error: chrome.runtime.lastError.message,
+                        requestId: message.requestId,
+                      })
+                    );
+                    return;
+                  }
+
+                  if (response && response.success && response.dataUrl) {
+                    console.log("Chrome Extension: Background screenshot captured successfully");
+                    const screenshotResponse = {
+                      type: "screenshot-data",
+                      data: response.dataUrl,
+                      requestId: message.requestId,
+                      // Only include path if it's configured in settings
+                      ...(settings.screenshotPath && { path: settings.screenshotPath }),
+                      // Include auto-paste setting
+                      autoPaste: settings.allowAutoPaste,
+                    };
+
+                    console.log("Chrome Extension: Sending background screenshot data response", {
+                      ...screenshotResponse,
+                      data: "[base64 data]",
+                    });
+
+                    ws.send(JSON.stringify(screenshotResponse));
+                  } else {
+                    console.error("Chrome Extension: Background screenshot failed:", response?.error);
+                    ws.send(
+                      JSON.stringify({
+                        type: "screenshot-error",
+                        error: response?.error || "Background screenshot capture failed",
+                        requestId: message.requestId,
+                      })
+                    );
+                  }
+                }
               );
               return;
             }
 
-            console.log("Chrome Extension: Screenshot captured successfully");
+            console.log("Chrome Extension: Direct screenshot captured successfully");
             // Just send the screenshot data, let the server handle paths
             const response = {
               type: "screenshot-data",
@@ -1178,13 +1225,257 @@ async function setupWebSocket() {
               autoPaste: settings.allowAutoPaste,
             };
 
-            console.log("Chrome Extension: Sending screenshot data response", {
+            console.log("Chrome Extension: Sending direct screenshot data response", {
               ...response,
               data: "[base64 data]",
             });
 
             ws.send(JSON.stringify(response));
           });
+        } else if (message.type === "inspect-elements-by-selector") {
+          console.log("Chrome Extension: Received request for inspecting elements by selector:", message.selector);
+          const resultLimit = message.resultLimit || 1;
+          const includeComputedStyles = message.includeComputedStyles || [];
+          
+          // Define the inspection function separately for better readability
+          const inspectionFunction = function(selector, limit, includeComputedStyles) {
+            try {
+              // Find all elements matching the selector
+              const elements = document.querySelectorAll(selector);
+              
+              if (elements.length === 0) {
+                return { error: "No elements found matching selector" };
+              }
+              
+              // Calculate specificity of a selector (simplified)
+              function calculateSpecificity(selector) {
+                let specificity = 0;
+                const idCount = (selector.match(/#[\w-]+/g) || []).length;
+                const classCount = (selector.match(/\.[\w-]+/g) || []).length;
+                const elementCount = (selector.match(/[a-z][\w-]*/ig) || []).length - 
+                                    (selector.match(/:[a-z][\w-]*/ig) || []).length;
+                
+                return idCount * 100 + classCount * 10 + elementCount;
+              }
+
+              // FNV-1a hash function implementation
+              function fnv1a(str) {
+                let h = 0x811c9dc5;
+                for (let i = 0; i < str.length; i++) {
+                  h ^= str.charCodeAt(i);
+                  h += (h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24);
+                }
+                // Convert to base36 string representation for readability and compactness
+                return (h >>> 0).toString(36);
+              }
+
+              function getStartTag(element) {
+                if (!element || !element.outerHTML) {
+                  return "";
+                }
+
+                let outerHTML = element.outerHTML;
+                const tagName = element.tagName.toLowerCase();
+                const closingTag = `</${tagName}>`;
+                
+                if (outerHTML.endsWith(closingTag)) {
+                  outerHTML = outerHTML.slice(0, outerHTML.length - closingTag.length);
+                }
+
+                const startTag = outerHTML.replace(element.innerHTML, "");
+                return startTag;
+              }
+              
+              // Storage for HTML and rule hashes to avoid duplication
+              const htmlStore = {};
+              const ruleStore = {};
+              const seenHtml = new Set();
+              const seenRules = new Set();
+              
+              // Process a single element to get its HTML and CSS details
+              function processElement(element, index) {
+                // Get the HTML and hash it
+                const html = element.outerHTML;
+                const htmlHash = fnv1a(html);
+                
+                // Store the HTML if we haven't seen it before
+                let seenHtmlBefore = false;
+                if (!seenHtml.has(htmlHash)) {
+                  htmlStore[htmlHash] = html;
+                  seenHtml.add(htmlHash);
+                } else {
+                  seenHtmlBefore = true;
+                }
+                
+                // Get computed styles if requested
+                let computedStyles;
+                if (Array.isArray(includeComputedStyles) && includeComputedStyles.length > 0) {
+                  computedStyles = {};
+                  const styles = window.getComputedStyle(element);
+                  for (const prop of includeComputedStyles) {
+                    if (prop in styles) {
+                      computedStyles[prop] = styles.getPropertyValue(prop);
+                    }
+                  }
+                }
+                
+                // Find matching rules
+                const matchedRules = [];
+                
+                for (let i = 0; i < document.styleSheets.length; i++) {
+                  try {
+                    const sheet = document.styleSheets[i];
+                    let rules = [];
+                    
+                    try {
+                      rules = sheet.cssRules || sheet.rules || [];
+                    } catch (e) {
+                      // Skip cross-origin stylesheets
+                      continue;
+                    }
+                    
+                    // Determine stylesheet origin
+                    let originType = 'author';
+                    if (sheet.href && (
+                      sheet.href.includes('user-agent') || 
+                      sheet.href.includes('chrome://') ||
+                      !sheet.ownerNode)) {
+                      originType = 'user-agent';
+                    }
+                    
+                    for (let j = 0; j < rules.length; j++) {
+                      const rule = rules[j];
+                      
+                      try {
+                        if (rule.selectorText && element.matches(rule.selectorText)) {
+                          matchedRules.push({
+                            cssText: rule.cssText,
+                            styleSheet: {
+                              href: sheet.href || 'inline',
+                              index: i,
+                              // Include style tag's attributes. This may be needed for CSS-in-JS solutions'
+                              ...(!sheet.href && { tag: getStartTag(sheet.ownerNode) })
+                            },
+                            specificity: calculateSpecificity(rule.selectorText),
+                          });
+                        }
+                      } catch (e) {
+                        // Skip non-standard rules
+                        continue;
+                      }
+                    }
+                  } catch (e) {
+                    // Skip inaccessible stylesheets
+                    continue;
+                  }
+                }
+                
+                // Sort rules by specificity (higher values first)
+                matchedRules.sort((a, b) => {
+                  if (b.specificity === a.specificity) {
+                    return b.styleSheet.index - a.styleSheet.index;
+                  }
+                  return b.specificity - a.specificity
+                });
+                
+                // Hash the entire matchedRules array
+                const rulesJson = JSON.stringify(matchedRules);
+                const rulesHash = fnv1a(rulesJson);
+                
+                // Store the rules if we haven't seen this exact set before
+                let seenRulesBefore = false;
+                if (!seenRules.has(rulesHash)) {
+                  ruleStore[rulesHash] = matchedRules;
+                  seenRules.add(rulesHash);
+                } else {
+                  seenRulesBefore = true;
+                }
+                
+                return {
+                  index: index,
+                  // Only send full HTML if it's the first occurrence
+                  ...(!seenHtmlBefore && { html }),
+                  htmlHash: htmlHash,
+                  // Include minimal dimensional info that isn't in the HTML
+                  dimensions: {
+                    offsetWidth: element.offsetWidth,
+                    offsetHeight: element.offsetHeight,
+                    clientWidth: element.clientWidth,
+                    clientHeight: element.clientHeight
+                  },
+                  boundingClientRect: element.getBoundingClientRect(),
+                  styles: {
+                    // Only include full rules if it's the first occurrence
+                    ...(!seenRulesBefore && { matchedRules }),
+                    matchedRulesHash: rulesHash,
+                    computedStyles,
+                  }
+                };
+              }
+              
+              // Process up to resultLimit elements
+              const elementsToProcess = Math.min(elements.length, limit);
+              const results = [];
+              
+              for (let i = 0; i < elementsToProcess; i++) {
+                results.push(processElement(elements[i], i));
+              }
+              
+              return {
+                elements: results,
+                totalCount: elements.length,
+                processedCount: elementsToProcess,
+                // selector: selector,
+                // Include the stores for the hashed content
+                // htmlStore,
+                // ruleStore,
+              };
+            } catch (error) {
+              return { error: "Error processing elements: " + error.message };
+            }
+          };
+          
+          // Execute script in the inspected window with cleaner syntax
+          chrome.devtools.inspectedWindow.eval(
+            `(${inspectionFunction.toString()})('${message.selector.replace(/'/g, "\\'")}', ${resultLimit}, ${JSON.stringify(includeComputedStyles)})`,
+            (result, isException) => {
+              if (isException || !result) {
+                console.error("Chrome Extension: Error inspecting elements by selector:", isException || "No result");
+                ws.send(
+                  JSON.stringify({
+                    type: "inspect-elements-error",
+                    error: isException?.value || "Failed to inspect elements by selector",
+                    requestId: message.requestId,
+                  })
+                );
+                return;
+              }
+              
+              // Check if result is an error object
+              if (result && result.error) {
+                console.error("Chrome Extension: Inspect elements by selector error:", result.error);
+                ws.send(
+                  JSON.stringify({
+                    type: "inspect-elements-error",
+                    error: result.error,
+                    requestId: message.requestId,
+                  })
+                );
+                return;
+              }
+              
+              console.log(`Chrome Extension: Found ${result.totalCount} elements, processed ${result.processedCount}`);
+              
+              // Send back the elements with styles data
+              ws.send(
+                JSON.stringify({
+                  type: "inspect-elements-response",
+                  data: result,
+                  requestId: message.requestId,
+                })
+              );
+            }
+          );
         } else if (message.type === "get-current-url") {
           console.log("Chrome Extension: Received request for current URL");
 

@@ -339,6 +339,42 @@ async function retestConnectionOnRefresh(tabId) {
   });
 }
 
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === "DELEGATE_SCREENSHOT" && message.tabId) {
+    // Get the tab we want to capture
+    chrome.tabs.get(message.tabId, (tab) => {
+      if (chrome.runtime.lastError) {
+        sendResponse({ success: false, error: chrome.runtime.lastError.message });
+        return;
+      }
+
+      // Get the window containing this tab
+      chrome.windows.get(tab.windowId, { populate: true }, (window) => {
+        // Make sure the tab is active in its window
+        chrome.tabs.update(message.tabId, { active: true }, () => {
+          // Focus the window
+          chrome.windows.update(tab.windowId, { focused: true }, () => {
+            // Wait a moment for the window to focus
+            setTimeout(() => {
+              // Capture the visible tab in that window
+              chrome.tabs.captureVisibleTab(tab.windowId, { format: "png" }, (dataUrl) => {
+                if (chrome.runtime.lastError) {
+                  sendResponse({ success: false, error: chrome.runtime.lastError.message });
+                  return;
+                }
+
+                sendResponse({ success: true, dataUrl: dataUrl });
+              });
+            }, 100);
+          });
+        });
+      });
+    });
+
+    return true; // Keep the message channel open for the async response
+  }
+});
+
 // Function to capture and send screenshot
 function captureAndSendScreenshot(message, settings, sendResponse) {
   // Get the inspected window's tab
@@ -348,6 +384,16 @@ function captureAndSendScreenshot(message, settings, sendResponse) {
       sendResponse({
         success: false,
         error: chrome.runtime.lastError.message,
+      });
+      return;
+    }
+
+    // Skip DevTools tabs
+    if (tab.url && tab.url.startsWith('devtools://')) {
+      console.error("Cannot capture DevTools tab:", tab.url);
+      sendResponse({
+        success: false,
+        error: "Cannot capture DevTools tabs. Please capture the actual application tab.",
       });
       return;
     }
@@ -367,65 +413,71 @@ function captureAndSendScreenshot(message, settings, sendResponse) {
         return;
       }
 
-      // Capture screenshot of the window containing our tab
-      chrome.tabs.captureVisibleTab(
-        targetWindow.id,
-        { format: "png" },
-        (dataUrl) => {
-          // Ignore DevTools panel capture error if it occurs
-          if (
-            chrome.runtime.lastError &&
-            !chrome.runtime.lastError.message.includes("devtools://")
-          ) {
-            console.error(
-              "Error capturing screenshot:",
-              chrome.runtime.lastError
-            );
-            sendResponse({
-              success: false,
-              error: chrome.runtime.lastError.message,
-            });
-            return;
-          }
+      console.log(`Capturing screenshot of window ${targetWindow.id} containing tab ${message.tabId}`);
 
-          // Send screenshot data to browser connector using configured settings
-          const serverUrl = `http://${settings.serverHost}:${settings.serverPort}/screenshot`;
-          console.log(`Sending screenshot to ${serverUrl}`);
+      // First focus the window and activate the tab
+      chrome.windows.update(targetWindow.id, { focused: true }, () => {
+        chrome.tabs.update(message.tabId, { active: true }, () => {
+          // Small delay to ensure the window and tab are focused
+          setTimeout(() => {
+            // Capture screenshot of the window containing our tab
+            chrome.tabs.captureVisibleTab(
+              targetWindow.id,
+              { format: "png" },
+              (dataUrl) => {
+                if (chrome.runtime.lastError) {
+                  console.error(
+                    "Error capturing screenshot:",
+                    chrome.runtime.lastError
+                  );
+                  sendResponse({
+                    success: false,
+                    error: chrome.runtime.lastError.message,
+                  });
+                  return;
+                }
 
-          fetch(serverUrl, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              data: dataUrl,
-              path: message.screenshotPath,
-            }),
-          })
-            .then((response) => response.json())
-            .then((result) => {
-              if (result.error) {
-                console.error("Error from server:", result.error);
-                sendResponse({ success: false, error: result.error });
-              } else {
-                console.log("Screenshot saved successfully:", result.path);
-                // Send success response even if DevTools capture failed
-                sendResponse({
-                  success: true,
-                  path: result.path,
-                  title: tab.title || "Current Tab",
-                });
+                // Send screenshot data to browser connector using configured settings
+                const serverUrl = `http://${settings.serverHost}:${settings.serverPort}/screenshot`;
+                console.log(`Sending screenshot to ${serverUrl}`);
+
+                fetch(serverUrl, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    data: dataUrl,
+                    path: message.screenshotPath,
+                  }),
+                })
+                  .then((response) => response.json())
+                  .then((result) => {
+                    if (result.error) {
+                      console.error("Error from server:", result.error);
+                      sendResponse({ success: false, error: result.error });
+                    } else {
+                      console.log("Screenshot saved successfully:", result.path);
+                      // Send success response
+                      sendResponse({
+                        success: true,
+                        path: result.path,
+                        title: tab.title || "Current Tab",
+                      });
+                    }
+                  })
+                  .catch((error) => {
+                    console.error("Error sending screenshot data:", error);
+                    sendResponse({
+                      success: false,
+                      error: error.message || "Failed to save screenshot",
+                    });
+                  });
               }
-            })
-            .catch((error) => {
-              console.error("Error sending screenshot data:", error);
-              sendResponse({
-                success: false,
-                error: error.message || "Failed to save screenshot",
-              });
-            });
-        }
-      );
+            );
+          }, 100); // 100ms delay
+        });
+      });
     });
   });
 }

@@ -4,6 +4,9 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import path from "path";
 import fs from "fs";
+// Using zod from the @modelcontextprotocol/sdk dependencies
+// This avoids adding zod as a direct dependency to package.json
+import { z } from "zod";
 
 // Create the MCP server
 const server = new McpServer({
@@ -315,6 +318,62 @@ server.tool(
           },
         ],
       };
+    });
+  }
+);
+
+server.tool(
+  "inspectElementsBySelector",
+  "Get HTML elements and their CSS styles matching a CSS selector",
+  { 
+    selector: z.string().describe("CSS selector to find elements (e.g., '.classname', '#id', 'div.container > p')"),
+    resultLimit: z.number().optional().default(1).describe("Maximum number of elements to process (default: 1)"),
+    includeComputedStyles: z.array(z.string()).optional().default([]).describe("Array of specific CSS properties to include in the computed styles output (empty array means no computed styles)")
+  },
+  async ({ selector, resultLimit = 1, includeComputedStyles = [] }) => {
+    return await withServerConnection(async () => {
+      try {
+        // Call the browser-connector endpoint
+        const response = await fetch(
+          `http://${discoveredHost}:${discoveredPort}/inspect-elements-by-selector`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ selector, resultLimit, includeComputedStyles })
+          }
+        );
+
+        const result = await response.json().catch(() => null);
+        if (result?.error) {
+          throw new Error(result.error);
+        }
+        if (!response.ok || result === null) {
+          throw new Error(`Server returned error: ${response.status}`);
+        }
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result.data || {}, null, 2)
+            }
+          ]
+        };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error("Error inspecting elements by selector:", errorMessage);
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Failed to inspect elements by selector: ${errorMessage}`
+            }
+          ],
+          isError: true
+        };
+      }
     });
   }
 );
