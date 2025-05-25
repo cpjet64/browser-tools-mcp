@@ -1104,16 +1104,25 @@ async function getServerInfo() {
   }
 }
 
-// Function to check WebSocket connectivity
-function checkWebSocketConnectivity() {
-  // Send a message to background script to check WebSocket status
-  chrome.runtime.sendMessage({ type: "CHECK_WEBSOCKET_STATUS" }, (response) => {
-    if (response && response.connected) {
-      websocketStatusElement.innerHTML = '<span style="color: #4CAF50;">&check; Connected</span>';
-    } else {
-      websocketStatusElement.innerHTML = '<span style="color: #F44336;">&cross; Disconnected</span>';
+// Function to check MCP Server connectivity (via browser-tools-server)
+async function checkMCPServerConnectivity() {
+  try {
+    // Check if the browser-tools-server is running (which hosts the MCP server)
+    const response = await fetch(`http://${settings.serverHost}:${settings.serverPort}/.identity`, {
+      signal: AbortSignal.timeout(3000)
+    });
+
+    if (response.ok) {
+      const identity = await response.json();
+      if (identity.signature === "mcp-browser-connector-24x7") {
+        websocketStatusElement.innerHTML = '<span style="color: #4CAF50;">&check; Connected</span>';
+        return;
+      }
     }
-  });
+    websocketStatusElement.innerHTML = '<span style="color: #F44336;">&cross; Disconnected</span>';
+  } catch (error) {
+    websocketStatusElement.innerHTML = '<span style="color: #F44336;">&cross; Disconnected</span>';
+  }
 }
 
 // Function to update system information
@@ -1125,6 +1134,7 @@ async function updateSystemInfo() {
   // Update server info
   serverVersionElement.textContent = "Server: Checking...";
   serverStatusElement.innerHTML = '<span style="color: #FFC107;">Checking...</span>';
+  websocketStatusElement.innerHTML = '<span style="color: #FFC107;">Checking...</span>';
 
   const serverInfo = await getServerInfo();
   if (serverInfo.connected) {
@@ -1145,8 +1155,8 @@ async function updateSystemInfo() {
     serverStatusElement.innerHTML = `<span style="color: #F44336;">&cross; ${serverInfo.error}</span>`;
   }
 
-  // Check WebSocket connectivity
-  checkWebSocketConnectivity();
+  // Check MCP Server connectivity
+  await checkMCPServerConnectivity();
 
   // MCP version is harder to get from the extension, so we'll show a placeholder
   mcpVersionElement.textContent = "MCP: Use 'Run Version Check' for details";
