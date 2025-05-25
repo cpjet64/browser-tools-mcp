@@ -28,7 +28,7 @@ If you want to publish your packages to NPM automatically:
 1. Go to your GitHub repository
 2. **Settings** → **Secrets and variables** → **Actions**
 3. Click **New repository secret**
-4. **Name**: `NPM_TOKEN`
+4. **Name**: `NPM_DEPLOY`
 5. **Secret**: Paste your NPM access token
 6. Click **Add secret**
 
@@ -60,7 +60,7 @@ This will:
 ### 🎯 Method 3: Manual Release
 
 1. **Go to Actions tab** in your GitHub repository
-2. **Select "🚀 Release"** workflow  
+2. **Select "🚀 Release"** workflow
 3. **Click "Run workflow"**
 4. **Choose options** and run
 

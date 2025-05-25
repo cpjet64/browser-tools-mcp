@@ -53,7 +53,7 @@ jobs:
           # Get current version from package.json
           CURRENT_VERSION=$(node -p "require('./browser-tools-mcp/package.json').version")
           echo "Current version: $CURRENT_VERSION"
-          
+
           # Check if this version already has a release
           if gh release view "v$CURRENT_VERSION" >/dev/null 2>&1; then
             echo "Release v$CURRENT_VERSION already exists"
@@ -62,7 +62,7 @@ jobs:
             echo "New version detected: $CURRENT_VERSION"
             echo "should_release=true" >> $GITHUB_OUTPUT
             echo "new_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
-            
+
             # Generate changelog since last release
             LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
             if [ -n "$LAST_TAG" ]; then
@@ -70,7 +70,7 @@ jobs:
             else
               CHANGELOG=$(git log --pretty=format:"- %s" --no-merges | head -20)
             fi
-            
+
             # Save changelog to output (escape newlines)
             echo "changelog<<EOF" >> $GITHUB_OUTPUT
             echo "$CHANGELOG" >> $GITHUB_OUTPUT
@@ -143,33 +143,33 @@ jobs:
         id: release-notes
         run: |
           VERSION="${{ needs.check-version.outputs.new_version }}"
-          
+
           cat > release-notes.md << EOF
           # 🚀 Browser Tools MCP v${VERSION}
-          
+
           ## 📋 What's New
-          
+
           ${{ needs.check-version.outputs.changelog }}
-          
+
           ## 📦 Installation
-          
+
           ### Quick Start
           \`\`\`bash
           # Install MCP Server
           npx @munawwar-forks/browser-tools-mcp@${VERSION}
-          
-          # Install Browser Tools Server  
+
+          # Install Browser Tools Server
           npx @munawwar-forks/browser-tools-server@${VERSION}
           \`\`\`
-          
+
           ### Chrome Extension
           1. Download \`browser-tools-chrome-extension-v${VERSION}.zip\`
           2. Extract the zip file
           3. Open Chrome → Extensions → Developer mode → Load unpacked
           4. Select the extracted folder
-          
+
           ## 🛠️ Features
-          
+
           - ✅ **17 MCP Tools** for browser automation
           - ✅ **Storage Access** - cookies, localStorage, sessionStorage
           - ✅ **Element Inspection** - CSS selectors + computed styles
@@ -177,16 +177,16 @@ jobs:
           - ✅ **Audit & Debug Modes** - comprehensive analysis
           - ✅ **Windows Compatibility** - path conversion + host discovery
           - ✅ **Multi-language Documentation** - English + Chinese
-          
+
           ## 🔧 Compatibility
-          
-          - Node.js 18+ 
+
+          - Node.js 18+
           - Chrome/Chromium browsers
           - Windows, macOS, Linux
           - MCP clients: Cursor, Claude Desktop, Cline, Zed
-          
+
           ---
-          
+
           📚 **Documentation**: [Browser Tools MCP Docs](https://github.com/cpjet64/browser-tools-mcp)
           🐛 **Issues**: [Report bugs](https://github.com/cpjet64/browser-tools-mcp/issues)
           💬 **Discussions**: [Community](https://github.com/cpjet64/browser-tools-mcp/discussions)
@@ -216,3 +216,88 @@ jobs:
           echo "**Assets:** 3 files (Chrome extension + 2 npm packages)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "🔗 **Release URL:** https://github.com/${{ github.repository }}/releases/tag/v${{ needs.check-version.outputs.new_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🚀 **Next:** NPM publishing workflow will automatically start!" >> $GITHUB_STEP_SUMMARY
+
+  publish-to-npm:
+    needs: [check-version, build-and-release]
+    if: needs.check-version.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+          cache-dependency-path: |
+            browser-tools-mcp/package-lock.json
+            browser-tools-server/package-lock.json
+
+      - name: 🔧 Install dependencies (MCP)
+        run: |
+          cd browser-tools-mcp
+          npm ci
+
+      - name: 🔧 Install dependencies (Server)
+        run: |
+          cd browser-tools-server
+          npm ci
+
+      - name: 🏗️ Build MCP Server
+        run: |
+          cd browser-tools-mcp
+          npm run build
+
+      - name: 🏗️ Build Browser Tools Server
+        run: |
+          cd browser-tools-server
+          npm run build
+
+      - name: 📤 Publish MCP Server to NPM
+        run: |
+          cd browser-tools-mcp
+          echo "🚀 Publishing MCP Server to NPM..."
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY }}
+
+      - name: 📤 Publish Server to NPM
+        run: |
+          cd browser-tools-server
+          echo "🚀 Publishing Browser Tools Server to NPM..."
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY }}
+
+      - name: 🎉 NPM Publish Summary
+        run: |
+          echo "## 📦 NPM Publishing Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          cd browser-tools-mcp
+          MCP_VERSION=$(node -p "require('./package.json').version")
+          MCP_NAME=$(node -p "require('./package.json').name")
+
+          cd ../browser-tools-server
+          SERVER_VERSION=$(node -p "require('./package.json').version")
+          SERVER_NAME=$(node -p "require('./package.json').name")
+
+          echo "### 📦 Published Packages:" >> $GITHUB_STEP_SUMMARY
+          echo "- [\`$MCP_NAME@$MCP_VERSION\`](https://www.npmjs.com/package/$MCP_NAME)" >> $GITHUB_STEP_SUMMARY
+          echo "- [\`$SERVER_NAME@$SERVER_VERSION\`](https://www.npmjs.com/package/$SERVER_NAME)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🚀 Installation:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "# Install MCP Server" >> $GITHUB_STEP_SUMMARY
+          echo "npx $MCP_NAME@$MCP_VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "# Install Browser Tools Server" >> $GITHUB_STEP_SUMMARY
+          echo "npx $SERVER_NAME@$SERVER_VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
