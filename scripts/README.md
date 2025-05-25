@@ -1,6 +1,6 @@
-# Browser Tools MCP Scripts
+# WebAI-MCP Scripts
 
-This directory contains comprehensive diagnostic, setup, and platform-specific utilities for Browser Tools MCP.
+This directory contains comprehensive diagnostic, setup, and platform-specific utilities for WebAI-MCP.
 
 ## Available Scripts
 
@@ -22,7 +22,7 @@ npm run diagnose
 - Detailed error reporting with solutions
 
 ### 🚀 `setup.js` - Automated Setup
-Automates the complete setup process for Browser Tools MCP.
+Automates the complete setup process for WebAI-MCP.
 
 ```bash
 node scripts/setup.js [options]
@@ -56,7 +56,7 @@ npm run platform-setup
 - **Linux**: Systemd services, package manager detection, tool validation
 
 ### ✅ `validate-installation.js` - Installation Validator
-Comprehensive validation of the entire Browser Tools MCP setup.
+Comprehensive validation of the entire WebAI-MCP setup.
 
 ```bash
 node scripts/validate-installation.js
@@ -134,14 +134,14 @@ npm run validate
 3. **"Build artifacts missing"**
    ```bash
    # Build packages
-   cd browser-tools-mcp && npm run build
-   cd ../browser-tools-server && npm run build
+   cd webai-mcp && npm run build
+   cd ../webai-server && npm run build
    ```
 
 4. **"Server not running"**
    ```bash
    # Start the server
-   npx @cpjet64/browser-tools-server
+   npx @cpjet64/webai-server
    ```
 
 5. **"Chrome extension not found"**
@@ -188,7 +188,7 @@ The scripts respect these environment variables:
 The scripts use ES modules and require:
 - Node.js 18+
 - NPM 8+
-- Access to the browser-tools-mcp repository structure
+- Access to the webai-mcp repository structure
 
 ## Development
 
@@ -215,9 +215,9 @@ const ICONS = { ... };
 // Main class
 class ScriptName {
   constructor() { ... }
-  
+
   async runScript() { ... }
-  
+
   // Helper methods
   private async helperMethod() { ... }
 }

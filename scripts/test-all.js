@@ -2,7 +2,7 @@
 
 /**
  * Comprehensive Test Runner for Browser Tools MCP
- * 
+ *
  * Automates testing of all components including server, MCP, extension,
  * and new diagnostic features across different branches.
  */
@@ -71,23 +71,23 @@ class TestRunner {
     try {
       // Pre-test setup
       await this.preTestSetup();
-      
+
       // Core component tests
       await this.testDiagnostics();
       await this.testBuildProcess();
       await this.testServerComponents();
       await this.testChromeExtension();
       await this.testIntegration();
-      
+
       // Feature branch tests (optional)
       if (this.options.testBranches) {
         await this.testFeatureBranches();
       }
-      
+
       // Cleanup and summary
       await this.cleanup();
       this.generateSummary();
-      
+
     } catch (error) {
       this.log(`Test runner failed: ${error.message}`, 'red', ICONS.error);
       await this.cleanup();
@@ -97,7 +97,7 @@ class TestRunner {
 
   async preTestSetup() {
     this.logSection('Pre-Test Setup');
-    
+
     // Check current branch
     try {
       const currentBranch = execSync('git branch --show-current', { encoding: 'utf8' }).trim();
@@ -109,7 +109,7 @@ class TestRunner {
     // Check Node.js version
     const nodeVersion = process.version;
     const majorVersion = parseInt(nodeVersion.slice(1).split('.')[0]);
-    
+
     if (majorVersion >= 18) {
       this.recordResult('pass', `Node.js ${nodeVersion} meets requirements`);
     } else {
@@ -159,9 +159,9 @@ class TestRunner {
     // Test diagnostic script
     try {
       this.log('Running diagnostic script...', 'blue', ICONS.test);
-      
+
       if (fs.existsSync('scripts/diagnose.js')) {
-        const output = execSync('node scripts/diagnose.js', { 
+        const output = execSync('node scripts/diagnose.js', {
           encoding: 'utf8',
           stdio: this.options.verbose ? 'inherit' : 'pipe'
         });
@@ -190,7 +190,7 @@ class TestRunner {
     try {
       if (fs.existsSync('scripts/validate-installation.js')) {
         this.log('Running installation validation...', 'blue', ICONS.test);
-        const output = execSync('node scripts/validate-installation.js', { 
+        const output = execSync('node scripts/validate-installation.js', {
           encoding: 'utf8',
           stdio: this.options.verbose ? 'inherit' : 'pipe'
         });
@@ -219,21 +219,21 @@ class TestRunner {
     for (const pkg of packages) {
       try {
         this.log(`Building ${pkg.name}...`, 'blue', ICONS.test);
-        
+
         const packagePath = path.join(process.cwd(), pkg.path);
-        
+
         // Install dependencies
-        execSync('npm install', { 
+        execSync('npm install', {
           cwd: packagePath,
           stdio: this.options.verbose ? 'inherit' : 'pipe'
         });
-        
+
         // Build package
-        execSync('npm run build', { 
+        execSync('npm run build', {
           cwd: packagePath,
           stdio: this.options.verbose ? 'inherit' : 'pipe'
         });
-        
+
         // Verify build output
         const distPath = path.join(packagePath, 'dist');
         if (fs.existsSync(distPath) && fs.readdirSync(distPath).length > 0) {
@@ -241,7 +241,7 @@ class TestRunner {
         } else {
           this.recordResult('fail', `${pkg.name} build produced no output`);
         }
-        
+
       } catch (error) {
         this.recordResult('fail', `${pkg.name} build failed: ${error.message}`);
       }
@@ -258,7 +258,7 @@ class TestRunner {
 
     // Test Browser Tools Server
     await this.testBrowserToolsServer();
-    
+
     // Test MCP Server
     await this.testMcpServer();
   }
@@ -266,7 +266,7 @@ class TestRunner {
   async testBrowserToolsServer() {
     try {
       this.log('Starting Browser Tools Server...', 'blue', ICONS.server);
-      
+
       // Start server in background
       this.serverProcess = spawn('node', ['dist/browser-connector.js'], {
         cwd: path.join(process.cwd(), 'browser-tools-server'),
@@ -275,12 +275,12 @@ class TestRunner {
 
       // Wait for server to start
       await this.waitForServer('http://localhost:3025/.identity', 10000);
-      
+
       // Test server endpoints
       await this.testServerEndpoints();
-      
+
       this.recordResult('pass', 'Browser Tools Server started and responding');
-      
+
     } catch (error) {
       this.recordResult('fail', `Browser Tools Server test failed: ${error.message}`);
     }
@@ -289,18 +289,18 @@ class TestRunner {
   async testMcpServer() {
     try {
       this.log('Testing MCP Server connection...', 'blue', ICONS.test);
-      
-      // Start MCP server in background (it should connect to Browser Tools Server)
+
+      // Start MCP server in background (it should connect to WebAI Server)
       this.mcpProcess = spawn('node', ['dist/mcp-server.js'], {
-        cwd: path.join(process.cwd(), 'browser-tools-mcp'),
+        cwd: path.join(process.cwd(), 'webai-mcp'),
         stdio: this.options.verbose ? 'inherit' : 'pipe'
       });
 
       // Give it time to connect
       await new Promise(resolve => setTimeout(resolve, 3000));
-      
+
       this.recordResult('pass', 'MCP Server started successfully');
-      
+
     } catch (error) {
       this.recordResult('fail', `MCP Server test failed: ${error.message}`);
     }
@@ -319,7 +319,7 @@ class TestRunner {
         const response = await fetch(`http://localhost:3025${endpoint}`, {
           signal: AbortSignal.timeout(5000)
         });
-        
+
         if (response.ok) {
           this.recordResult('pass', `Endpoint ${endpoint} responding`);
         } else {
@@ -357,7 +357,7 @@ class TestRunner {
       const manifestPath = path.join(extensionPath, 'manifest.json');
       if (fs.existsSync(manifestPath)) {
         const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-        
+
         if (manifest.manifest_version === 3) {
           this.recordResult('pass', 'Extension uses Manifest V3');
         } else {
@@ -385,7 +385,7 @@ class TestRunner {
         const response = await fetch('http://localhost:3025/.identity', {
           signal: AbortSignal.timeout(5000)
         });
-        
+
         if (response.ok) {
           const identity = await response.json();
           if (identity.signature === 'mcp-browser-connector-24x7') {
@@ -419,15 +419,15 @@ class TestRunner {
     for (const branch of branches) {
       try {
         this.log(`Testing branch: ${branch}`, 'blue', ICONS.test);
-        
+
         // Switch to branch
         execSync(`git checkout ${branch}`, { stdio: 'pipe' });
-        
+
         // Test branch-specific features
         await this.testBranchFeatures(branch);
-        
+
         this.recordResult('pass', `Branch ${branch} tested successfully`);
-        
+
       } catch (error) {
         this.recordResult('fail', `Branch ${branch} test failed: ${error.message}`);
       }
@@ -448,27 +448,27 @@ class TestRunner {
           execSync('node scripts/diagnose.js', { stdio: 'pipe' });
         }
         break;
-        
+
       case 'feature/enhanced-error-handling':
         // Test enhanced error handling by building MCP server
         if (fs.existsSync('browser-tools-mcp/error-handler.ts')) {
-          execSync('npm run build', { 
+          execSync('npm run build', {
             cwd: 'browser-tools-mcp',
             stdio: 'pipe'
           });
         }
         break;
-        
+
       case 'feature/proxy-support':
         // Test proxy configuration by building server
         if (fs.existsSync('browser-tools-server/proxy-config.ts')) {
-          execSync('npm run build', { 
+          execSync('npm run build', {
             cwd: 'browser-tools-server',
             stdio: 'pipe'
           });
         }
         break;
-        
+
       case 'feature/platform-enhancements':
         if (fs.existsSync('scripts/platform-setup.js')) {
           // Just validate the script exists and is syntactically correct
@@ -480,23 +480,23 @@ class TestRunner {
 
   async waitForServer(url, timeout = 10000) {
     const start = Date.now();
-    
+
     while (Date.now() - start < timeout) {
       try {
         const response = await fetch(url, {
           signal: AbortSignal.timeout(1000)
         });
-        
+
         if (response.ok) {
           return true;
         }
       } catch (error) {
         // Continue waiting
       }
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
     }
-    
+
     throw new Error(`Server did not start within ${timeout}ms`);
   }
 
@@ -537,7 +537,7 @@ class TestRunner {
     this.logSection('Test Summary');
 
     const total = this.results.passed + this.results.failed + this.results.warnings;
-    
+
     this.log(`Total tests: ${total}`, 'blue', ICONS.info);
     this.log(`Passed: ${this.results.passed}`, 'green', ICONS.success);
     this.log(`Failed: ${this.results.failed}`, 'red', ICONS.error);

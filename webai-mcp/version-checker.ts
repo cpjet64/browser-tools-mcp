@@ -86,7 +86,7 @@ export class VersionChecker {
           if (fs.existsSync(packagePath)) {
             const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
             // Verify this is the MCP server package
-            if (packageJson.name && packageJson.name.includes('browser-tools-mcp')) {
+            if (packageJson.name && (packageJson.name.includes('webai-mcp') || packageJson.name.includes('browser-tools-mcp'))) {
               return {
                 component: 'MCP Server',
                 version: packageJson.version,
@@ -120,21 +120,25 @@ export class VersionChecker {
 
   private static async getBrowserToolsServerVersion(): Promise<VersionInfo> {
     try {
-      // Try multiple possible paths for the browser-tools-server package.json
+      // Try multiple possible paths for the webai-server package.json
       const possiblePaths = [
-        path.join(process.cwd(), 'browser-tools-server', 'package.json'), // Sibling directory
-        path.join(process.cwd(), '..', 'browser-tools-server', 'package.json'), // Parent structure
-        path.join(__dirname, '..', '..', 'browser-tools-server', 'package.json'), // Relative to this file
+        path.join(process.cwd(), 'webai-server', 'package.json'), // Sibling directory
+        path.join(process.cwd(), '..', 'webai-server', 'package.json'), // Parent structure
+        path.join(__dirname, '..', '..', 'webai-server', 'package.json'), // Relative to this file
+        // Legacy paths for backward compatibility
+        path.join(process.cwd(), 'browser-tools-server', 'package.json'),
+        path.join(process.cwd(), '..', 'browser-tools-server', 'package.json'),
+        path.join(__dirname, '..', '..', 'browser-tools-server', 'package.json'),
       ];
 
       for (const packagePath of possiblePaths) {
         try {
           if (fs.existsSync(packagePath)) {
             const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
-            // Verify this is the browser tools server package
-            if (packageJson.name && packageJson.name.includes('browser-tools-server')) {
+            // Verify this is the webai server package
+            if (packageJson.name && (packageJson.name.includes('webai-server') || packageJson.name.includes('browser-tools-server'))) {
               return {
-                component: 'Browser Tools Server',
+                component: 'WebAI Server',
                 version: packageJson.version,
                 path: packagePath,
                 isValid: true
@@ -149,14 +153,14 @@ export class VersionChecker {
 
       // If no valid package.json found, return unknown
       return {
-        component: 'Browser Tools Server',
+        component: 'WebAI Server',
         version: 'unknown',
         path: 'package.json not found',
         isValid: false
       };
     } catch (error) {
       return {
-        component: 'Browser Tools Server',
+        component: 'WebAI Server',
         version: 'unknown',
         path: 'error reading package.json',
         isValid: false

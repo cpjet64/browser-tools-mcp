@@ -31,42 +31,42 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
           cache-dependency-path: |
-            browser-tools-mcp/package-lock.json
-            browser-tools-server/package-lock.json
+            webai-mcp/package-lock.json
+            webai-server/package-lock.json
 
       - name: 🔧 Install dependencies (MCP)
         run: |
-          cd browser-tools-mcp
+          cd webai-mcp
           npm ci
 
       - name: 🔧 Install dependencies (Server)
         run: |
-          cd browser-tools-server
+          cd webai-server
           npm ci
 
       - name: 🏗️ Build MCP Server
         run: |
-          cd browser-tools-mcp
+          cd webai-mcp
           npm run build
 
-      - name: 🏗️ Build Browser Tools Server
+      - name: 🏗️ Build WebAI Server
         run: |
-          cd browser-tools-server
+          cd webai-server
           npm run build
 
       - name: 🧪 Test MCP Server
         run: |
-          cd browser-tools-mcp
+          cd webai-mcp
           # Basic smoke test - check if the server can start
           timeout 10s node dist/mcp-server.js || true
           echo "✅ MCP Server smoke test passed"
 
-      - name: 🧪 Test Browser Tools Server
+      - name: 🧪 Test WebAI Server
         run: |
-          cd browser-tools-server
+          cd webai-server
           # Basic smoke test - check if the server can start
           timeout 10s node dist/browser-connector.js || true
-          echo "✅ Browser Tools Server smoke test passed"
+          echo "✅ WebAI Server smoke test passed"
         shell: bash
 
       - name: 📋 Validate Chrome Extension

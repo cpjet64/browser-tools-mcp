@@ -1,6 +1,6 @@
-# Browser Tools MCP Server
+# WebAI-MCP Server
 
-A Model Context Protocol (MCP) server that provides AI-powered browser tools integration. This server works in conjunction with the Browser Tools Server to provide AI capabilities for browser debugging and analysis.
+A Model Context Protocol (MCP) server that provides AI-powered browser integration. This server works in conjunction with the WebAI Server to provide AI capabilities for browser debugging and analysis.
 
 ## Features
 
@@ -17,36 +17,36 @@ A Model Context Protocol (MCP) server that provides AI-powered browser tools int
 ## Prerequisites
 
 - Node.js 14 or higher
-- Browser Tools Server running
+- WebAI Server running
 - Chrome or Chromium browser installed (required for audit functionality)
 
 ## Installation
 
 ```bash
-npx @cpjet64/browser-tools-mcp
+npx @cpjet64/webai-mcp
 ```
 
 Or install globally:
 
 ```bash
-npm install -g @cpjet64/browser-tools-mcp
+npm install -g @cpjet64/webai-mcp
 ```
 
 ## Usage
 
-1. First, make sure the Browser Tools Server is running:
+1. First, make sure the WebAI Server is running:
 
 ```bash
-npx @cpjet64/browser-tools-server
+npx @cpjet64/webai-server
 ```
 
 2. Then start the MCP server:
 
 ```bash
-npx @cpjet64/browser-tools-mcp
+npx @cpjet64/webai-mcp
 ```
 
-3. The MCP server will connect to the Browser Tools Server and provide the following capabilities:
+3. The MCP server will connect to the WebAI Server and provide the following capabilities:
 
 - Get HTML by selector
 - Console log retrieval

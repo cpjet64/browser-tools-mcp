@@ -102,24 +102,24 @@ jobs:
 
       - name: 🔧 Install Dependencies
         run: |
-          cd browser-tools-mcp && npm ci
-          cd ../browser-tools-server && npm ci
+          cd webai-mcp && npm ci
+          cd ../webai-server && npm ci
 
       - name: 🏗️ Build Packages
         run: |
-          cd browser-tools-mcp && npm run build
-          cd ../browser-tools-server && npm run build
+          cd webai-mcp && npm run build
+          cd ../webai-server && npm run build
 
       - name: 🧪 Run Tests
         if: github.event.inputs.skip_tests != 'true'
         run: |
           echo "🧪 Testing MCP Server..."
-          cd browser-tools-mcp
+          cd webai-mcp
           timeout 10s node dist/mcp-server.js || echo "✅ MCP Server test passed"
 
-          echo "🧪 Testing Browser Tools Server..."
-          cd ../browser-tools-server
-          timeout 5s node dist/browser-connector.js || echo "✅ Browser Tools Server test passed"
+          echo "🧪 Testing WebAI Server..."
+          cd ../webai-server
+          timeout 5s node dist/browser-connector.js || echo "✅ WebAI Server test passed"
 
           echo "🧪 Testing Chrome Extension..."
           cd ../chrome-extension

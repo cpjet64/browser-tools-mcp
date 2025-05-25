@@ -52,8 +52,8 @@ npx @cpjet64/webai-server@latest
    1. Open Augment settings
    2. Go to MCP Servers configuration
    3. Add new server:
-      - **Name**: `browser-tools`
-      - **Command**: `npx -y @cpjet64/browser-tools-mcp@latest`
+      - **Name**: `webai`
+      - **Command**: `npx -y @cpjet64/webai-mcp@latest`
    4. Save configuration
 
    **For Cursor IDE:**
@@ -61,9 +61,9 @@ npx @cpjet64/webai-server@latest
    {
      "mcp": {
        "servers": {
-         "browser-tools": {
+         "webai": {
            "command": "npx",
-           "args": ["@cpjet64/browser-tools-mcp@latest"]
+           "args": ["@cpjet64/webai-mcp@latest"]
          }
        }
      }
@@ -74,20 +74,20 @@ npx @cpjet64/webai-server@latest
    ```json
    {
      "mcpServers": {
-       "browser-tools": {
+       "webai": {
          "command": "npx",
-         "args": ["@cpjet64/browser-tools-mcp@latest"]
+         "args": ["@cpjet64/webai-mcp@latest"]
        }
      }
    }
    ```
 
    **For Cline/Zed/Other MCP Clients:**
-   - Command: `npx @cpjet64/browser-tools-mcp@latest`
+   - Command: `npx @cpjet64/webai-mcp@latest`
    - Check your client's documentation for specific configuration format
 
-3. **Start Browser Server**:
-   - Open a new terminal and run: `npx @cpjet64/browser-tools-server@latest`
+3. **Start WebAI Server**:
+   - Open a new terminal and run: `npx @cpjet64/webai-server@latest`
 
 4. **Open DevTools**:
    - Open Chrome DevTools → BrowserToolsMCP panel

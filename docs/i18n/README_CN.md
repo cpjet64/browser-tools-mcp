@@ -56,11 +56,11 @@ npx @cpjet64/webai-server@latest
    - 解压并在Chrome → 扩展程序 → 开发者模式 → 加载已解压的扩展程序中加载
 
 2. **配置您的IDE**：
-   - 将`npx @cpjet64/browser-tools-mcp@latest`添加到您的MCP客户端配置中
+   - 将`npx @cpjet64/webai-mcp@latest`添加到您的MCP客户端配置中
    - 不同的IDE有不同的配置 - 请查看您的IDE的MCP文档
 
-3. **启动浏览器服务器**：
-   - 打开新终端并运行：`npx @cpjet64/browser-tools-server@latest`
+3. **启动WebAI服务器**：
+   - 打开新终端并运行：`npx @cpjet64/webai-server@latest`
 
 4. **打开开发工具**：
    - 打开Chrome开发工具 → BrowserToolsMCP面板
