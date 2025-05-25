@@ -10,7 +10,12 @@
     "setup:quick": "node setup.js --skip-diagnostics",
     "platform-setup": "node platform-setup.js",
     "validate": "node validate-installation.js",
-    "full-setup": "npm run setup && npm run platform-setup && npm run validate"
+    "test": "node test-all.js",
+    "test:verbose": "node test-all.js --verbose",
+    "test:branches": "node test-all.js --test-branches",
+    "test:quick": "node test-all.js --skip-build",
+    "full-setup": "npm run setup && npm run platform-setup && npm run validate",
+    "full-test": "npm run full-setup && npm run test"
   },
   "bin": {
     "browser-tools-diagnose": "./diagnose.js",
