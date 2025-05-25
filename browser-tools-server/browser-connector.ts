@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import express from "express";
+import express, { Request, Response, RequestHandler } from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import { tokenizeAndEstimateCost } from "llm-cost";
@@ -20,6 +20,7 @@ import {
 } from "./lighthouse/index.js";
 import * as net from "net";
 import { runBestPracticesAudit } from "./lighthouse/best-practices.js";
+import { ProxyManager, type NetworkConfig, type ProxyConfig } from "./proxy-config.js";
 
 /**
  * Converts a file path to the appropriate format for the current platform
@@ -165,7 +166,16 @@ let currentSettings = {
   screenshotPath: getDefaultDownloadsFolder(),
   // Add server host configuration
   serverHost: process.env.SERVER_HOST || "0.0.0.0", // Default to all interfaces
+  // Add network configuration
+  networkConfig: {
+    timeout: parseInt(process.env.NETWORK_TIMEOUT || "30000"),
+    retries: parseInt(process.env.NETWORK_RETRIES || "3"),
+    userAgent: process.env.USER_AGENT || "Browser-Tools-MCP/1.3.0",
+  } as NetworkConfig,
 };
+
+// Initialize proxy manager
+let proxyManager = ProxyManager.createFromEnvironment();
 
 // Add new storage for selected element
 let selectedElement: any = null;
@@ -725,6 +735,9 @@ export class BrowserConnector {
         await this.getSessionStorage(req, res);
       }
     );
+
+    // Add proxy configuration endpoints
+    this.setupProxyEndpoints();
 
     // Handle upgrade requests for WebSocket
     this.server.on(
@@ -1916,6 +1929,163 @@ export class BrowserConnector {
       );
       return res.status(500).json({ error: errorMessage });
     }
+  }
+
+  // Setup proxy configuration endpoints
+  private setupProxyEndpoints(): void {
+    // Get current proxy configuration
+    const getProxyConfig: RequestHandler = (req: Request, res: Response) => {
+      try {
+        const config = proxyManager.getConfig();
+        res.json({
+          status: "success",
+          config: {
+            ...config,
+            // Don't expose sensitive information
+            proxy: config.proxy ? {
+              ...config.proxy,
+              password: config.proxy.password ? "***" : undefined
+            } : undefined
+          }
+        });
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        res.status(500).json({ error: errorMessage });
+      }
+    };
+    this.app.get("/proxy/config", getProxyConfig);
+
+    // Update proxy configuration
+    const updateProxyConfig: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+      try {
+        const newConfig = req.body as Partial<NetworkConfig>;
+
+        // Validate proxy configuration if provided
+        if (newConfig.proxy && newConfig.proxy.enabled) {
+          const validation = await ProxyManager.validateProxyConfig(newConfig.proxy);
+          if (!validation.valid) {
+            res.status(400).json({
+              error: `Invalid proxy configuration: ${validation.error}`
+            });
+            return;
+          }
+        }
+
+        // Update the proxy manager
+        proxyManager.updateConfig(newConfig);
+
+        // Update current settings
+        if (newConfig.timeout !== undefined) {
+          currentSettings.networkConfig.timeout = newConfig.timeout;
+        }
+        if (newConfig.retries !== undefined) {
+          currentSettings.networkConfig.retries = newConfig.retries;
+        }
+        if (newConfig.userAgent !== undefined) {
+          currentSettings.networkConfig.userAgent = newConfig.userAgent;
+        }
+
+        res.json({
+          status: "success",
+          message: "Proxy configuration updated successfully"
+        });
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        res.status(500).json({ error: errorMessage });
+      }
+    };
+    this.app.post("/proxy/config", updateProxyConfig);
+
+    // Test proxy connectivity
+    const testProxyConnectivity: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+      try {
+        const { testUrls } = req.body;
+        const urls = testUrls || [
+          'https://www.google.com',
+          'https://httpbin.org/get',
+          'https://api.github.com'
+        ];
+
+        const results = await proxyManager.testConnectivity(urls);
+
+        const successCount = results.filter(r => r.success).length;
+        const totalCount = results.length;
+
+        res.json({
+          status: "success",
+          results,
+          summary: {
+            successful: successCount,
+            total: totalCount,
+            successRate: Math.round((successCount / totalCount) * 100)
+          }
+        });
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        res.status(500).json({ error: errorMessage });
+      }
+    };
+    this.app.post("/proxy/test", testProxyConnectivity);
+
+    // Get proxy recommendations
+    const getProxyRecommendations: RequestHandler = (req: Request, res: Response) => {
+      try {
+        const recommendations = ProxyManager.getRecommendedSettings();
+        res.json({
+          status: "success",
+          recommendations
+        });
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        res.status(500).json({ error: errorMessage });
+      }
+    };
+    this.app.get("/proxy/recommendations", getProxyRecommendations);
+
+    // Auto-detect system proxy
+    const autoDetectProxy: RequestHandler = (req: Request, res: Response) => {
+      try {
+        const systemProxy = ProxyManager.detectSystemProxy();
+
+        if (systemProxy) {
+          res.json({
+            status: "success",
+            detected: true,
+            proxy: {
+              ...systemProxy,
+              password: systemProxy.password ? "***" : undefined
+            }
+          });
+        } else {
+          res.json({
+            status: "success",
+            detected: false,
+            message: "No system proxy configuration detected"
+          });
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        res.status(500).json({ error: errorMessage });
+      }
+    };
+    this.app.post("/proxy/auto-detect", autoDetectProxy);
+
+    // Reset proxy configuration
+    const resetProxyConfig: RequestHandler = (req: Request, res: Response) => {
+      try {
+        // Reset to environment-based configuration
+        proxyManager = ProxyManager.createFromEnvironment();
+
+        res.json({
+          status: "success",
+          message: "Proxy configuration reset to environment defaults"
+        });
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        res.status(500).json({ error: errorMessage });
+      }
+    };
+    this.app.post("/proxy/reset", resetProxyConfig);
   }
 }
 
