@@ -156,10 +156,10 @@ jobs:
           ### Quick Start
           \`\`\`bash
           # Install MCP Server
-          npx @munawwar-forks/browser-tools-mcp@${VERSION}
+          npx @cpjet64/browser-tools-mcp@${VERSION}
 
           # Install Browser Tools Server
-          npx @munawwar-forks/browser-tools-server@${VERSION}
+          npx @cpjet64/browser-tools-server@${VERSION}
           \`\`\`
 
           ### Chrome Extension

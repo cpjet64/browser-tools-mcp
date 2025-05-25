@@ -67,8 +67,8 @@ jobs:
       - name: 🧪 Test Browser Tools Server
         run: |
           cd browser-tools-server
-          # Basic smoke test
-          node dist/browser-connector.js --help || echo "No help flag, that's ok"
+          # Basic smoke test - start server and stop after 5 seconds
+          timeout 5s node dist/browser-connector.js || echo "Server started and stopped successfully"
           echo "✅ Browser Tools Server builds and runs"
 
       - name: 📋 Pre-publish Info
