@@ -4,9 +4,12 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import path from "path";
 import fs from "fs";
+import os from "os";
 // Using zod from the @modelcontextprotocol/sdk dependencies
 // This avoids adding zod as a direct dependency to package.json
 import { z } from "zod";
+import { ErrorHandler, type ErrorContext } from "./error-handler.js";
+import { VersionChecker } from "./version-checker.js";
 
 // Create the MCP server
 const server = new McpServer({
@@ -117,22 +120,38 @@ async function discoverServer(): Promise<boolean> {
 
 // Wrapper function to ensure server connection before making requests
 async function withServerConnection<T>(
-  apiCall: () => Promise<T>
+  apiCall: () => Promise<T>,
+  operation: string = "API call"
 ): Promise<T | any> {
+  const context: ErrorContext = {
+    operation,
+    host: discoveredHost,
+    port: discoveredPort,
+    platform: os.platform()
+  };
+
   // Attempt to discover server if not already discovered
   if (!serverDiscovered) {
     const discovered = await discoverServer();
     if (!discovered) {
+      const enhancedError = ErrorHandler.analyzeError(
+        "Failed to discover browser connector server",
+        { ...context, operation: "server discovery" }
+      );
+
       return {
         content: [
           {
             type: "text",
-            text: "Failed to discover browser connector server. Please ensure it's running.",
+            text: ErrorHandler.formatErrorForUser(enhancedError),
           },
         ],
         isError: true,
       };
     }
+    // Update context with discovered connection
+    context.host = discoveredHost;
+    context.port = discoveredPort;
   }
 
   // Now make the actual API call with discovered host/port
@@ -143,20 +162,32 @@ async function withServerConnection<T>(
     console.error(
       `API call failed: ${error.message}. Attempting rediscovery...`
     );
+
+    const originalError = error;
     serverDiscovered = false;
 
     if (await discoverServer()) {
       console.error("Rediscovery successful. Retrying API call...");
       try {
+        // Update context with rediscovered connection
+        context.host = discoveredHost;
+        context.port = discoveredPort;
+
         // Retry the API call with the newly discovered connection
         return await apiCall();
       } catch (retryError: any) {
         console.error(`Retry failed: ${retryError.message}`);
+
+        const enhancedError = ErrorHandler.analyzeError(
+          retryError,
+          { ...context, operation: `${operation} (retry)`, originalError }
+        );
+
         return {
           content: [
             {
               type: "text",
-              text: `Error after reconnection attempt: ${retryError.message}`,
+              text: ErrorHandler.formatErrorForUser(enhancedError),
             },
           ],
           isError: true,
@@ -164,11 +195,17 @@ async function withServerConnection<T>(
       }
     } else {
       console.error("Rediscovery failed. Could not reconnect to server.");
+
+      const enhancedError = ErrorHandler.analyzeError(
+        originalError,
+        { ...context, operation: `${operation} (connection failed)`, originalError }
+      );
+
       return {
         content: [
           {
             type: "text",
-            text: `Failed to reconnect to server: ${error.message}`,
+            text: ErrorHandler.formatErrorForUser(enhancedError),
           },
         ],
         isError: true,
@@ -183,6 +220,11 @@ server.tool("getConsoleLogs", "Check our browser logs", async () => {
     const response = await fetch(
       `http://${discoveredHost}:${discoveredPort}/console-logs`
     );
+
+    if (!response.ok) {
+      throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+    }
+
     const json = await response.json();
     return {
       content: [
@@ -192,7 +234,7 @@ server.tool("getConsoleLogs", "Check our browser logs", async () => {
         },
       ],
     };
-  });
+  }, "get console logs");
 });
 
 server.tool(
@@ -203,6 +245,11 @@ server.tool(
       const response = await fetch(
         `http://${discoveredHost}:${discoveredPort}/console-errors`
       );
+
+      if (!response.ok) {
+        throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+      }
+
       const json = await response.json();
       return {
         content: [
@@ -212,7 +259,7 @@ server.tool(
           },
         ],
       };
-    });
+    }, "get console errors");
   }
 );
 
@@ -221,6 +268,11 @@ server.tool("getNetworkErrors", "Check our network ERROR logs", async () => {
     const response = await fetch(
       `http://${discoveredHost}:${discoveredPort}/network-errors`
     );
+
+    if (!response.ok) {
+      throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+    }
+
     const json = await response.json();
     return {
       content: [
@@ -231,7 +283,7 @@ server.tool("getNetworkErrors", "Check our network ERROR logs", async () => {
       ],
       isError: true,
     };
-  });
+  }, "get network errors");
 });
 
 server.tool("getNetworkLogs", "Check ALL our network logs", async () => {
@@ -239,6 +291,11 @@ server.tool("getNetworkLogs", "Check ALL our network logs", async () => {
     const response = await fetch(
       `http://${discoveredHost}:${discoveredPort}/network-success`
     );
+
+    if (!response.ok) {
+      throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+    }
+
     const json = await response.json();
     return {
       content: [
@@ -248,7 +305,7 @@ server.tool("getNetworkLogs", "Check ALL our network logs", async () => {
         },
       ],
     };
-  });
+  }, "get network logs");
 });
 
 server.tool(
@@ -325,7 +382,7 @@ server.tool(
 server.tool(
   "inspectElementsBySelector",
   "Get HTML elements and their CSS styles matching a CSS selector",
-  { 
+  {
     selector: z.string().describe("CSS selector to find elements (e.g., '.classname', '#id', 'div.container > p')"),
     resultLimit: z.number().optional().default(1).describe("Maximum number of elements to process (default: 1)"),
     includeComputedStyles: z.array(z.string()).optional().default([]).describe("Array of specific CSS properties to include in the computed styles output (empty array means no computed styles)")
@@ -1662,6 +1719,39 @@ server.tool("getSessionStorage", "Get all sessionStorage items", async () => {
     }
   });
 });
+
+// Add version compatibility check tool
+server.tool(
+  "checkVersionCompatibility",
+  "Check version compatibility between MCP server, Browser Tools server, and Chrome extension",
+  {},
+  async () => {
+    try {
+      const result = await VersionChecker.checkVersionCompatibility();
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: VersionChecker.formatCompatibilityReport(result),
+          },
+        ],
+        isError: !result.isCompatible,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Failed to check version compatibility: ${errorMessage}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  }
+);
 
 // Start receiving messages on stdio
 (async () => {
