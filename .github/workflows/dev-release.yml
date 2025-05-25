@@ -1,0 +1,112 @@
+name: Dev Release
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+jobs:
+  publish-dev:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+      
+      - name: Install dependencies - browser-tools-server
+        run: |
+          cd browser-tools-server
+          npm ci
+      
+      - name: Install dependencies - browser-tools-mcp
+        run: |
+          cd browser-tools-mcp
+          npm ci
+      
+      - name: Build packages
+        run: |
+          cd browser-tools-server
+          npm run build
+          cd ../browser-tools-mcp
+          npm run build
+      
+      - name: Get current version and increment dev version
+        id: version
+        run: |
+          cd browser-tools-server
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          
+          # Check if this is already a dev version
+          if [[ $CURRENT_VERSION == *"-dev."* ]]; then
+            # Increment the dev number
+            npm version prerelease --preid=dev --no-git-tag-version
+          else
+            # Create first dev version
+            npm version prerelease --preid=dev --no-git-tag-version
+          fi
+          
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          
+          # Update browser-tools-mcp to same version
+          cd ../browser-tools-mcp
+          npm version $NEW_VERSION --no-git-tag-version
+      
+      - name: Publish browser-tools-server to NPM (dev tag)
+        run: |
+          cd browser-tools-server
+          npm publish --tag dev
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY }}
+      
+      - name: Publish browser-tools-mcp to NPM (dev tag)
+        run: |
+          cd browser-tools-mcp
+          npm publish --tag dev
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY }}
+      
+      - name: Create dev release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.version.outputs.new_version }}
+          release_name: Dev Release v${{ steps.version.outputs.new_version }}
+          body: |
+            🧪 **Development Release**
+            
+            This is a development release with the latest features and improvements.
+            
+            **⚠️ Warning**: Development releases may be unstable. Use `@latest` for production.
+            
+            **Installation:**
+            ```bash
+            npx @cpjet64/browser-tools-mcp@dev
+            npx @cpjet64/browser-tools-server@dev
+            ```
+            
+            **Changes since last stable release:**
+            - Latest development features
+            - Bug fixes and improvements
+            - Experimental functionality
+            
+            **Full Changelog**: https://github.com/cpjet64/browser-tools-mcp/compare/main...dev
+          draft: false
+          prerelease: true
+      
+      - name: Commit version changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add browser-tools-server/package.json browser-tools-mcp/package.json
+          git commit -m "chore: bump dev version to ${{ steps.version.outputs.new_version }}" || exit 0
+          git push

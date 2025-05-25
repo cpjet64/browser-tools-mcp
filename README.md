@@ -1,4 +1,4 @@
-# BrowserTools MCP - Enhanced Fork by cpjet64
+# Browser Tools MCP
 
 > Make your AI tools 10x more aware and capable of interacting with your browser
 
@@ -8,32 +8,19 @@
 
 English | [简体中文](./docs/i18n/README_CN.md)
 
-This is an **enhanced fork** of the original BrowserTools MCP with significant improvements and new features. It's a powerful browser monitoring and interaction tool that enables AI-powered applications via Anthropic's Model Context Protocol (MCP) to capture and analyze browser data through a Chrome extension.
+Browser Tools MCP is a comprehensive browser automation and monitoring solution that enables AI applications to capture and analyze browser data through a Chrome extension. It provides 20+ tools for screenshots, console logs, network monitoring, storage access, audits, and cross-platform auto-paste functionality.
 
-## 🚀 What's New in This Fork (v1.4.0)
+## ✨ Key Features
 
-This fork includes **ALL community contributions** and major enhancements with **complete feature integration**:
-
-### ✨ **New Integrated Features**
-- 🍪 **Storage Access Tools** - Access cookies, localStorage, and sessionStorage
-- 🔍 **Advanced Element Inspection** - CSS selector-based element inspection with computed styles
-- 📸 **Enhanced Screenshots** - Fixed screenshot capture with separate DevTools windows
-- 🧪 **Audit & Debug Modes** - Comprehensive analysis tools via Lighthouse
-- 🪟 **Windows Compatibility** - Full Windows support with path conversion
-- 🌍 **Multi-language Documentation** - Chinese translation support
-- 🤖 **Automated Releases** - Professional release automation with NPM publishing
-- 🔧 **Automated Diagnostics** - Complete diagnostic and setup workflows
-- 🛡️ **Enhanced Error Handling** - Robust error management and recovery
-- 🌐 **Proxy Support** - Full network configuration and proxy management
-- 🖥️ **Platform Enhancements** - Cross-platform compatibility and optimization
-
-### 🔧 **Technical Improvements**
-- ⚡ **Latest Dependencies** - Express 5.x, body-parser 2.x, node-fetch 3.x
-- 🐛 **Bug Fixes** - stringSizeLimit and other critical fixes applied
-- 🧪 **Cross-platform Testing** - Automated testing on Windows, macOS, Linux
-- 📦 **Professional Packaging** - Automated Chrome extension and NPM package releases
-- 🔄 **Complete Integration** - All feature branches merged into unified main branch
-- 🎯 **Production Ready** - Comprehensive testing and validation infrastructure
+- 📸 **Screenshot Capture** - High-quality screenshots with auto-paste to any IDE
+- 🔍 **Element Inspection** - CSS selector-based inspection with computed styles
+- 📊 **Console & Network Monitoring** - Real-time browser logs and network requests
+- 🍪 **Storage Access** - Cookies, localStorage, and sessionStorage data
+- 🧪 **Comprehensive Audits** - Accessibility, performance, SEO, and best practices
+- 🎯 **Cross-Platform Auto-Paste** - Windows, macOS, Linux support for all IDEs
+- 🌐 **Network & Proxy Management** - Complete network configuration tools
+- 🔧 **Automated Diagnostics** - System validation and setup workflows
+- 🛡️ **Enhanced Error Handling** - Robust error recovery and reporting
 
 ## 🚀 Quick Installation
 
@@ -67,11 +54,9 @@ npx @cpjet64/browser-tools-server@latest
    3. Add new server:
       - **Name**: `browser-tools`
       - **Command**: `npx -y @cpjet64/browser-tools-mcp@latest`
-      - **Environment Variables**: (none needed)
    4. Save configuration
 
    **For Cursor IDE:**
-   - Add to your `.cursor-settings` or MCP configuration:
    ```json
    {
      "mcp": {
@@ -86,7 +71,6 @@ npx @cpjet64/browser-tools-server@latest
    ```
 
    **For Claude Desktop:**
-   - Add to your `claude_desktop_config.json`:
    ```json
    {
      "mcpServers": {
@@ -98,9 +82,9 @@ npx @cpjet64/browser-tools-server@latest
    }
    ```
 
-   **For Other MCP Clients:**
-   - Use command: `npx @cpjet64/browser-tools-mcp@latest`
-   - Check your client's MCP documentation for specific configuration format
+   **For Cline/Zed/Other MCP Clients:**
+   - Command: `npx @cpjet64/browser-tools-mcp@latest`
+   - Check your client's documentation for specific configuration format
 
 3. **Start Browser Server**:
    - Open a new terminal and run: `npx @cpjet64/browser-tools-server@latest`
@@ -110,17 +94,22 @@ npx @cpjet64/browser-tools-server@latest
    - Ensure connection is established
 
 5. **Test the Setup**:
-
-   **For Augment Users:**
-   - Try: *"Take a screenshot of this page"*
-   - Try: *"Run system diagnostics"* (new feature!)
-   - Try: *"Show me the console logs"*
-   - Try: *"Configure proxy settings"* (new feature!)
-
-   **For All MCP Clients:**
    - Basic test: *"Take a screenshot"*
    - Advanced test: *"Run an accessibility audit"*
-   - New features: *"Validate installation"*
+   - System test: *"Run system diagnostics"*
+   - Network test: *"Configure proxy settings"*
+
+## 🧪 Development Version
+
+Want to try the latest features before they're released?
+
+```bash
+# Install development version (may be unstable)
+npx @cpjet64/browser-tools-mcp@dev
+npx @cpjet64/browser-tools-server@dev
+```
+
+**Note**: Development versions include the latest features but may be unstable. Use `@latest` for production.
 
 ### **💡 Important Notes**
 
@@ -144,20 +133,20 @@ After that, it should work but if it doesn't let me know and I can share some mo
 
 ## 🛠️ Complete Feature Set
 
-This enhanced fork provides **20+ MCP tools** for comprehensive browser automation with **integrated advanced features**:
+Browser Tools MCP provides **20+ MCP tools** for comprehensive browser automation:
 
 ### **📊 Browser Monitoring**
 - **Console Logs** - Capture and analyze browser console output
 - **Network Requests** - Monitor XHR/fetch requests and responses
-- **Screenshots** - Take high-quality screenshots (works with separate DevTools)
+- **Screenshots** - Take high-quality screenshots with auto-paste
 - **Selected Elements** - Inspect currently selected DOM elements
 
-### **🍪 Storage Access** *(Enhanced)*
+### **🍪 Storage Access**
 - **Cookies** - Read and analyze browser cookies
 - **localStorage** - Access localStorage data
 - **sessionStorage** - Access sessionStorage data
 
-### **🔍 Advanced Element Inspection** *(Enhanced)*
+### **🔍 Advanced Element Inspection**
 - **CSS Selector Inspection** - Inspect elements using CSS selectors
 - **Computed Styles** - Get computed CSS styles for elements
 - **Chrome Debugging API** - Deep element analysis
@@ -171,24 +160,31 @@ This enhanced fork provides **20+ MCP tools** for comprehensive browser automati
 - **Audit Mode** - Run all audits in sequence
 - **Debugger Mode** - Run all debugging tools in sequence
 
-### **🔧 Automated Diagnostics** *(New Integrated)*
+### **🔧 Automated Diagnostics**
 - **System Diagnostics** - Comprehensive system and environment validation
 - **Automated Setup** - Intelligent setup and configuration workflows
 - **Installation Validation** - Verify installation integrity and dependencies
 - **Platform Detection** - Cross-platform compatibility checking
 
-### **🌐 Network & Proxy Management** *(New Integrated)*
+### **🌐 Network & Proxy Management**
 - **Proxy Configuration** - Complete proxy setup and management
 - **Network Diagnostics** - Network connectivity and performance testing
 - **Proxy Auto-detection** - Automatic system proxy discovery
 - **Network Recommendations** - Environment-specific network optimization
 
-### **🛡️ Enhanced Error Handling** *(New Integrated)*
+### **🛡️ Enhanced Error Handling**
 - **Intelligent Error Recovery** - Automatic error detection and recovery
 - **Detailed Error Reporting** - Comprehensive error context and solutions
 - **Graceful Degradation** - Fallback mechanisms for failed operations
 
-### **🖥️ Platform-Specific Features** *(New Integrated)*
+### **🎯 Cross-Platform Auto-Paste**
+- **Windows Auto-paste** - PowerShell-based automation for all IDEs
+- **macOS Auto-paste** - AppleScript automation with element detection
+- **Linux Auto-paste** - xdotool automation for window management
+- **Multi-IDE Support** - Cursor, VS Code, Zed, Claude Desktop, Custom apps
+- **Configurable Target** - User-selectable IDE from extension panel
+
+### **🖥️ Platform-Specific Features**
 - **Windows Optimization** - Windows-specific path handling and features
 - **macOS Integration** - Native macOS compatibility and optimization
 - **Linux Support** - Full Linux distribution compatibility
@@ -379,17 +375,24 @@ Once installed, you can use natural language commands with your MCP client:
 - *"What network requests were made?"*
 - *"Enter debugger mode"*
 
-### **Network & Proxy Management** *(New)*
+### **Network & Proxy Management**
 - *"Configure proxy settings"*
 - *"Test network connectivity"*
 - *"Auto-detect system proxy"*
 - *"Optimize network settings for this environment"*
 
-### **Automated Diagnostics** *(New)*
+### **Automated Diagnostics**
 - *"Run system diagnostics"*
 - *"Validate installation"*
 - *"Check platform compatibility"*
 - *"Setup automated configuration"*
+
+### **Cross-Platform Auto-Paste**
+- *"Take a screenshot and paste it to VS Code"* (configure target IDE in extension)
+- *"Screenshot this page"* (auto-pastes to configured IDE)
+- **Windows**: PowerShell automation with process detection
+- **macOS**: AppleScript with element detection and fallbacks
+- **Linux**: xdotool automation (requires `xclip` and `xdotool`)
 
 ## 🔧 Compatibility
 
@@ -422,18 +425,115 @@ Once installed, you can use natural language commands with your MCP client:
 - **Chinese Documentation**: [简体中文文档](./docs/i18n/README_CN.md)
 - **Original Docs**: [BrowserTools MCP Docs](https://browsertools.agentdesk.ai/)
 
+## 🔄 Migration from Original Repository
+
+If you're currently using the original `AgentDeskAI/browser-tools-mcp`, here's how to migrate to this enhanced version:
+
+### **📦 Package Migration**
+
+**1. Update MCP Server Package:**
+```bash
+# Remove old package
+npm uninstall @munawwar-forks/browser-tools-mcp
+
+# Install new package
+npm install @cpjet64/browser-tools-mcp
+```
+
+**2. Update Browser Server Package:**
+```bash
+# Remove old package
+npm uninstall @munawwar-forks/browser-tools-server
+
+# Install new package
+npm install @cpjet64/browser-tools-server
+```
+
+### **⚙️ Configuration Updates**
+
+**Update your MCP client configuration:**
+
+**Before (Original):**
+```json
+{
+  "mcpServers": {
+    "browser-tools": {
+      "command": "npx",
+      "args": ["@munawwar-forks/browser-tools-mcp"]
+    }
+  }
+}
+```
+
+**After (This Fork):**
+```json
+{
+  "mcpServers": {
+    "browser-tools": {
+      "command": "npx",
+      "args": ["@cpjet64/browser-tools-mcp"]
+    }
+  }
+}
+```
+
+### **🔧 Chrome Extension**
+
+**Option 1: Download from Releases (Recommended)**
+1. Download the latest `.zip` from [Releases](https://github.com/cpjet64/browser-tools-mcp/releases)
+2. Remove the old extension from Chrome
+3. Load the new extension using "Load unpacked"
+
+**Option 2: Build from Source**
+```bash
+git clone https://github.com/cpjet64/browser-tools-mcp.git
+cd browser-tools-mcp/chrome-extension
+# Load the folder in Chrome Extensions → Developer mode → Load unpacked
+```
+
+### **✨ New Features Available After Migration**
+
+- 🎯 **Cross-Platform Auto-Paste** - Windows, macOS, Linux support
+- 🔧 **Automated Diagnostics** - System validation and setup workflows
+- 🌐 **Network & Proxy Management** - Complete network configuration tools
+- 🛡️ **Enhanced Error Handling** - Better error recovery and reporting
+- 🍪 **Storage Access Tools** - Cookies, localStorage, sessionStorage
+- 🧪 **Advanced Audits** - Accessibility, performance, SEO analysis
+
+### **🔍 Verification**
+
+After migration, test that everything works:
+```bash
+# Start the new browser server
+npx @cpjet64/browser-tools-server
+
+# Test in your MCP client
+"Take a screenshot"
+"Run system diagnostics"
+"Configure proxy settings"
+```
+
+### **💡 Migration Notes**
+
+- **Backward Compatible** - All existing functionality preserved
+- **Same API** - No changes to MCP tool interfaces
+- **Enhanced Features** - Additional tools and capabilities
+- **Better Stability** - Improved error handling and cross-platform support
+
 ## 🤝 Contributing
 
-This is an independent fork focused on stability and feature completeness.
+Browser Tools MCP is actively maintained and welcomes contributions.
 
 ### **🐛 Issues & Feature Requests**
 - Open an issue for bugs or feature requests
 - Check existing issues before creating new ones
+- Provide detailed reproduction steps and environment information
 
-### **🔄 Updates**
-- This fork maintains independence from the original repository
-- All valuable community contributions are integrated
-- Automated testing ensures stability across platforms
+### **🔄 Development**
+- Fork the repository and create feature branches
+- Follow existing code style and patterns
+- Add tests for new functionality
+- Update documentation as needed
 
 ## 📄 License
 

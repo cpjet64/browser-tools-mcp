@@ -11,10 +11,22 @@ import { z } from "zod";
 import { ErrorHandler, type ErrorContext } from "./error-handler.js";
 import { VersionChecker } from "./version-checker.js";
 
+// Get version from package.json
+let packageVersion = "1.4.0"; // fallback version
+try {
+  const packagePath = path.join(__dirname, "..", "package.json");
+  if (fs.existsSync(packagePath)) {
+    const packageJson = JSON.parse(fs.readFileSync(packagePath, "utf8"));
+    packageVersion = packageJson.version;
+  }
+} catch (error) {
+  console.warn("Could not read package.json version, using fallback:", packageVersion);
+}
+
 // Create the MCP server
 const server = new McpServer({
   name: "Browser Tools MCP",
-  version: "1.2.0",
+  version: packageVersion,
 });
 
 // Track the discovered server connection

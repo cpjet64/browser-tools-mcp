@@ -12,6 +12,8 @@ let settings = {
   serverHost: "localhost",
   serverPort: 3025,
   allowAutoPaste: false, // Default auto-paste setting
+  targetIDE: "cursor", // Default target IDE
+  customAppName: "", // Custom application name
 };
 
 // Track connection status
@@ -349,6 +351,9 @@ advancedSettingsHeader.addEventListener("click", () => {
 
 // Get all inputs by ID
 const allowAutoPasteCheckbox = document.getElementById("allow-auto-paste");
+const targetIDESelect = document.getElementById("target-ide");
+const customAppNameDiv = document.getElementById("custom-app-name");
+const customAppNameInput = document.getElementById("custom-app-input");
 
 // Update UI from settings
 function updateUIFromSettings() {
@@ -362,6 +367,11 @@ function updateUIFromSettings() {
   serverHostInput.value = settings.serverHost;
   serverPortInput.value = settings.serverPort;
   allowAutoPasteCheckbox.checked = settings.allowAutoPaste;
+  targetIDESelect.value = settings.targetIDE;
+  customAppNameInput.value = settings.customAppName;
+
+  // Show/hide custom app name input based on selection
+  customAppNameDiv.style.display = settings.targetIDE === "custom" ? "block" : "none";
   hideAllRadio.checked = false;
   hideSensitiveRadio.checked = false;
   hideNothingRadio.checked = false;
@@ -466,6 +476,19 @@ serverPortInput.addEventListener("change", (e) => {
 // Add event listener for auto-paste checkbox
 allowAutoPasteCheckbox.addEventListener("change", (e) => {
   settings.allowAutoPaste = e.target.checked;
+  saveSettings();
+});
+
+// Add event listener for target IDE selection
+targetIDESelect.addEventListener("change", (e) => {
+  settings.targetIDE = e.target.value;
+  customAppNameDiv.style.display = e.target.value === "custom" ? "block" : "none";
+  saveSettings();
+});
+
+// Add event listener for custom app name
+customAppNameInput.addEventListener("change", (e) => {
+  settings.customAppName = e.target.value;
   saveSettings();
 });
 

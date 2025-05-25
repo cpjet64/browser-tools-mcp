@@ -145,8 +145,22 @@
         <div class="checkbox-group-2" style="margin-top: 10px; display: flex; align-items: center;">
             <label>
                 <input type="checkbox" id="allow-auto-paste">
-                Allow Auto-paste to Cursor
+                Enable Auto-paste
             </label>
+        </div>
+        <div style="margin-top: 10px;">
+            <label for="target-ide">Target IDE:</label>
+            <select id="target-ide" style="margin-left: 10px; padding: 4px;">
+                <option value="cursor">Cursor</option>
+                <option value="vscode">VS Code</option>
+                <option value="zed">Zed</option>
+                <option value="claude-desktop">Claude Desktop</option>
+                <option value="custom">Custom Application</option>
+            </select>
+        </div>
+        <div id="custom-app-name" style="margin-top: 10px; display: none;">
+            <label for="custom-app-input">Application Name:</label>
+            <input type="text" id="custom-app-input" placeholder="e.g., MyIDE" style="margin-left: 10px; padding: 4px;">
         </div>
     </div>
 

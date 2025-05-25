@@ -13,6 +13,8 @@ let settings = {
   serverHost: "localhost", // Default server host
   serverPort: 3025, // Default server port
   allowAutoPaste: false, // Default auto-paste setting
+  targetIDE: "cursor", // Default target IDE
+  customAppName: "", // Custom application name
 };
 
 // Keep track of debugger state
@@ -1188,8 +1190,10 @@ async function setupWebSocket() {
                       requestId: message.requestId,
                       // Only include path if it's configured in settings
                       ...(settings.screenshotPath && { path: settings.screenshotPath }),
-                      // Include auto-paste setting
+                      // Include auto-paste settings
                       autoPaste: settings.allowAutoPaste,
+                      targetIDE: settings.targetIDE,
+                      customAppName: settings.customAppName,
                     };
 
                     console.log("Chrome Extension: Sending background screenshot data response", {
@@ -1221,8 +1225,10 @@ async function setupWebSocket() {
               requestId: message.requestId,
               // Only include path if it's configured in settings
               ...(settings.screenshotPath && { path: settings.screenshotPath }),
-              // Include auto-paste setting
+              // Include auto-paste settings
               autoPaste: settings.allowAutoPaste,
+              targetIDE: settings.targetIDE,
+              customAppName: settings.customAppName,
             };
 
             console.log("Chrome Extension: Sending direct screenshot data response", {
@@ -1236,25 +1242,25 @@ async function setupWebSocket() {
           console.log("Chrome Extension: Received request for inspecting elements by selector:", message.selector);
           const resultLimit = message.resultLimit || 1;
           const includeComputedStyles = message.includeComputedStyles || [];
-          
+
           // Define the inspection function separately for better readability
           const inspectionFunction = function(selector, limit, includeComputedStyles) {
             try {
               // Find all elements matching the selector
               const elements = document.querySelectorAll(selector);
-              
+
               if (elements.length === 0) {
                 return { error: "No elements found matching selector" };
               }
-              
+
               // Calculate specificity of a selector (simplified)
               function calculateSpecificity(selector) {
                 let specificity = 0;
                 const idCount = (selector.match(/#[\w-]+/g) || []).length;
                 const classCount = (selector.match(/\.[\w-]+/g) || []).length;
-                const elementCount = (selector.match(/[a-z][\w-]*/ig) || []).length - 
+                const elementCount = (selector.match(/[a-z][\w-]*/ig) || []).length -
                                     (selector.match(/:[a-z][\w-]*/ig) || []).length;
-                
+
                 return idCount * 100 + classCount * 10 + elementCount;
               }
 
@@ -1277,7 +1283,7 @@ async function setupWebSocket() {
                 let outerHTML = element.outerHTML;
                 const tagName = element.tagName.toLowerCase();
                 const closingTag = `</${tagName}>`;
-                
+
                 if (outerHTML.endsWith(closingTag)) {
                   outerHTML = outerHTML.slice(0, outerHTML.length - closingTag.length);
                 }
@@ -1285,19 +1291,19 @@ async function setupWebSocket() {
                 const startTag = outerHTML.replace(element.innerHTML, "");
                 return startTag;
               }
-              
+
               // Storage for HTML and rule hashes to avoid duplication
               const htmlStore = {};
               const ruleStore = {};
               const seenHtml = new Set();
               const seenRules = new Set();
-              
+
               // Process a single element to get its HTML and CSS details
               function processElement(element, index) {
                 // Get the HTML and hash it
                 const html = element.outerHTML;
                 const htmlHash = fnv1a(html);
-                
+
                 // Store the HTML if we haven't seen it before
                 let seenHtmlBefore = false;
                 if (!seenHtml.has(htmlHash)) {
@@ -1306,7 +1312,7 @@ async function setupWebSocket() {
                 } else {
                   seenHtmlBefore = true;
                 }
-                
+
                 // Get computed styles if requested
                 let computedStyles;
                 if (Array.isArray(includeComputedStyles) && includeComputedStyles.length > 0) {
@@ -1318,34 +1324,34 @@ async function setupWebSocket() {
                     }
                   }
                 }
-                
+
                 // Find matching rules
                 const matchedRules = [];
-                
+
                 for (let i = 0; i < document.styleSheets.length; i++) {
                   try {
                     const sheet = document.styleSheets[i];
                     let rules = [];
-                    
+
                     try {
                       rules = sheet.cssRules || sheet.rules || [];
                     } catch (e) {
                       // Skip cross-origin stylesheets
                       continue;
                     }
-                    
+
                     // Determine stylesheet origin
                     let originType = 'author';
                     if (sheet.href && (
-                      sheet.href.includes('user-agent') || 
+                      sheet.href.includes('user-agent') ||
                       sheet.href.includes('chrome://') ||
                       !sheet.ownerNode)) {
                       originType = 'user-agent';
                     }
-                    
+
                     for (let j = 0; j < rules.length; j++) {
                       const rule = rules[j];
-                      
+
                       try {
                         if (rule.selectorText && element.matches(rule.selectorText)) {
                           matchedRules.push({
@@ -1369,7 +1375,7 @@ async function setupWebSocket() {
                     continue;
                   }
                 }
-                
+
                 // Sort rules by specificity (higher values first)
                 matchedRules.sort((a, b) => {
                   if (b.specificity === a.specificity) {
@@ -1377,11 +1383,11 @@ async function setupWebSocket() {
                   }
                   return b.specificity - a.specificity
                 });
-                
+
                 // Hash the entire matchedRules array
                 const rulesJson = JSON.stringify(matchedRules);
                 const rulesHash = fnv1a(rulesJson);
-                
+
                 // Store the rules if we haven't seen this exact set before
                 let seenRulesBefore = false;
                 if (!seenRules.has(rulesHash)) {
@@ -1390,7 +1396,7 @@ async function setupWebSocket() {
                 } else {
                   seenRulesBefore = true;
                 }
-                
+
                 return {
                   index: index,
                   // Only send full HTML if it's the first occurrence
@@ -1412,15 +1418,15 @@ async function setupWebSocket() {
                   }
                 };
               }
-              
+
               // Process up to resultLimit elements
               const elementsToProcess = Math.min(elements.length, limit);
               const results = [];
-              
+
               for (let i = 0; i < elementsToProcess; i++) {
                 results.push(processElement(elements[i], i));
               }
-              
+
               return {
                 elements: results,
                 totalCount: elements.length,
@@ -1434,7 +1440,7 @@ async function setupWebSocket() {
               return { error: "Error processing elements: " + error.message };
             }
           };
-          
+
           // Execute script in the inspected window with cleaner syntax
           chrome.devtools.inspectedWindow.eval(
             `(${inspectionFunction.toString()})('${message.selector.replace(/'/g, "\\'")}', ${resultLimit}, ${JSON.stringify(includeComputedStyles)})`,
@@ -1450,7 +1456,7 @@ async function setupWebSocket() {
                 );
                 return;
               }
-              
+
               // Check if result is an error object
               if (result && result.error) {
                 console.error("Chrome Extension: Inspect elements by selector error:", result.error);
@@ -1463,9 +1469,9 @@ async function setupWebSocket() {
                 );
                 return;
               }
-              
+
               console.log(`Chrome Extension: Found ${result.totalCount} elements, processed ${result.processedCount}`);
-              
+
               // Send back the elements with styles data
               ws.send(
                 JSON.stringify({

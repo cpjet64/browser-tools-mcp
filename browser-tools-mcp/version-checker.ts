@@ -1,6 +1,6 @@
 /**
  * Version Compatibility Checker for Browser Tools MCP
- * 
+ *
  * Validates version compatibility between MCP server, Browser Tools server,
  * and Chrome extension components.
  */
@@ -48,7 +48,7 @@ export class VersionChecker {
       const serverRuntimeVersion = await this.getServerRuntimeVersion();
 
       result.versions = [mcpVersion, serverVersion, extensionVersion];
-      
+
       if (serverRuntimeVersion) {
         result.versions.push(serverRuntimeVersion);
       }
@@ -56,7 +56,7 @@ export class VersionChecker {
       // Check compatibility between components
       this.checkMcpServerCompatibility(mcpVersion, serverVersion, result);
       this.checkExtensionCompatibility(extensionVersion, serverVersion, result);
-      
+
       if (serverRuntimeVersion) {
         this.checkRuntimeCompatibility(serverRuntimeVersion, serverVersion, result);
       }
@@ -74,20 +74,45 @@ export class VersionChecker {
 
   private static async getMcpServerVersion(): Promise<VersionInfo> {
     try {
-      const packagePath = path.join(process.cwd(), 'browser-tools-mcp', 'package.json');
-      const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
-      
+      // Try multiple possible paths for the MCP server package.json
+      const possiblePaths = [
+        path.join(process.cwd(), 'package.json'), // Current directory (when running from browser-tools-mcp)
+        path.join(process.cwd(), 'browser-tools-mcp', 'package.json'), // Parent directory structure
+        path.join(__dirname, '..', 'package.json'), // Relative to this file
+      ];
+
+      for (const packagePath of possiblePaths) {
+        try {
+          if (fs.existsSync(packagePath)) {
+            const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+            // Verify this is the MCP server package
+            if (packageJson.name && packageJson.name.includes('browser-tools-mcp')) {
+              return {
+                component: 'MCP Server',
+                version: packageJson.version,
+                path: packagePath,
+                isValid: true
+              };
+            }
+          }
+        } catch (pathError) {
+          // Continue to next path
+          continue;
+        }
+      }
+
+      // If no valid package.json found, return unknown
       return {
         component: 'MCP Server',
-        version: packageJson.version,
-        path: packagePath,
-        isValid: true
+        version: 'unknown',
+        path: 'package.json not found',
+        isValid: false
       };
     } catch (error) {
       return {
         component: 'MCP Server',
         version: 'unknown',
-        path: 'browser-tools-mcp/package.json',
+        path: 'error reading package.json',
         isValid: false
       };
     }
@@ -95,20 +120,45 @@ export class VersionChecker {
 
   private static async getBrowserToolsServerVersion(): Promise<VersionInfo> {
     try {
-      const packagePath = path.join(process.cwd(), 'browser-tools-server', 'package.json');
-      const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
-      
+      // Try multiple possible paths for the browser-tools-server package.json
+      const possiblePaths = [
+        path.join(process.cwd(), 'browser-tools-server', 'package.json'), // Sibling directory
+        path.join(process.cwd(), '..', 'browser-tools-server', 'package.json'), // Parent structure
+        path.join(__dirname, '..', '..', 'browser-tools-server', 'package.json'), // Relative to this file
+      ];
+
+      for (const packagePath of possiblePaths) {
+        try {
+          if (fs.existsSync(packagePath)) {
+            const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+            // Verify this is the browser tools server package
+            if (packageJson.name && packageJson.name.includes('browser-tools-server')) {
+              return {
+                component: 'Browser Tools Server',
+                version: packageJson.version,
+                path: packagePath,
+                isValid: true
+              };
+            }
+          }
+        } catch (pathError) {
+          // Continue to next path
+          continue;
+        }
+      }
+
+      // If no valid package.json found, return unknown
       return {
         component: 'Browser Tools Server',
-        version: packageJson.version,
-        path: packagePath,
-        isValid: true
+        version: 'unknown',
+        path: 'package.json not found',
+        isValid: false
       };
     } catch (error) {
       return {
         component: 'Browser Tools Server',
         version: 'unknown',
-        path: 'browser-tools-server/package.json',
+        path: 'error reading package.json',
         isValid: false
       };
     }
@@ -116,20 +166,45 @@ export class VersionChecker {
 
   private static async getChromeExtensionVersion(): Promise<VersionInfo> {
     try {
-      const manifestPath = path.join(process.cwd(), 'chrome-extension', 'manifest.json');
-      const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-      
+      // Try multiple possible paths for the chrome extension manifest.json
+      const possiblePaths = [
+        path.join(process.cwd(), 'chrome-extension', 'manifest.json'), // Sibling directory
+        path.join(process.cwd(), '..', 'chrome-extension', 'manifest.json'), // Parent structure
+        path.join(__dirname, '..', '..', 'chrome-extension', 'manifest.json'), // Relative to this file
+      ];
+
+      for (const manifestPath of possiblePaths) {
+        try {
+          if (fs.existsSync(manifestPath)) {
+            const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+            // Verify this is the browser tools extension
+            if (manifest.name && manifest.name.includes('BrowserTools')) {
+              return {
+                component: 'Chrome Extension',
+                version: manifest.version,
+                path: manifestPath,
+                isValid: true
+              };
+            }
+          }
+        } catch (pathError) {
+          // Continue to next path
+          continue;
+        }
+      }
+
+      // If no valid manifest.json found, return unknown
       return {
         component: 'Chrome Extension',
-        version: manifest.version,
-        path: manifestPath,
-        isValid: true
+        version: 'unknown',
+        path: 'manifest.json not found',
+        isValid: false
       };
     } catch (error) {
       return {
         component: 'Chrome Extension',
         version: 'unknown',
-        path: 'chrome-extension/manifest.json',
+        path: 'error reading manifest.json',
         isValid: false
       };
     }
@@ -141,7 +216,7 @@ export class VersionChecker {
       const response = await fetch('http://localhost:3025/.identity', {
         signal: AbortSignal.timeout(2000)
       });
-      
+
       if (response.ok) {
         const identity = await response.json();
         if (identity.signature === 'mcp-browser-connector-24x7') {
@@ -156,7 +231,7 @@ export class VersionChecker {
     } catch (error) {
       // Server not running or not accessible
     }
-    
+
     return null;
   }
 
@@ -266,15 +341,15 @@ export class VersionChecker {
       const latestVersion = versions.reduce((latest, current) => {
         const latestParts = this.parseVersion(latest.version);
         const currentParts = this.parseVersion(current.version);
-        
+
         if (!latestParts || !currentParts) return latest;
-        
+
         if (currentParts.major > latestParts.major ||
             (currentParts.major === latestParts.major && currentParts.minor > latestParts.minor) ||
             (currentParts.major === latestParts.major && currentParts.minor === latestParts.minor && currentParts.patch > latestParts.patch)) {
           return current;
         }
-        
+
         return latest;
       });
 
