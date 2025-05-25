@@ -138,8 +138,8 @@ jobs:
           sed -i "s/v[0-9]\+\.[0-9]\+\.[0-9]\+/v$NEW_VERSION/g" README.md
 
           # Update MCP README if it exists
-          if [ -f "browser-tools-mcp/README.md" ]; then
-            sed -i "s/v[0-9]\+\.[0-9]\+\.[0-9]\+/v$NEW_VERSION/g" browser-tools-mcp/README.md
+          if [ -f "webai-mcp/README.md" ]; then
+            sed -i "s/v[0-9]\+\.[0-9]\+\.[0-9]\+/v$NEW_VERSION/g" webai-mcp/README.md
           fi
 
           # Update Chinese README if it exists
@@ -163,17 +163,17 @@ jobs:
 
           # Create Chrome Extension Package
           cd chrome-extension
-          zip -r ../browser-tools-chrome-extension-v$NEW_VERSION.zip . \
+          zip -r ../webai-chrome-extension-v$NEW_VERSION.zip . \
             -x "*.git*" "node_modules/*" "*.DS_Store*"
 
           # Create NPM packages
-          cd ../browser-tools-mcp
+          cd ../webai-mcp
           npm pack
-          mv *.tgz ../browser-tools-mcp-v$NEW_VERSION.tgz
+          mv *.tgz ../webai-mcp-v$NEW_VERSION.tgz
 
-          cd ../browser-tools-server
+          cd ../webai-server
           npm pack
-          mv *.tgz ../browser-tools-server-v$NEW_VERSION.tgz
+          mv *.tgz ../webai-server-v$NEW_VERSION.tgz
 
       - name: 📝 Generate Changelog
         id: changelog
@@ -193,9 +193,9 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ steps.version.outputs.new_version }}
-          name: "🚀 Browser Tools MCP v${{ steps.version.outputs.new_version }}"
+          name: "🚀 WebAI-MCP v${{ steps.version.outputs.new_version }}"
           body: |
-            # 🚀 Browser Tools MCP v${{ steps.version.outputs.new_version }}
+            # 🚀 WebAI-MCP v${{ steps.version.outputs.new_version }}
 
             ## 📋 What's New
 
@@ -206,14 +206,14 @@ jobs:
             ### Quick Start
             ```bash
             # Install MCP Server
-            npx @cpjet64/browser-tools-mcp@${{ steps.version.outputs.new_version }}
+            npx @cpjet64/webai-mcp@${{ steps.version.outputs.new_version }}
 
-            # Install Browser Tools Server
-            npx @cpjet64/browser-tools-server@${{ steps.version.outputs.new_version }}
+            # Install WebAI Server
+            npx @cpjet64/webai-server@${{ steps.version.outputs.new_version }}
             ```
 
             ### Chrome Extension
-            1. Download `browser-tools-chrome-extension-v${{ steps.version.outputs.new_version }}.zip`
+            1. Download `webai-chrome-extension-v${{ steps.version.outputs.new_version }}.zip`
             2. Extract and load in Chrome → Extensions → Developer mode → Load unpacked
 
             ## 🛠️ Features
@@ -233,25 +233,25 @@ jobs:
 
             ---
 
-            📚 **Documentation**: [Browser Tools MCP](https://github.com/cpjet64/browser-tools-mcp)
-            🐛 **Issues**: [Report bugs](https://github.com/cpjet64/browser-tools-mcp/issues)
+            📚 **Documentation**: [WebAI-MCP](https://github.com/cpjet64/WebAI-MCP)
+            🐛 **Issues**: [Report bugs](https://github.com/cpjet64/WebAI-MCP/issues)
           draft: false
           prerelease: ${{ github.event.inputs.prerelease }}
           files: |
-            browser-tools-chrome-extension-v${{ steps.version.outputs.new_version }}.zip
-            browser-tools-mcp-v${{ steps.version.outputs.new_version }}.tgz
-            browser-tools-server-v${{ steps.version.outputs.new_version }}.tgz
+            webai-chrome-extension-v${{ steps.version.outputs.new_version }}.zip
+            webai-mcp-v${{ steps.version.outputs.new_version }}.tgz
+            webai-server-v${{ steps.version.outputs.new_version }}.tgz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 📤 Publish to NPM
         run: |
           echo "🚀 Publishing MCP Server to NPM..."
-          cd browser-tools-mcp
+          cd webai-mcp
           npm publish --access public
 
-          echo "🚀 Publishing Browser Tools Server to NPM..."
-          cd ../browser-tools-server
+          echo "🚀 Publishing WebAI Server to NPM..."
+          cd ../webai-server
           npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY }}
@@ -272,13 +272,13 @@ jobs:
           echo "- NPM packages published" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📦 Published Packages:" >> $GITHUB_STEP_SUMMARY
-          echo "- [\`@cpjet64/browser-tools-mcp@$NEW_VERSION\`](https://www.npmjs.com/package/@cpjet64/browser-tools-mcp)" >> $GITHUB_STEP_SUMMARY
-          echo "- [\`@cpjet64/browser-tools-server@$NEW_VERSION\`](https://www.npmjs.com/package/@cpjet64/browser-tools-server)" >> $GITHUB_STEP_SUMMARY
+          echo "- [\`@cpjet64/webai-mcp@$NEW_VERSION\`](https://www.npmjs.com/package/@cpjet64/webai-mcp)" >> $GITHUB_STEP_SUMMARY
+          echo "- [\`@cpjet64/webai-server@$NEW_VERSION\`](https://www.npmjs.com/package/@cpjet64/webai-server)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 🚀 Installation:" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          echo "npx @cpjet64/browser-tools-mcp@$NEW_VERSION" >> $GITHUB_STEP_SUMMARY
-          echo "npx @cpjet64/browser-tools-server@$NEW_VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "npx @cpjet64/webai-mcp@$NEW_VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "npx @cpjet64/webai-server@$NEW_VERSION" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "🔗 **Release:** https://github.com/${{ github.repository }}/releases/tag/v$NEW_VERSION" >> $GITHUB_STEP_SUMMARY

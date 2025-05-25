@@ -40,7 +40,7 @@ jobs:
       - name: Get current version and increment dev version
         id: version
         run: |
-          cd browser-tools-server
+          cd webai-server
           CURRENT_VERSION=$(node -p "require('./package.json').version")
           echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
 
@@ -116,14 +116,14 @@ jobs:
           ### Quick Start (Development Version)
           \`\`\`bash
           # Install MCP Server (dev)
-          npx @cpjet64/browser-tools-mcp@dev
+          npx @cpjet64/webai-mcp@dev
 
-          # Install Browser Tools Server (dev)
-          npx @cpjet64/browser-tools-server@dev
+          # Install WebAI Server (dev)
+          npx @cpjet64/webai-server@dev
           \`\`\`
 
           ### Chrome Extension (Development)
-          1. Download \`browser-tools-chrome-extension-v${VERSION}.zip\`
+          1. Download \`webai-chrome-extension-v${VERSION}.zip\`
           2. Extract the zip file
           3. Open Chrome → Extensions → Developer mode → Load unpacked
           4. Select the extracted folder
@@ -160,27 +160,27 @@ jobs:
           - Report issues on GitHub for quick fixes
           - Feedback welcome for new features
 
-          **Full Changelog**: https://github.com/cpjet64/browser-tools-mcp/compare/main...dev
+          **Full Changelog**: https://github.com/cpjet64/WebAI-MCP/compare/main...dev
 
           ---
 
-          📚 **Documentation**: [Browser Tools MCP Docs](https://github.com/cpjet64/browser-tools-mcp)
-          🐛 **Issues**: [Report bugs](https://github.com/cpjet64/browser-tools-mcp/issues)
-          💬 **Discussions**: [Community](https://github.com/cpjet64/browser-tools-mcp/discussions)
+          📚 **Documentation**: [WebAI-MCP Docs](https://github.com/cpjet64/WebAI-MCP)
+          🐛 **Issues**: [Report bugs](https://github.com/cpjet64/WebAI-MCP/issues)
+          💬 **Discussions**: [Community](https://github.com/cpjet64/WebAI-MCP/discussions)
           EOF
 
       - name: Create dev release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ steps.version.outputs.new_version }}
-          name: "🧪 Browser Tools MCP v${{ steps.version.outputs.new_version }} (Dev)"
+          name: "🧪 WebAI-MCP v${{ steps.version.outputs.new_version }} (Dev)"
           body_path: dev-release-notes.md
           draft: false
           prerelease: true
           files: |
-            browser-tools-chrome-extension-v${{ steps.version.outputs.new_version }}.zip
-            browser-tools-mcp-v${{ steps.version.outputs.new_version }}.tgz
-            browser-tools-server-v${{ steps.version.outputs.new_version }}.tgz
+            webai-chrome-extension-v${{ steps.version.outputs.new_version }}.zip
+            webai-mcp-v${{ steps.version.outputs.new_version }}.tgz
+            webai-server-v${{ steps.version.outputs.new_version }}.tgz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -188,6 +188,6 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add browser-tools-server/package.json browser-tools-mcp/package.json
+          git add webai-server/package.json webai-mcp/package.json chrome-extension/manifest.json
           git commit -m "chore: bump dev version to ${{ steps.version.outputs.new_version }}" || exit 0
           git push
