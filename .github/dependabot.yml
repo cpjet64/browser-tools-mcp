@@ -5,10 +5,10 @@
 version: 2
 updates:
   # ===================================================================
-  # NPM ECOSYSTEM - browser-tools-mcp package
+  # NPM ECOSYSTEM - webai-mcp package
   # ===================================================================
   - package-ecosystem: "npm"
-    directory: "/browser-tools-mcp"
+    directory: "/webai-mcp"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -53,10 +53,10 @@ updates:
     #     versions: ["1.x", "2.x"]
 
   # ===================================================================
-  # NPM ECOSYSTEM - browser-tools-server package
+  # NPM ECOSYSTEM - webai-server package
   # ===================================================================
   - package-ecosystem: "npm"
-    directory: "/browser-tools-server"
+    directory: "/webai-server"
     schedule:
       interval: "weekly"
       day: "monday"

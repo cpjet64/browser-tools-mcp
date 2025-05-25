@@ -4,8 +4,8 @@ on:
   push:
     branches: [main]
     paths:
-      - 'browser-tools-mcp/package.json'
-      - 'browser-tools-server/package.json'
+      - 'webai-mcp/package.json'
+      - 'webai-server/package.json'
       - 'chrome-extension/manifest.json'
   workflow_dispatch:
     inputs:

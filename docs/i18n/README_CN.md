@@ -1,10 +1,10 @@
-# BrowserTools MCP - cpjet64增强版
+# WebAI-MCP - cpjet64增强版
 
 > 让您的AI工具更强大，能够与浏览器进行十倍意识和交互
 
 [English](../../README.md) | 简体中文
 
-这是原始BrowserTools MCP的**增强版本**，具有重大改进和新功能。它是一个强大的浏览器监控和交互工具，通过Anthropic的Model Context Protocol (MCP) 使AI应用程序能够通过Chrome扩展程序捕获和分析浏览器数据。
+这是原始Browser Tools MCP的**增强版本**，现已重新命名为WebAI-MCP，具有重大改进和新功能。它是一个强大的浏览器监控和交互工具，通过Anthropic的Model Context Protocol (MCP) 使AI应用程序能够通过Chrome扩展程序捕获和分析浏览器数据。
 
 ## 🚀 此版本的新功能 (v1.4.0)
 

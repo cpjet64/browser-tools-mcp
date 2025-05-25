@@ -2,7 +2,7 @@
 
 /**
  * Browser Tools MCP Setup Automation Script
- * 
+ *
  * Automates the setup process for browser-tools-mcp including:
  * - Dependency installation
  * - Building packages
@@ -102,11 +102,11 @@ class SetupTool {
 
   async runInitialDiagnostics() {
     this.logSection('Initial Diagnostics');
-    
+
     try {
       const diagnostic = new DiagnosticTool();
       await diagnostic.runDiagnostics();
-      
+
       // Check if there are critical issues
       if (diagnostic.issues.length > 0) {
         this.log('Found existing issues. Setup will attempt to fix them.', 'yellow', ICONS.warning);
@@ -122,7 +122,7 @@ class SetupTool {
     // Check Node.js version
     const nodeVersion = process.version;
     const majorVersion = parseInt(nodeVersion.slice(1).split('.')[0]);
-    
+
     if (majorVersion >= 18) {
       this.log(`Node.js ${nodeVersion} ✓`, 'green', ICONS.success);
     } else {
@@ -147,11 +147,11 @@ class SetupTool {
 
     // Check if we're in the right directory
     const packageJsonPath = path.join(process.cwd(), 'package.json');
-    const mcpPackagePath = path.join(process.cwd(), 'browser-tools-mcp', 'package.json');
-    const serverPackagePath = path.join(process.cwd(), 'browser-tools-server', 'package.json');
+    const mcpPackagePath = path.join(process.cwd(), 'webai-mcp', 'package.json');
+    const serverPackagePath = path.join(process.cwd(), 'webai-server', 'package.json');
 
     if (!fs.existsSync(mcpPackagePath) || !fs.existsSync(serverPackagePath)) {
-      throw new Error('Please run this script from the browser-tools-mcp repository root directory.');
+      throw new Error('Please run this script from the webai-mcp repository root directory.');
     }
 
     this.log('Repository structure ✓', 'green', ICONS.success);
@@ -161,25 +161,25 @@ class SetupTool {
     this.logSection('Installing Dependencies');
 
     const packages = [
-      { name: 'MCP Server', path: 'browser-tools-mcp' },
-      { name: 'Browser Tools Server', path: 'browser-tools-server' }
+      { name: 'MCP Server', path: 'webai-mcp' },
+      { name: 'WebAI Server', path: 'webai-server' }
     ];
 
     for (const pkg of packages) {
       this.log(`Installing ${pkg.name} dependencies...`, 'blue', ICONS.package);
-      
+
       try {
         const cwd = path.join(process.cwd(), pkg.path);
-        
+
         // Check if package-lock.json exists, use npm ci if it does, npm install if not
         const lockFilePath = path.join(cwd, 'package-lock.json');
         const command = fs.existsSync(lockFilePath) ? 'npm ci' : 'npm install';
-        
+
         if (this.options.verbose) {
           this.log(`Running: ${command} in ${pkg.path}`, 'blue', ICONS.info);
         }
 
-        execSync(command, { 
+        execSync(command, {
           cwd,
           stdio: this.options.verbose ? 'inherit' : 'pipe',
           encoding: 'utf8'
@@ -204,15 +204,15 @@ class SetupTool {
 
     for (const pkg of packages) {
       this.log(`Building ${pkg.name}...`, 'blue', ICONS.build);
-      
+
       try {
         const cwd = path.join(process.cwd(), pkg.path);
-        
+
         if (this.options.verbose) {
           this.log(`Running: npm run build in ${pkg.path}`, 'blue', ICONS.info);
         }
 
-        execSync('npm run build', { 
+        execSync('npm run build', {
           cwd,
           stdio: this.options.verbose ? 'inherit' : 'pipe',
           encoding: 'utf8'
@@ -294,7 +294,7 @@ class SetupTool {
 
     // Check for common tools
     const tools = ['curl', 'wget', 'unzip'];
-    
+
     for (const tool of tools) {
       try {
         execSync(`which ${tool}`, { stdio: 'pipe' });
@@ -312,7 +312,7 @@ class SetupTool {
     try {
       const diagnostic = new DiagnosticTool();
       await diagnostic.runDiagnostics();
-      
+
       if (diagnostic.issues.length === 0) {
         this.log('All validation checks passed ✓', 'green', ICONS.success);
       } else {
@@ -333,12 +333,12 @@ class SetupTool {
       this.log('🎉 Browser Tools MCP setup completed successfully!', 'green', ICONS.rocket);
     } else {
       this.log('Setup completed with some issues:', 'yellow', ICONS.warning);
-      
+
       if (this.errors.length > 0) {
         this.log('Errors:', 'red', ICONS.error);
         this.errors.forEach(error => this.log(`  ${error}`, 'red', '  '));
       }
-      
+
       if (this.warnings.length > 0) {
         this.log('Warnings:', 'yellow', ICONS.warning);
         this.warnings.forEach(warning => this.log(`  ${warning}`, 'yellow', '  '));

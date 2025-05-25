@@ -20,21 +20,21 @@ jobs:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Install dependencies - browser-tools-server
+      - name: Install dependencies - webai-server
         run: |
-          cd browser-tools-server
+          cd webai-server
           npm ci
 
-      - name: Install dependencies - browser-tools-mcp
+      - name: Install dependencies - webai-mcp
         run: |
-          cd browser-tools-mcp
+          cd webai-mcp
           npm ci
 
       - name: Build packages
         run: |
-          cd browser-tools-server
+          cd webai-server
           npm run build
-          cd ../browser-tools-mcp
+          cd ../webai-mcp
           npm run build
 
       - name: Get current version and increment dev version
