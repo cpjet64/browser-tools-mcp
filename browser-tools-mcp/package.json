@@ -1,6 +1,6 @@
 {
-  "name": "@munawwar-forks/browser-tools-mcp",
-  "version": "1.2.1",
+  "name": "@cpjet64/browser-tools-mcp",
+  "version": "1.3.0",
   "description": "MCP (Model Context Protocol) server for browser tools integration",
   "main": "dist/mcp-server.js",
   "bin": {
@@ -11,7 +11,7 @@
   },
   "scripts": {
     "inspect": "tsc && npx @modelcontextprotocol/inspector node -- dist/mcp-server.js",
-    "inspect-live": "npx @modelcontextprotocol/inspector npx -- @munawwar-forks/browser-tools-mcp",
+    "inspect-live": "npx @modelcontextprotocol/inspector npx -- @cpjet64/browser-tools-mcp",
     "build": "tsc",
     "start": "tsc && node dist/mcp-server.js",
     "prepublishOnly": "npm run build",
