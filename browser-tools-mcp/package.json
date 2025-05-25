@@ -1,6 +1,6 @@
 {
   "name": "@cpjet64/browser-tools-mcp",
-  "version": "1.4.1-dev.2",
+  "version": "1.4.1-dev.3",
   "description": "MCP (Model Context Protocol) server for browser tools integration",
   "main": "dist/mcp-server.js",
   "bin": {
