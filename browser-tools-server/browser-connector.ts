@@ -200,6 +200,14 @@ const cookiesCallbacks = new Map<string, CookiesCallback>();
 const localStorageCallbacks = new Map<string, LocalStorageCallback>();
 const sessionStorageCallbacks = new Map<string, SessionStorageCallback>();
 
+// Add new state for tracking selector requests
+interface SelectorCallback {
+  resolve: (value: string[]) => void;
+  reject: (reason: Error) => void;
+}
+
+const selectorCallbacks = new Map<string, SelectorCallback>();
+
 // Function to get available port starting with the given port
 async function getAvailablePort(
   startPort: number,
@@ -651,6 +659,18 @@ export class BrowserConnector {
       }
     );
 
+    // Register the inspect-elements-by-selector endpoint
+    this.app.post(
+      "/inspect-elements-by-selector",
+      async (req: express.Request, res: express.Response) => {
+        console.log(
+          "Browser Connector: Received request to /inspect-elements-by-selector endpoint"
+        );
+        console.log("Browser Connector: Request body:", req.body);
+        await this.inspectElementsBySelector(req, res);
+      }
+    );
+
     // Set up accessibility audit endpoint
     this.setupAccessibilityAudit();
 
@@ -887,7 +907,28 @@ export class BrowserConnector {
             } else {
               console.log("No callbacks found for sessionStorage");
             }
-          } else {
+          }
+          // Handle selector response
+          if (data.type === "html-by-selector" && data.requestId) {
+            console.log("Received HTML by selector response");
+            const callback = selectorCallbacks.get(data.requestId);
+            if (callback) {
+              callback.resolve(data.html || []);
+              selectorCallbacks.delete(data.requestId);
+            } else {
+              console.log("No callback found for selector request:", data.requestId);
+            }
+          }
+          // Handle selector error
+          else if (data.type === "selector-error" && data.requestId) {
+            console.log("Received selector error:", data.error);
+            const callback = selectorCallbacks.get(data.requestId);
+            if (callback) {
+              callback.reject(new Error(data.error || "Failed to get HTML by selector"));
+              selectorCallbacks.delete(data.requestId);
+            }
+          }
+          else {
             console.log("Unhandled message type:", data.type);
           }
         } catch (error) {
@@ -1546,6 +1587,113 @@ export class BrowserConnector {
         });
       }
     });
+  }
+
+  // Add method to handle elements with styles requests
+  private async inspectElementsBySelector(req: express.Request, res: express.Response) {
+    if (!this.activeConnection) {
+      return res.status(503).json({ error: "Chrome extension not connected" });
+    }
+
+    const { selector, resultLimit = 1, includeComputedStyles = [] } = req.body;
+    if (!selector) {
+      return res.status(400).json({ error: "No selector provided" });
+    }
+
+    try {
+      const requestId = Date.now().toString();
+      console.log("Browser Connector: Generated requestId for elements with styles request:", requestId);
+
+      // Create promise that will resolve when we get the elements and styles data
+      const elementsBySelectorPromise = new Promise<any>((resolve, reject) => {
+        console.log(
+          `Browser Connector: Setting up elements with styles callback for requestId: ${requestId}`
+        );
+
+        // Store callback in a map
+        const elementsBySelectorCallbacks = new Map<string, {
+          resolve: (value: any) => void;
+          reject: (reason: Error) => void;
+        }>();
+
+        // Store callback in map
+        elementsBySelectorCallbacks.set(requestId, { resolve, reject });
+
+        // Add a message listener for inspect-elements-by-selector response
+        const messageHandler = (event: WebSocket.MessageEvent) => {
+          try {
+            const response = JSON.parse(event.data as string);
+
+            if (response.type === "inspect-elements-response" && response.requestId === requestId) {
+              console.log("Browser Connector: Received inspect-elements-by-selector response");
+              const callback = elementsBySelectorCallbacks.get(requestId);
+              if (callback) {
+                callback.resolve(response.data);
+                elementsBySelectorCallbacks.delete(requestId);
+                this.activeConnection?.removeEventListener("message", messageHandler);
+              }
+            }
+            else if (response.type === "inspect-elements-error" && response.requestId === requestId) {
+              console.error("Browser Connector: inspect-elements-by-selector error:", response.error);
+              const callback = elementsBySelectorCallbacks.get(requestId);
+              if (callback) {
+                callback.reject(new Error(response.error || "Failed to get inspect-elements-by-selector"));
+                elementsBySelectorCallbacks.delete(requestId);
+                this.activeConnection?.removeEventListener("message", messageHandler);
+              }
+            }
+          } catch (error) {
+            console.error("Error processing inspect-elements-by-selector response:", error);
+          }
+        };
+
+        // Add the message listener
+        this.activeConnection?.addEventListener("message", messageHandler);
+
+        // Set timeout to clean up if we don't get a response
+        setTimeout(() => {
+          if (elementsBySelectorCallbacks.has(requestId)) {
+            console.log(
+              `Browser Connector: inspect-elements-by-selector request timed out for requestId: ${requestId}`
+            );
+            elementsBySelectorCallbacks.delete(requestId);
+            this.activeConnection?.removeEventListener("message", messageHandler);
+            reject(new Error("inspect-elements-by-selector request timed out - no response from Chrome extension"));
+          }
+        }, 10000); // 10 second timeout
+      });
+
+      // Send request to extension
+      const message = JSON.stringify({
+        type: "inspect-elements-by-selector",
+        selector,
+        resultLimit,
+        includeComputedStyles,
+        requestId,
+      });
+      console.log(
+        `Browser Connector: Sending WebSocket message to extension:`,
+        message
+      );
+      this.activeConnection.send(message);
+
+      // Wait for inspect-elements-by-selector data
+      console.log("Browser Connector: Waiting for inspect-elements-by-selector response...");
+      const elementsBySelector = await elementsBySelectorPromise;
+      console.log(`Browser Connector: Received inspect-elements-by-selector data with ${elementsBySelector.elements.length} elements`);
+
+      res.json({ data: elementsBySelector });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("Browser Connector: Error inspecting elements by selector:", errorMessage);
+      if (errorMessage.includes("Invalid selector")) {
+        return res.status(400).json({ error: errorMessage });
+      } else if (errorMessage.includes("timed out")) {
+        return res.status(504).json({ error: errorMessage });
+      } else {
+        return res.status(500).json({ error: errorMessage });
+      }
+    }
   }
 
   // Add method to get cookies
