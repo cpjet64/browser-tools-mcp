@@ -1,45 +1,81 @@
-# BrowserTools MCP
+# BrowserTools MCP - cpjet64增强版
 
 > 让您的AI工具更强大，能够与浏览器进行十倍意识和交互
 
 [English](../../README.md) | 简体中文
 
-此应用程序是一个强大的浏览器监控和交互工具，通过Anthropic的Model Context Protocol (MCP) 使AI应用程序能够通过Chrome扩展程序捕获和分析浏览器数据。
+这是原始BrowserTools MCP的**增强版本**，具有重大改进和新功能。它是一个强大的浏览器监控和交互工具，通过Anthropic的Model Context Protocol (MCP) 使AI应用程序能够通过Chrome扩展程序捕获和分析浏览器数据。
 
-阅读我们的[文档](https://browsertools.agentdesk.ai/)获取完整的安装、快速入门和贡献指南。
+## 🚀 此版本的新功能 (v1.4.0)
 
-## 路线图
+此版本包含**所有社区贡献**和主要增强功能，具有**完整功能集成**：
 
-查看我们的项目路线图：[Github Roadmap / Project Board](https://github.com/orgs/AgentDeskAI/projects/1/views/1)
+### ✨ **新集成功能**
+- 🍪 **存储访问工具** - 访问cookies、localStorage和sessionStorage
+- 🔍 **高级元素检查** - 基于CSS选择器的元素检查和计算样式
+- 📸 **增强截图** - 修复了独立开发工具窗口的截图捕获
+- 🧪 **审计和调试模式** - 通过Lighthouse进行综合分析工具
+- 🪟 **Windows兼容性** - 完整的Windows支持和路径转换
+- 🌍 **多语言文档** - 中文翻译支持
+- 🤖 **自动化发布** - 专业的发布自动化和NPM发布
+- 🔧 **自动化诊断** - 完整的诊断和设置工作流程
+- 🛡️ **增强错误处理** - 强大的错误管理和恢复
+- 🌐 **代理支持** - 完整的网络配置和代理管理
+- 🖥️ **平台增强** - 跨平台兼容性和优化
 
-## 更新
+### 🔧 **技术改进**
+- ⚡ **最新依赖** - Express 5.x、body-parser 2.x、node-fetch 3.x
+- 🐛 **错误修复** - stringSizeLimit和其他关键修复
+- 🧪 **跨平台测试** - Windows、macOS、Linux自动化测试
+- 📦 **专业打包** - 自动化Chrome扩展和NPM包发布
+- 🔄 **完整集成** - 所有功能分支合并到统一主分支
+- 🎯 **生产就绪** - 综合测试和验证基础设施
 
-v1.3.3 已发布！以下是主要更新内容：
-- 现在可以在Chrome开发工具面板中启用"Allow Auto-Paste into Cursor"功能。截图将自动粘贴到Cursor中（请确保在Cursor的Agent输入字段中聚焦/点击，否则可能无法工作！）
-- 通过Lighthouse集成了SEO、性能、可访问性和最佳实践分析工具套件
-- 实现了一个针对NextJS应用的特定提示，以改善SEO
-- 添加了Debugger Mode工具，按特定顺序执行所有调试工具，并附带提示来改进推理
-- 添加了Audit Mode工具，按特定顺序执行所有审计工具
-- 解决了Windows连接问题
-- 改进了BrowserTools服务器、扩展程序和MCP服务器之间的网络连接，包括自动发现主机/端口、自动重新连接和优雅关机机制
-- 现在可以更方便地通过Ctrl+C退出BrowserTools服务器
+## 🚀 快速安装
 
-## 快速入门指南
+### **方法1：NPM（推荐）**
 
-运行这个MCP工具需要三个组件：
+```bash
+# 1. 安装MCP服务器（用于您的IDE）
+npx @cpjet64/browser-tools-mcp@latest
 
-1. 从这里安装我们的Chrome扩展程序：[v1.3.3 BrowserToolsMCP Chrome Extension](https://github.com/AgentDeskAI/browser-tools-mcp/releases/download/v1.3.3/BrowserTools-1.2.0-extension.zip)
-2. 在IDE中运行此命令安装MCP服务器：`npx @agentdeskai/browser-tools-mcp@latest`
-3. 在新终端中运行此命令：`npx @agentdeskai/browser-tools-server@latest`
+# 2. 安装浏览器工具服务器（在单独的终端中运行）
+npx @cpjet64/browser-tools-server@latest
+```
 
-* 不同的IDE有不同的配置，但此命令是一个很好的起点，请参考IDE的文档进行正确的配置设置
+### **方法2：从发布页面下载**
 
-重要提示 - 需要安装两个服务器：
-- browser-tools-server（本地NodeJS中间件服务器，用于收集日志）
-- browser-tools-mcp（安装到IDE中的MCP服务器，与扩展程序和browser-tools-server通信）
+1. **Chrome扩展**：从[最新发布](https://github.com/cpjet64/browser-tools-mcp/releases/latest)下载
+2. **MCP服务器**：`npx @cpjet64/browser-tools-mcp@latest`
+3. **浏览器服务器**：`npx @cpjet64/browser-tools-server@latest`
 
-`npx @agentdeskai/browser-tools-mcp@latest` 是在IDE中运行的命令
-`npx @agentdeskai/browser-tools-server@latest` 是在新终端窗口中运行的命令
+### **📋 设置步骤**
+
+1. **安装Chrome扩展**：
+   - 从发布页面下载`.zip`文件
+   - 解压并在Chrome → 扩展程序 → 开发者模式 → 加载已解压的扩展程序中加载
+
+2. **配置您的IDE**：
+   - 将`npx @cpjet64/browser-tools-mcp@latest`添加到您的MCP客户端配置中
+   - 不同的IDE有不同的配置 - 请查看您的IDE的MCP文档
+
+3. **启动浏览器服务器**：
+   - 打开新终端并运行：`npx @cpjet64/browser-tools-server@latest`
+
+4. **打开开发工具**：
+   - 打开Chrome开发工具 → BrowserToolsMCP面板
+   - 确保连接已建立
+
+### **💡 重要说明**
+
+**需要两个服务器**：
+- **`@cpjet64/browser-tools-mcp`** → 用于您的IDE的MCP服务器
+- **`@cpjet64/browser-tools-server`** → 本地中间件服务器
+
+**故障排除**：
+- 如果遇到问题，请关闭所有Chrome窗口并重新启动
+- 重新启动browser-tools-server
+- 确保只有一个开发工具面板打开
 
 完成上述步骤后，打开Chrome的开发工具并进入BrowserToolsMCP面板。
 
@@ -76,12 +112,12 @@ v1.3.3 已发布！以下是主要更新内容：
 
 ### ▶️ **运行审计**
 
-**无头浏览器自动化**：  
+**无头浏览器自动化**：
 Puppeteer自动化无头Chrome实例，加载页面并收集审计数据，即使对于SPA或通过JavaScript加载的内容也能确保结果的准确性。
 
 无头浏览器实例在最后一次审计调用后保持活动状态**60秒**，以便高效处理连续的审计请求。
 
-**结构化结果**：  
+**结构化结果**：
 每个审计返回结构化的JSON格式结果，包含总体评分和详细的问题列表。这使得MCP客户端可以轻松解释发现并提供可行的见解。
 
 MCP服务器提供了运行当前页面审计的工具。以下是触发它们的示例查询：

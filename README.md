@@ -10,11 +10,11 @@ English | [简体中文](./docs/i18n/README_CN.md)
 
 This is an **enhanced fork** of the original BrowserTools MCP with significant improvements and new features. It's a powerful browser monitoring and interaction tool that enables AI-powered applications via Anthropic's Model Context Protocol (MCP) to capture and analyze browser data through a Chrome extension.
 
-## 🚀 What's New in This Fork (v1.3.3)
+## 🚀 What's New in This Fork (v1.4.0)
 
-This fork includes **ALL community contributions** and major enhancements:
+This fork includes **ALL community contributions** and major enhancements with **complete feature integration**:
 
-### ✨ **New Features**
+### ✨ **New Integrated Features**
 - 🍪 **Storage Access Tools** - Access cookies, localStorage, and sessionStorage
 - 🔍 **Advanced Element Inspection** - CSS selector-based element inspection with computed styles
 - 📸 **Enhanced Screenshots** - Fixed screenshot capture with separate DevTools windows
@@ -22,12 +22,18 @@ This fork includes **ALL community contributions** and major enhancements:
 - 🪟 **Windows Compatibility** - Full Windows support with path conversion
 - 🌍 **Multi-language Documentation** - Chinese translation support
 - 🤖 **Automated Releases** - Professional release automation with NPM publishing
+- 🔧 **Automated Diagnostics** - Complete diagnostic and setup workflows
+- 🛡️ **Enhanced Error Handling** - Robust error management and recovery
+- 🌐 **Proxy Support** - Full network configuration and proxy management
+- 🖥️ **Platform Enhancements** - Cross-platform compatibility and optimization
 
 ### 🔧 **Technical Improvements**
 - ⚡ **Latest Dependencies** - Express 5.x, body-parser 2.x, node-fetch 3.x
 - 🐛 **Bug Fixes** - stringSizeLimit and other critical fixes applied
 - 🧪 **Cross-platform Testing** - Automated testing on Windows, macOS, Linux
 - 📦 **Professional Packaging** - Automated Chrome extension and NPM package releases
+- 🔄 **Complete Integration** - All feature branches merged into unified main branch
+- 🎯 **Production Ready** - Comprehensive testing and validation infrastructure
 
 ## 🚀 Quick Installation
 
@@ -86,7 +92,7 @@ After that, it should work but if it doesn't let me know and I can share some mo
 
 ## 🛠️ Complete Feature Set
 
-This enhanced fork provides **17 MCP tools** for comprehensive browser automation:
+This enhanced fork provides **20+ MCP tools** for comprehensive browser automation with **integrated advanced features**:
 
 ### **📊 Browser Monitoring**
 - **Console Logs** - Capture and analyze browser console output
@@ -94,12 +100,12 @@ This enhanced fork provides **17 MCP tools** for comprehensive browser automatio
 - **Screenshots** - Take high-quality screenshots (works with separate DevTools)
 - **Selected Elements** - Inspect currently selected DOM elements
 
-### **🍪 Storage Access** *(New in this fork)*
+### **🍪 Storage Access** *(Enhanced)*
 - **Cookies** - Read and analyze browser cookies
 - **localStorage** - Access localStorage data
 - **sessionStorage** - Access sessionStorage data
 
-### **🔍 Advanced Element Inspection** *(New in this fork)*
+### **🔍 Advanced Element Inspection** *(Enhanced)*
 - **CSS Selector Inspection** - Inspect elements using CSS selectors
 - **Computed Styles** - Get computed CSS styles for elements
 - **Chrome Debugging API** - Deep element analysis
@@ -113,8 +119,33 @@ This enhanced fork provides **17 MCP tools** for comprehensive browser automatio
 - **Audit Mode** - Run all audits in sequence
 - **Debugger Mode** - Run all debugging tools in sequence
 
+### **🔧 Automated Diagnostics** *(New Integrated)*
+- **System Diagnostics** - Comprehensive system and environment validation
+- **Automated Setup** - Intelligent setup and configuration workflows
+- **Installation Validation** - Verify installation integrity and dependencies
+- **Platform Detection** - Cross-platform compatibility checking
+
+### **🌐 Network & Proxy Management** *(New Integrated)*
+- **Proxy Configuration** - Complete proxy setup and management
+- **Network Diagnostics** - Network connectivity and performance testing
+- **Proxy Auto-detection** - Automatic system proxy discovery
+- **Network Recommendations** - Environment-specific network optimization
+
+### **🛡️ Enhanced Error Handling** *(New Integrated)*
+- **Intelligent Error Recovery** - Automatic error detection and recovery
+- **Detailed Error Reporting** - Comprehensive error context and solutions
+- **Graceful Degradation** - Fallback mechanisms for failed operations
+
+### **🖥️ Platform-Specific Features** *(New Integrated)*
+- **Windows Optimization** - Windows-specific path handling and features
+- **macOS Integration** - Native macOS compatibility and optimization
+- **Linux Support** - Full Linux distribution compatibility
+- **Cross-platform Validation** - Unified experience across all platforms
+
 ### **🧹 Utility Tools**
 - **Wipe Logs** - Clear stored logs and data
+- **Process Management** - Intelligent process monitoring and cleanup
+- **Configuration Management** - Centralized settings and preferences
 
 ---
 
@@ -296,6 +327,18 @@ Once installed, you can use natural language commands with your MCP client:
 - *"What network requests were made?"*
 - *"Enter debugger mode"*
 
+### **Network & Proxy Management** *(New)*
+- *"Configure proxy settings"*
+- *"Test network connectivity"*
+- *"Auto-detect system proxy"*
+- *"Optimize network settings for this environment"*
+
+### **Automated Diagnostics** *(New)*
+- *"Run system diagnostics"*
+- *"Validate installation"*
+- *"Check platform compatibility"*
+- *"Setup automated configuration"*
+
 ## 🔧 Compatibility
 
 ### **MCP Clients**
@@ -351,4 +394,4 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-**Made with ❤️ by cpjet64** | **Enhanced Fork** | **v1.3.3**
+**Made with ❤️ by cpjet64** | **Enhanced Fork** | **v1.4.0** | **Fully Integrated**
