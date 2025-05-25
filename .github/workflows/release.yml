@@ -121,6 +121,18 @@ jobs:
           cd browser-tools-server
           npm run build
 
+      - name: 📦 Update Chrome Extension Version
+        run: |
+          cd chrome-extension
+          VERSION="${{ needs.check-version.outputs.new_version }}"
+          node -e "
+            const fs = require('fs');
+            const manifest = JSON.parse(fs.readFileSync('manifest.json', 'utf8'));
+            manifest.version = '$VERSION';
+            fs.writeFileSync('manifest.json', JSON.stringify(manifest, null, 2));
+          "
+          echo "Updated Chrome extension version to $VERSION"
+
       - name: 📦 Create Chrome Extension Package
         run: |
           cd chrome-extension

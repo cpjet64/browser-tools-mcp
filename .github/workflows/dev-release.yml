@@ -60,6 +60,15 @@ jobs:
           cd ../browser-tools-mcp
           npm version $NEW_VERSION --no-git-tag-version
 
+          # Update chrome extension manifest version
+          cd ../chrome-extension
+          node -e "
+            const fs = require('fs');
+            const manifest = JSON.parse(fs.readFileSync('manifest.json', 'utf8'));
+            manifest.version = '$NEW_VERSION'.replace('-dev.', '.');
+            fs.writeFileSync('manifest.json', JSON.stringify(manifest, null, 2));
+          "
+
       - name: Create Chrome Extension Package
         run: |
           cd chrome-extension
