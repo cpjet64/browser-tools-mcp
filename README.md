@@ -1,69 +1,120 @@
-# BrowserTools MCP
+# BrowserTools MCP - Enhanced Fork by cpjet64
 
 > Make your AI tools 10x more aware and capable of interacting with your browser
 
+[![Latest Release](https://img.shields.io/github/v/release/cpjet64/browser-tools-mcp?style=flat-square)](https://github.com/cpjet64/browser-tools-mcp/releases)
+[![NPM MCP Server](https://img.shields.io/npm/v/@cpjet64/browser-tools-mcp?style=flat-square&label=MCP%20Server)](https://www.npmjs.com/package/@cpjet64/browser-tools-mcp)
+[![NPM Browser Server](https://img.shields.io/npm/v/@cpjet64/browser-tools-server?style=flat-square&label=Browser%20Server)](https://www.npmjs.com/package/@cpjet64/browser-tools-server)
+
 English | [简体中文](./docs/i18n/README_CN.md)
 
-This application is a powerful browser monitoring and interaction tool that enables AI-powered applications via Anthropic's Model Context Protocol (MCP) to capture and analyze browser data through a Chrome extension.
+This is an **enhanced fork** of the original BrowserTools MCP with significant improvements and new features. It's a powerful browser monitoring and interaction tool that enables AI-powered applications via Anthropic's Model Context Protocol (MCP) to capture and analyze browser data through a Chrome extension.
 
-Read our [docs](https://browsertools.agentdesk.ai/) for the full installation, quickstart and contribution guides.
+## 🚀 What's New in This Fork (v1.3.0)
 
-## Roadmap
+This fork includes **ALL community contributions** and major enhancements:
 
-Check out our project roadmap here: [Github Roadmap / Project Board](https://github.com/orgs/AgentDeskAI/projects/1/views/1)
+### ✨ **New Features**
+- 🍪 **Storage Access Tools** - Access cookies, localStorage, and sessionStorage
+- 🔍 **Advanced Element Inspection** - CSS selector-based element inspection with computed styles
+- 📸 **Enhanced Screenshots** - Fixed screenshot capture with separate DevTools windows
+- 🧪 **Audit & Debug Modes** - Comprehensive analysis tools via Lighthouse
+- 🪟 **Windows Compatibility** - Full Windows support with path conversion
+- 🌍 **Multi-language Documentation** - Chinese translation support
+- 🤖 **Automated Releases** - Professional release automation with NPM publishing
 
-## Updates
+### 🔧 **Technical Improvements**
+- ⚡ **Latest Dependencies** - Express 5.x, body-parser 2.x, node-fetch 3.x
+- 🐛 **Bug Fixes** - stringSizeLimit and other critical fixes applied
+- 🧪 **Cross-platform Testing** - Automated testing on Windows, macOS, Linux
+- 📦 **Professional Packaging** - Automated Chrome extension and NPM package releases
 
-v1.2.0 is out! Here's a quick breakdown of the update:
-- You can now enable "Allow Auto-Paste into Cursor" within the DevTools panel. Screenshots will be automatically pasted into Cursor (just make sure to focus/click into the Agent input field in Cursor, otherwise it won't work!)
-- Integrated a suite of SEO, performance, accessibility, and best practice analysis tools via Lighthouse
-- Implemented a NextJS specific prompt used to improve SEO for a NextJS application
-- Added Debugger Mode as a tool which executes all debugging tools in a particular sequence, along with a prompt to improve reasoning
-- Added Audit Mode as a tool to execute all auditing tools in a particular sequence
-- Resolved Windows connectivity issues
-- Improved networking between BrowserTools server, extension and MCP server with host/port auto-discovery, auto-reconnect, and graceful shutdown mechanisms
-- Added ability to more easily exit out of the Browser Tools server with Ctrl+C
+## 🚀 Quick Installation
 
-## Quickstart Guide
+### **Method 1: NPM (Recommended)**
 
-There are three components to run this MCP tool:
+```bash
+# 1. Install MCP Server (for your IDE)
+npx @cpjet64/browser-tools-mcp@latest
 
-1. Install our chrome extension from here: [v1.2.0 BrowserToolsMCP Chrome Extension](https://github.com/AgentDeskAI/browser-tools-mcp/releases/download/v1.2.0/BrowserTools-1.2.0-extension.zip)
-2. Install the MCP server from this command within your IDE: `npx @agentdeskai/browser-tools-mcp@latest`
-3. Open a new terminal and run this command: `npx @agentdeskai/browser-tools-server@latest`
+# 2. Install Browser Tools Server (run in separate terminal)
+npx @cpjet64/browser-tools-server@latest
+```
 
-* Different IDEs have different configs but this command is generally a good starting point; please reference your IDEs docs for the proper config setup
+### **Method 2: Download from Releases**
 
-IMPORTANT TIP - there are two servers you need to install. There's...
-- browser-tools-server (local nodejs server that's a middleware for gathering logs)
-and
-- browser-tools-mcp (MCP server that you install into your IDE that communicates w/ the extension + browser-tools-server)
+1. **Chrome Extension**: Download from [Latest Release](https://github.com/cpjet64/browser-tools-mcp/releases/latest)
+2. **MCP Server**: `npx @cpjet64/browser-tools-mcp@latest`
+3. **Browser Server**: `npx @cpjet64/browser-tools-server@latest`
 
-`npx @agentdeskai/browser-tools-mcp@latest` is what you put into your IDE
-`npx @agentdeskai/browser-tools-server@latest` is what you run in a new terminal window
+### **📋 Setup Steps**
+
+1. **Install Chrome Extension**:
+   - Download the `.zip` file from releases
+   - Extract and load in Chrome → Extensions → Developer mode → Load unpacked
+
+2. **Configure Your IDE**:
+   - Add `npx @cpjet64/browser-tools-mcp@latest` to your MCP client configuration
+   - Different IDEs have different configs - check your IDE's MCP documentation
+
+3. **Start Browser Server**:
+   - Open a new terminal and run: `npx @cpjet64/browser-tools-server@latest`
+
+4. **Open DevTools**:
+   - Open Chrome DevTools → BrowserToolsMCP panel
+   - Ensure connection is established
+
+### **💡 Important Notes**
+
+**Two Servers Required**:
+- **`@cpjet64/browser-tools-mcp`** → MCP server for your IDE
+- **`@cpjet64/browser-tools-server`** → Local middleware server
+
+**Troubleshooting**:
+- Close ALL Chrome windows and restart if having issues
+- Restart the browser-tools-server
+- Ensure only ONE DevTools panel is open
 
 After those three steps, open up your chrome dev tools and then the BrowserToolsMCP panel.
 
 If you're still having issues try these steps:
-- Quit / close down your browser. Not just the window but all of Chrome itself. 
+- Quit / close down your browser. Not just the window but all of Chrome itself.
 - Restart the local node server (browser-tools-server)
 - Make sure you only have ONE instance of chrome dev tools panel open
 
 After that, it should work but if it doesn't let me know and I can share some more steps to gather logs/info about the issue!
 
-If you have any questions or issues, feel free to open an issue ticket! And if you have any ideas to make this better, feel free to reach out or open an issue ticket with an enhancement tag or reach out to me at [@tedx_ai on x](https://x.com/tedx_ai)
+## 🛠️ Complete Feature Set
 
-## Full Update Notes:
+This enhanced fork provides **17 MCP tools** for comprehensive browser automation:
 
-Coding agents like Cursor can run these audits against the current page seamlessly. By leveraging Puppeteer and the Lighthouse npm library, BrowserTools MCP can now:
+### **📊 Browser Monitoring**
+- **Console Logs** - Capture and analyze browser console output
+- **Network Requests** - Monitor XHR/fetch requests and responses
+- **Screenshots** - Take high-quality screenshots (works with separate DevTools)
+- **Selected Elements** - Inspect currently selected DOM elements
 
-- Evaluate pages for WCAG compliance
-- Identify performance bottlenecks
-- Flag on-page SEO issues
-- Check adherence to web development best practices
-- Review NextJS specific issues with SEO
+### **🍪 Storage Access** *(New in this fork)*
+- **Cookies** - Read and analyze browser cookies
+- **localStorage** - Access localStorage data
+- **sessionStorage** - Access sessionStorage data
 
-...all without leaving your IDE 🎉
+### **🔍 Advanced Element Inspection** *(New in this fork)*
+- **CSS Selector Inspection** - Inspect elements using CSS selectors
+- **Computed Styles** - Get computed CSS styles for elements
+- **Chrome Debugging API** - Deep element analysis
+
+### **🧪 Audit & Analysis Tools**
+- **Accessibility Audit** - WCAG compliance checking
+- **Performance Audit** - Page speed and optimization analysis
+- **SEO Audit** - Search engine optimization analysis
+- **Best Practices Audit** - Web development best practices
+- **NextJS Audit** - NextJS-specific optimization checks
+- **Audit Mode** - Run all audits in sequence
+- **Debugger Mode** - Run all debugging tools in sequence
+
+### **🧹 Utility Tools**
+- **Wipe Logs** - Clear stored logs and data
 
 ---
 
@@ -92,12 +143,12 @@ Ensure you have:
 
 ### ▶️ **Running Audits**
 
-**Headless Browser Automation**:  
+**Headless Browser Automation**:
  Puppeteer automates a headless Chrome instance to load the page and collect audit data, ensuring accurate results even for SPAs or content loaded via JavaScript.
 
 The headless browser instance remains active for **60 seconds** after the last audit call to efficiently handle consecutive audit requests.
 
-**Structured Results**:  
+**Structured Results**:
  Each audit returns results in a structured JSON format, including overall scores and detailed issue lists. This makes it easy for MCP-compatible clients to interpret the findings and present actionable insights.
 
 The MCP server provides tools to run audits on the current page. Here are example queries you can use to trigger them:
@@ -219,26 +270,85 @@ All consumers of the BrowserTools MCP Server interface with the same NodeJS API 
 - Provides standardized tools for AI clients
 - Compatible with various MCP clients (Cursor, Cline, Zed, Claude Desktop, etc.)
 
-## Installation
+## 🎯 Usage Examples
 
-Installation steps can be found in our documentation:
+Once installed, you can use natural language commands with your MCP client:
 
-- [BrowserTools MCP Docs](https://browsertools.agentdesk.ai/)
+### **Storage Access**
+- *"What cookies are set on this page?"*
+- *"Show me the localStorage data"*
+- *"What's in sessionStorage?"*
 
-## Usage
+### **Element Inspection**
+- *"Inspect all buttons on this page"*
+- *"Get the computed styles for .header elements"*
+- *"Find all elements with class 'nav-item'"*
 
-Once installed and configured, the system allows any compatible MCP client to:
+### **Audits & Analysis**
+- *"Run an accessibility audit"*
+- *"Check the performance of this page"*
+- *"Analyze SEO issues"*
+- *"Enter audit mode"*
 
-- Monitor browser console output
-- Capture network traffic
-- Take screenshots
-- Analyze selected elements
-- Access browser storage (cookies, localStorage, sessionStorage)
-- Wipe logs stored in our MCP server
-- Run accessibility, performance, SEO, and best practices audits
+### **Debugging**
+- *"Take a screenshot"*
+- *"Show me console errors"*
+- *"What network requests were made?"*
+- *"Enter debugger mode"*
 
-## Compatibility
+## 🔧 Compatibility
 
-- Works with any MCP-compatible client
-- Primarily designed for Cursor IDE integration
-- Supports other AI editors and MCP clients
+### **MCP Clients**
+- ✅ **Cursor IDE** - Primary integration
+- ✅ **Claude Desktop** - Full support
+- ✅ **Cline** - Compatible
+- ✅ **Zed** - Compatible
+- ✅ **Any MCP-compatible client**
+
+### **Operating Systems**
+- ✅ **Windows** - Full support with path conversion
+- ✅ **macOS** - Native support
+- ✅ **Linux** - Native support
+
+### **Node.js Versions**
+- ✅ **Node.js 18+** - Recommended
+- ✅ **Node.js 20** - Fully tested
+- ✅ **Node.js 22** - Latest support
+
+### **Browsers**
+- ✅ **Chrome** - Primary support
+- ✅ **Chromium** - Compatible
+- ✅ **Edge** - Compatible (Chromium-based)
+
+## 📚 Documentation
+
+- **Setup Guide**: [Release Setup Documentation](./docs/RELEASE_SETUP.md)
+- **Chinese Documentation**: [简体中文文档](./docs/i18n/README_CN.md)
+- **Original Docs**: [BrowserTools MCP Docs](https://browsertools.agentdesk.ai/)
+
+## 🤝 Contributing
+
+This is an independent fork focused on stability and feature completeness.
+
+### **🐛 Issues & Feature Requests**
+- Open an issue for bugs or feature requests
+- Check existing issues before creating new ones
+
+### **🔄 Updates**
+- This fork maintains independence from the original repository
+- All valuable community contributions are integrated
+- Automated testing ensures stability across platforms
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **Original Project**: [AgentDeskAI/browser-tools-mcp](https://github.com/AgentDeskAI/browser-tools-mcp)
+- **Community Contributors**: All PR authors whose work is integrated in this fork
+- **MCP Protocol**: [Anthropic's Model Context Protocol](https://modelcontextprotocol.io/)
+
+---
+
+**Made with ❤️ by cpjet64** | **Enhanced Fork** | **v1.3.0**
