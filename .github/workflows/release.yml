@@ -273,20 +273,30 @@ jobs:
           npm run build
 
       - name: 📤 Publish MCP Server to NPM
+        if: ${{ secrets.NPM_TOKEN }}
         run: |
           cd webai-mcp
           echo "🚀 Publishing MCP Server to NPM..."
           npm publish --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        continue-on-error: true
 
       - name: 📤 Publish WebAI Server to NPM
+        if: ${{ secrets.NPM_TOKEN }}
         run: |
           cd webai-server
           echo "🚀 Publishing WebAI Server to NPM..."
           npm publish --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        continue-on-error: true
+
+      - name: ⚠️ NPM Publishing Skipped
+        if: ${{ !secrets.NPM_TOKEN }}
+        run: |
+          echo "⚠️ NPM publishing skipped - NPM_TOKEN secret not configured"
+          echo "To enable NPM publishing, add NPM_TOKEN secret to repository settings"
 
       - name: 🎉 NPM Publish Summary
         run: |

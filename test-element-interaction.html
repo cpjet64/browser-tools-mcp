@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Element Interaction Tools Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #005a87;
+        }
+        input, textarea, select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            background: #f0f8ff;
+            border: 1px solid #b0d4f1;
+        }
+        .success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Element Interaction Tools Test Page</h1>
+        <p>This page is designed to test the new Element Interaction Tools in WebAI-MCP Phase 1.</p>
+        
+        <!-- Click Element Tests -->
+        <div class="test-section">
+            <h2>1. Click Element Tests</h2>
+            <button id="test-button-1" onclick="showResult('click-result-1', 'Button 1 clicked successfully!', 'success')">
+                Click Me (Button 1)
+            </button>
+            <button class="test-button-class" onclick="showResult('click-result-2', 'Button 2 clicked successfully!', 'success')">
+                Click Me (Button 2)
+            </button>
+            <button onclick="showResult('click-result-3', 'Coordinate click worked!', 'success')">
+                Click Me (Coordinates)
+            </button>
+            <div id="click-result-1" class="result" style="display: none;"></div>
+            <div id="click-result-2" class="result" style="display: none;"></div>
+            <div id="click-result-3" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Fill Input Tests -->
+        <div class="test-section">
+            <h2>2. Fill Input Tests</h2>
+            <div class="form-group">
+                <label for="test-input-1">Text Input:</label>
+                <input type="text" id="test-input-1" placeholder="Enter text here..." onchange="showInputResult('input-result-1', this.value)">
+                <div id="input-result-1" class="result" style="display: none;"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="test-textarea">Textarea:</label>
+                <textarea id="test-textarea" rows="3" placeholder="Enter multiline text..." onchange="showInputResult('textarea-result', this.value)"></textarea>
+                <div id="textarea-result" class="result" style="display: none;"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="test-email">Email Input:</label>
+                <input type="email" name="email" placeholder="test@example.com" onchange="showInputResult('email-result', this.value)">
+                <div id="email-result" class="result" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Select Option Tests -->
+        <div class="test-section">
+            <h2>3. Select Option Tests</h2>
+            <div class="form-group">
+                <label for="test-select-1">Select by Value:</label>
+                <select id="test-select-1" onchange="showSelectResult('select-result-1', this)">
+                    <option value="">Choose an option...</option>
+                    <option value="option1">Option 1</option>
+                    <option value="option2">Option 2</option>
+                    <option value="option3">Option 3</option>
+                </select>
+                <div id="select-result-1" class="result" style="display: none;"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="test-select-2">Select by Text:</label>
+                <select id="test-select-2" onchange="showSelectResult('select-result-2', this)">
+                    <option value="">Choose a fruit...</option>
+                    <option value="apple">Apple</option>
+                    <option value="banana">Banana</option>
+                    <option value="orange">Orange</option>
+                </select>
+                <div id="select-result-2" class="result" style="display: none;"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="test-select-3">Select by Index:</label>
+                <select id="test-select-3" onchange="showSelectResult('select-result-3', this)">
+                    <option value="">Choose a color...</option>
+                    <option value="red">Red</option>
+                    <option value="green">Green</option>
+                    <option value="blue">Blue</option>
+                </select>
+                <div id="select-result-3" class="result" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Form Submit Tests -->
+        <div class="test-section">
+            <h2>4. Form Submit Tests</h2>
+            <form id="test-form-1" onsubmit="handleFormSubmit(event, 'form-result-1')">
+                <div class="form-group">
+                    <label for="form-name">Name:</label>
+                    <input type="text" id="form-name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="form-message">Message:</label>
+                    <textarea id="form-message" name="message" rows="3" required></textarea>
+                </div>
+                <button type="submit">Submit Form</button>
+                <div id="form-result-1" class="result" style="display: none;"></div>
+            </form>
+            
+            <form id="test-form-2" onsubmit="handleFormSubmit(event, 'form-result-2')">
+                <div class="form-group">
+                    <label for="form-email">Email:</label>
+                    <input type="email" id="form-email" name="email" required>
+                </div>
+                <button type="submit" id="submit-button-2">Submit via Button Click</button>
+                <div id="form-result-2" class="result" style="display: none;"></div>
+            </form>
+        </div>
+
+        <!-- Test Instructions -->
+        <div class="test-section">
+            <h2>🧪 Test Instructions</h2>
+            <p><strong>Use these MCP tools to test the Element Interaction functionality:</strong></p>
+            
+            <h3>Click Element Tests:</h3>
+            <code>clickElement({ selector: "#test-button-1" })</code><br>
+            <code>clickElement({ selector: ".test-button-class" })</code><br>
+            <code>clickElement({ coordinates: { x: 300, y: 400 } })</code>
+            
+            <h3>Fill Input Tests:</h3>
+            <code>fillInput({ selector: "#test-input-1", text: "Hello World!" })</code><br>
+            <code>fillInput({ selector: "#test-textarea", text: "This is a multiline\ntext example." })</code><br>
+            <code>fillInput({ selector: "input[name='email']", text: "test@webai-mcp.com" })</code>
+            
+            <h3>Select Option Tests:</h3>
+            <code>selectOption({ selector: "#test-select-1", value: "option2" })</code><br>
+            <code>selectOption({ selector: "#test-select-2", text: "Banana" })</code><br>
+            <code>selectOption({ selector: "#test-select-3", index: 2 })</code>
+            
+            <h3>Form Submit Tests:</h3>
+            <code>submitForm({ formSelector: "#test-form-1" })</code><br>
+            <code>submitForm({ submitButtonSelector: "#submit-button-2" })</code>
+        </div>
+    </div>
+
+    <script>
+        function showResult(elementId, message, type = 'success') {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `result ${type}`;
+            element.style.display = 'block';
+        }
+
+        function showInputResult(elementId, value) {
+            showResult(elementId, `Input value changed to: "${value}"`, 'success');
+        }
+
+        function showSelectResult(elementId, selectElement) {
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            const message = `Selected: "${selectedOption.text}" (value: "${selectedOption.value}", index: ${selectElement.selectedIndex})`;
+            showResult(elementId, message, 'success');
+        }
+
+        function handleFormSubmit(event, resultId) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData.entries());
+            const message = `Form submitted successfully! Data: ${JSON.stringify(data)}`;
+            showResult(resultId, message, 'success');
+        }
+
+        // Add some dynamic content for testing element waiting
+        setTimeout(() => {
+            const dynamicButton = document.createElement('button');
+            dynamicButton.id = 'dynamic-button';
+            dynamicButton.textContent = 'Dynamic Button (appears after 3 seconds)';
+            dynamicButton.onclick = () => showResult('dynamic-result', 'Dynamic button clicked!', 'success');
+            
+            const dynamicDiv = document.createElement('div');
+            dynamicDiv.innerHTML = '<h3>Dynamic Content:</h3>';
+            dynamicDiv.appendChild(dynamicButton);
+            dynamicDiv.innerHTML += '<div id="dynamic-result" class="result" style="display: none;"></div>';
+            
+            document.querySelector('.container').appendChild(dynamicDiv);
+        }, 3000);
+    </script>
+</body>
+</html>

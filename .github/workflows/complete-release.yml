@@ -296,6 +296,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 📤 Publish to NPM
+        if: ${{ secrets.NPM_TOKEN }}
         run: |
           echo "🚀 Publishing MCP Server to NPM..."
           cd webai-mcp
@@ -305,7 +306,14 @@ jobs:
           cd ../webai-server
           npm publish --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        continue-on-error: true
+
+      - name: ⚠️ NPM Publishing Skipped
+        if: ${{ !secrets.NPM_TOKEN }}
+        run: |
+          echo "⚠️ NPM publishing skipped - NPM_TOKEN secret not configured"
+          echo "To enable NPM publishing, add NPM_TOKEN secret to repository settings"
 
       - name: 🎉 Release Complete
         run: |

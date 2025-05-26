@@ -156,18 +156,28 @@ jobs:
           mv *.tgz ../webai-server-v${{ steps.version.outputs.new_version }}.tgz
 
       - name: 📤 Publish webai-server to NPM (dev tag)
+        if: ${{ secrets.NPM_TOKEN }}
         run: |
           cd webai-server
           npm publish --tag dev --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        continue-on-error: true
 
       - name: 📤 Publish webai-mcp to NPM (dev tag)
+        if: ${{ secrets.NPM_TOKEN }}
         run: |
           cd webai-mcp
           npm publish --tag dev --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        continue-on-error: true
+
+      - name: ⚠️ NPM Publishing Skipped
+        if: ${{ !secrets.NPM_TOKEN }}
+        run: |
+          echo "⚠️ NPM publishing skipped - NPM_TOKEN secret not configured"
+          echo "To enable NPM publishing, add NPM_TOKEN secret to repository settings"
 
       - name: 📝 Generate Release Notes
         id: release-notes

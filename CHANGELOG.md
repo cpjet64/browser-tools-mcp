@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🚀 **Phase 1: Enhanced Core Features (In Progress)**
 
 #### **✨ Added**
+
 - **RefreshBrowser Tool** - Advanced browser refresh functionality with configurable options:
   - `waitForLoad`: Wait for page to fully load after refresh (default: true)
   - `timeout`: Configurable timeout for page load (default: 10000ms)
