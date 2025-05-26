@@ -1743,6 +1743,124 @@ async function setupWebSocket() {
               );
             }
           );
+        } else if (message.type === "refresh-browser") {
+          console.log("Chrome Extension: Refreshing browser...");
+
+          const { waitForLoad, timeout, preserveScrollPosition, clearCache } = message;
+
+          try {
+            // Store scroll position if requested
+            let scrollPosition = null;
+            if (preserveScrollPosition) {
+              chrome.devtools.inspectedWindow.eval(
+                `({ x: window.scrollX || window.pageXOffset, y: window.scrollY || window.pageYOffset })`,
+                (result, isException) => {
+                  if (!isException && result) {
+                    scrollPosition = result;
+                    console.log("Chrome Extension: Stored scroll position:", scrollPosition);
+                  }
+                }
+              );
+            }
+
+            // Clear cache if requested
+            if (clearCache) {
+              console.log("Chrome Extension: Clearing browser cache...");
+              chrome.devtools.network.clear();
+            }
+
+            // Perform the refresh
+            console.log("Chrome Extension: Performing page refresh...");
+            chrome.devtools.inspectedWindow.reload({
+              ignoreCache: clearCache || false,
+              userAgent: null, // Use default user agent
+              injectedScript: preserveScrollPosition && scrollPosition ?
+                `setTimeout(() => { window.scrollTo(${scrollPosition.x}, ${scrollPosition.y}); }, 100);` :
+                null
+            });
+
+            // If waitForLoad is true, wait for the page to load
+            if (waitForLoad) {
+              const startTime = Date.now();
+              const checkInterval = 100; // Check every 100ms
+              const maxTimeout = timeout || 10000;
+
+              const checkPageLoad = () => {
+                chrome.devtools.inspectedWindow.eval(
+                  `document.readyState === 'complete'`,
+                  (isComplete, isException) => {
+                    const elapsed = Date.now() - startTime;
+
+                    if (isException) {
+                      console.error("Chrome Extension: Error checking page load state:", isException);
+                      ws.send(
+                        JSON.stringify({
+                          type: "refresh-browser-error",
+                          error: "Failed to check page load state",
+                          requestId: message.requestId,
+                        })
+                      );
+                      return;
+                    }
+
+                    if (isComplete) {
+                      console.log("Chrome Extension: Page refresh completed successfully");
+                      ws.send(
+                        JSON.stringify({
+                          type: "refresh-browser-response",
+                          success: true,
+                          message: "Browser refreshed successfully",
+                          timestamp: Date.now(),
+                          loadTime: elapsed,
+                          requestId: message.requestId,
+                        })
+                      );
+                    } else if (elapsed >= maxTimeout) {
+                      console.log("Chrome Extension: Page refresh timed out");
+                      ws.send(
+                        JSON.stringify({
+                          type: "refresh-browser-response",
+                          success: true,
+                          message: "Browser refreshed (timed out waiting for complete load)",
+                          timestamp: Date.now(),
+                          loadTime: elapsed,
+                          requestId: message.requestId,
+                        })
+                      );
+                    } else {
+                      // Continue checking
+                      setTimeout(checkPageLoad, checkInterval);
+                    }
+                  }
+                );
+              };
+
+              // Start checking after a brief delay to allow refresh to begin
+              setTimeout(checkPageLoad, 500);
+            } else {
+              // Don't wait for load, respond immediately
+              console.log("Chrome Extension: Page refresh initiated (not waiting for load)");
+              ws.send(
+                JSON.stringify({
+                  type: "refresh-browser-response",
+                  success: true,
+                  message: "Browser refresh initiated",
+                  timestamp: Date.now(),
+                  requestId: message.requestId,
+                })
+              );
+            }
+
+          } catch (error) {
+            console.error("Chrome Extension: Error refreshing browser:", error);
+            ws.send(
+              JSON.stringify({
+                type: "refresh-browser-error",
+                error: error.message || "Failed to refresh browser",
+                requestId: message.requestId,
+              })
+            );
+          }
         }
       } catch (error) {
         console.error(

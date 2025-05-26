@@ -1732,6 +1732,72 @@ server.tool("getSessionStorage", "Get all sessionStorage items", async () => {
   });
 });
 
+// Add RefreshBrowser tool
+server.tool(
+  "refreshBrowser",
+  "Refresh the current browser page",
+  {
+    waitForLoad: z.boolean().optional().default(true).describe("Wait for page to fully load after refresh"),
+    timeout: z.number().optional().default(10000).describe("Timeout in milliseconds for page load"),
+    preserveScrollPosition: z.boolean().optional().default(false).describe("Attempt to preserve scroll position"),
+    clearCache: z.boolean().optional().default(false).describe("Clear browser cache before refresh")
+  },
+  async ({ waitForLoad = true, timeout = 10000, preserveScrollPosition = false, clearCache = false }) => {
+    return await withServerConnection(async () => {
+      try {
+        console.log(
+          `Sending POST request to http://${discoveredHost}:${discoveredPort}/refresh-browser`
+        );
+        const response = await fetch(
+          `http://${discoveredHost}:${discoveredPort}/refresh-browser`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({
+              waitForLoad,
+              timeout,
+              preserveScrollPosition,
+              clearCache,
+              source: "mcp_tool",
+              timestamp: Date.now(),
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Server returned ${response.status}: ${errorText}`);
+        }
+
+        const json = await response.json();
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(json, null, 2),
+            },
+          ],
+        };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error("Error in refresh browser:", errorMessage);
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Failed to refresh browser: ${errorMessage}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    }, "refresh browser");
+  }
+);
+
 // Add version compatibility check tool
 server.tool(
   "checkVersionCompatibility",

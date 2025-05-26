@@ -213,10 +213,16 @@ interface SessionStorageCallback {
   reject: (reason: Error) => void;
 }
 
+interface RefreshBrowserCallback {
+  resolve: (value: { success: boolean; message: string; timestamp: number }) => void;
+  reject: (reason: Error) => void;
+}
+
 const screenshotCallbacks = new Map<string, ScreenshotCallback>();
 const cookiesCallbacks = new Map<string, CookiesCallback>();
 const localStorageCallbacks = new Map<string, LocalStorageCallback>();
 const sessionStorageCallbacks = new Map<string, SessionStorageCallback>();
+const refreshBrowserCallbacks = new Map<string, RefreshBrowserCallback>();
 
 // Add new state for tracking selector requests
 interface SelectorCallback {
@@ -771,6 +777,20 @@ export class BrowserConnector {
       }
     );
 
+    // Add refresh browser endpoint
+    this.app.post(
+      "/refresh-browser",
+      async (req: express.Request, res: express.Response): Promise<void> => {
+        console.log("Browser Connector: Received request to /refresh-browser endpoint");
+        console.log("Browser Connector: Request body:", req.body);
+        console.log(
+          "Browser Connector: Active WebSocket connection:",
+          !!this.activeConnection
+        );
+        await this.refreshBrowser(req, res);
+      }
+    );
+
     // Add proxy configuration endpoints
     this.setupProxyEndpoints();
 
@@ -986,6 +1006,30 @@ export class BrowserConnector {
             if (callback) {
               callback.reject(new Error(data.error || "Failed to get HTML by selector"));
               selectorCallbacks.delete(data.requestId);
+            }
+          }
+          // Handle refresh browser response
+          else if (data.type === "refresh-browser-response" && data.requestId) {
+            console.log("Received refresh browser response");
+            const callback = refreshBrowserCallbacks.get(data.requestId);
+            if (callback) {
+              callback.resolve({
+                success: data.success || true,
+                message: data.message || "Browser refreshed successfully",
+                timestamp: data.timestamp || Date.now()
+              });
+              refreshBrowserCallbacks.delete(data.requestId);
+            } else {
+              console.log("No callback found for refresh browser request:", data.requestId);
+            }
+          }
+          // Handle refresh browser error
+          else if (data.type === "refresh-browser-error" && data.requestId) {
+            console.log("Received refresh browser error:", data.error);
+            const callback = refreshBrowserCallbacks.get(data.requestId);
+            if (callback) {
+              callback.reject(new Error(data.error || "Failed to refresh browser"));
+              refreshBrowserCallbacks.delete(data.requestId);
             }
           }
           else {
@@ -1826,6 +1870,87 @@ export class BrowserConnector {
         error instanceof Error ? error.message : String(error);
       console.error(
         "Browser Connector: Error getting sessionStorage:",
+        errorMessage
+      );
+      return res.status(500).json({ error: errorMessage });
+    }
+  }
+
+  // Add method to refresh browser
+  async refreshBrowser(req: express.Request, res: express.Response) {
+    if (!this.activeConnection) {
+      console.log(
+        "Browser Connector: No active WebSocket connection to Chrome extension"
+      );
+      return res.status(503).json({ error: "Chrome extension not connected" });
+    }
+
+    try {
+      console.log("Browser Connector: Refreshing browser");
+      const requestId = Date.now().toString();
+      console.log("Browser Connector: Generated requestId:", requestId);
+
+      const { waitForLoad, timeout, preserveScrollPosition, clearCache } = req.body;
+
+      // Create promise that will resolve when we get the refresh response
+      const refreshPromise = new Promise<{ success: boolean; message: string; timestamp: number }>(
+        (resolve, reject) => {
+          console.log(
+            `Browser Connector: Setting up refresh browser callback for requestId: ${requestId}`
+          );
+          // Store callback in map
+          refreshBrowserCallbacks.set(requestId, { resolve, reject });
+          console.log(
+            "Browser Connector: Current callbacks:",
+            Array.from(refreshBrowserCallbacks.keys())
+          );
+
+          // Set timeout to clean up if we don't get a response
+          setTimeout(() => {
+            if (refreshBrowserCallbacks.has(requestId)) {
+              console.log(
+                `Browser Connector: Refresh browser request timed out for requestId: ${requestId}`
+              );
+              refreshBrowserCallbacks.delete(requestId);
+              reject(
+                new Error(
+                  "Refresh browser request timed out - no response from Chrome extension"
+                )
+              );
+            }
+          }, (timeout || 10000) + 5000); // Add 5 seconds buffer to the user timeout
+        }
+      );
+
+      // Send refresh browser request to extension
+      const message = JSON.stringify({
+        type: "refresh-browser",
+        requestId: requestId,
+        waitForLoad: waitForLoad !== false, // Default to true
+        timeout: timeout || 10000,
+        preserveScrollPosition: preserveScrollPosition || false,
+        clearCache: clearCache || false
+      });
+      console.log(
+        `Browser Connector: Sending WebSocket message to extension:`,
+        message
+      );
+      this.activeConnection.send(message);
+
+      // Wait for refresh response
+      console.log("Browser Connector: Waiting for refresh browser response...");
+      const result = await refreshPromise;
+      console.log(
+        "Browser Connector: Received refresh browser response, returning result..."
+      );
+
+      // Return the refresh result
+      res.json(result);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      console.error(
+        "Browser Connector: Error refreshing browser:",
         errorMessage
       );
       return res.status(500).json({ error: errorMessage });
