@@ -102,8 +102,8 @@ jobs:
 
       - name: 🔧 Install Dependencies
         run: |
-          cd webai-mcp && npm ci
-          cd ../webai-server && npm ci
+          cd webai-mcp && npm install
+          cd ../webai-server && npm install
           npm ci  # Install root dependencies for changelog automation
 
       - name: 🏗️ Build Packages

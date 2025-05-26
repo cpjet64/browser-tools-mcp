@@ -32,12 +32,12 @@ jobs:
       - name: 🔧 Install dependencies (MCP)
         run: |
           cd webai-mcp
-          npm ci
+          npm install
 
       - name: 🔧 Install dependencies (Server)
         run: |
           cd webai-server
-          npm ci
+          npm install
 
       - name: 🔧 Install root dependencies (for changelog automation)
         run: npm ci
