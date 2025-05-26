@@ -7,9 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - Development
 
-### 🚀 **Phase 1: Enhanced Core Features (In Progress)**
+### 🚀 Phase 1: Enhanced Core Features (In Progress)
 
-#### **✨ Added**
+#### ✨ Added
 
 - **RefreshBrowser Tool** - Advanced browser refresh functionality with configurable options:
   - `waitForLoad`: Wait for page to fully load after refresh (default: true)
@@ -19,12 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Dev Release Workflow** - Restored automated development builds and releases
 - **Enhanced Documentation** - Restored critical documentation files lost during migration
 
-#### **🔧 Changed**
+#### 🔧 Changed
+
 - **Test Workflow** - Now triggers on both `main` and `dev` branch pushes
 - **Dev Versioning** - Automatic dev version bumping (e.g., `1.4.3-dev.0`, `1.4.3-dev.1`)
 - **NPM Publishing** - Dev releases published with `@dev` tag for early testing
 
-#### **📚 Documentation**
+#### 📚 Documentation
 - **DEV_BRANCH_STRATEGY.md** - Restored development workflow documentation
 - **EXTENSION_TROUBLESHOOTING.md** - Restored user troubleshooting guide
 - **version.json** - Restored unified version tracking with feature flags
