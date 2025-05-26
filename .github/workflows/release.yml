@@ -44,14 +44,14 @@ jobs:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: |
-            browser-tools-mcp/package-lock.json
-            browser-tools-server/package-lock.json
+            webai-mcp/package-lock.json
+            webai-server/package-lock.json
 
       - name: 🔍 Check for version changes
         id: version-check
         run: |
           # Get current version from package.json
-          CURRENT_VERSION=$(node -p "require('./browser-tools-mcp/package.json').version")
+          CURRENT_VERSION=$(node -p "require('./webai-mcp/package.json').version")
           echo "Current version: $CURRENT_VERSION"
 
           # Check if this version already has a release

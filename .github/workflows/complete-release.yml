@@ -48,8 +48,8 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
           cache-dependency-path: |
-            browser-tools-mcp/package-lock.json
-            browser-tools-server/package-lock.json
+            webai-mcp/package-lock.json
+            webai-server/package-lock.json
 
       - name: 🔧 Configure Git
         run: |
@@ -59,7 +59,7 @@ jobs:
       - name: 📈 Determine New Version
         id: version
         run: |
-          cd browser-tools-mcp
+          cd webai-mcp
           CURRENT_VERSION=$(node -p "require('./package.json').version")
           echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
 
@@ -82,11 +82,11 @@ jobs:
           NEW_VERSION="${{ steps.version.outputs.new_version }}"
 
           # Update MCP Server
-          cd browser-tools-mcp
+          cd webai-mcp
           npm version $NEW_VERSION --no-git-tag-version
 
-          # Update Browser Tools Server
-          cd ../browser-tools-server
+          # Update WebAI Server
+          cd ../webai-server
           npm version $NEW_VERSION --no-git-tag-version
 
           # Update Chrome Extension
