@@ -5,6 +5,93 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - Development
+
+### 🚀 **Phase 1: Enhanced Core Features (In Progress)**
+
+#### **✨ Added**
+- **RefreshBrowser Tool** - Advanced browser refresh functionality with configurable options:
+  - `waitForLoad`: Wait for page to fully load after refresh (default: true)
+  - `timeout`: Configurable timeout for page load (default: 10000ms)
+  - `preserveScrollPosition`: Attempt to preserve scroll position (default: false)
+  - `clearCache`: Clear browser cache before refresh (default: false)
+- **Dev Release Workflow** - Restored automated development builds and releases
+- **Enhanced Documentation** - Restored critical documentation files lost during migration
+
+#### **🔧 Changed**
+- **Test Workflow** - Now triggers on both `main` and `dev` branch pushes
+- **Dev Versioning** - Automatic dev version bumping (e.g., `1.4.3-dev.0`, `1.4.3-dev.1`)
+- **NPM Publishing** - Dev releases published with `@dev` tag for early testing
+
+#### **📚 Documentation**
+- **DEV_BRANCH_STRATEGY.md** - Restored development workflow documentation
+- **EXTENSION_TROUBLESHOOTING.md** - Restored user troubleshooting guide
+- **version.json** - Restored unified version tracking with feature flags
+- **Enhanced .gitignore** - Comprehensive Node.js/TypeScript patterns for cleaner repository
+
+#### **🐛 Fixed**
+- **Dev Build System** - Restored missing dev-release workflow that was deleted during migration
+- **GitHub Actions** - Fixed dev branch continuous integration
+- **Documentation** - Restored important files accidentally deleted during WebAI-MCP migration
+
+---
+
+## [1.4.2] - 2025-05-26
+
+### 🎯 **WebAI-MCP Migration & Stabilization**
+
+#### **🔄 Breaking Changes**
+- **Project Rebranding** - Complete migration from "Browser Tools MCP" to "WebAI-MCP"
+- **Package Names** - Updated to `@cpjet64/webai-mcp` and `@cpjet64/webai-server`
+- **Repository Structure** - Migrated directories from `browser-tools-*` to `webai-*`
+- **GitHub URLs** - Updated all references to new WebAI-MCP repository structure
+
+#### **✨ Added**
+- **Enhanced .gitignore** - Comprehensive patterns for Node.js/TypeScript development:
+  - Dependency management patterns (npm, yarn)
+  - TypeScript build artifacts and source maps
+  - Environment variable and configuration file patterns
+  - IDE/editor specific files (VS Code, IntelliJ, Vim, etc.)
+  - Cross-platform OS generated files
+  - Testing and coverage report patterns
+  - Chrome extension development files
+  - Development tool caches
+
+#### **🔧 Changed**
+- **GitHub Workflows** - Updated all workflows for new directory structure
+- **Documentation** - Updated all documentation with WebAI-MCP branding
+- **Chrome Extension** - Updated manifest and references to WebAI-MCP
+- **Package Metadata** - Updated descriptions, keywords, and repository URLs
+
+#### **🐛 Fixed**
+- **GitHub Actions** - Fixed cache-dependency-path errors in workflows
+- **Directory References** - Updated all file paths and directory references
+- **NPM Publishing** - Fixed package names in publishing workflows
+- **Release Assets** - Updated file naming conventions for releases
+
+---
+
+## [1.4.1] - 2025-05-25
+
+### 🔧 **Stability & Dependency Updates**
+
+#### **✨ Added**
+- **Express.js 5.x Support** - Major Express.js update with improved performance
+- **Enhanced TypeScript Support** - Updated @types/express to 5.0.2
+- **Dependency Security** - Updated cookie package from 0.7.1 to 0.7.2
+
+#### **🔧 Changed**
+- **Package Dependencies** - Major dependency updates for security and performance
+- **Build Process** - Improved build stability and error handling
+- **Version Management** - Enhanced version synchronization across components
+
+#### **🐛 Fixed**
+- **Merge Conflicts** - Resolved dependency update conflicts
+- **Package Names** - Maintained correct package naming during updates
+- **Version Consistency** - Ensured version alignment across all components
+
+---
+
 ## [1.4.0] - 2024-12-19
 
 ### 🎉 **MAJOR RELEASE - Complete Feature Integration**
@@ -211,4 +298,4 @@ This release represents a **complete integration** of all feature branches into 
 
 ---
 
-**For complete details on each release, see the [GitHub Releases](https://github.com/cpjet64/browser-tools-mcp/releases) page.**
+**For complete details on each release, see the [GitHub Releases](https://github.com/cpjet64/WebAI-MCP/releases) page.**
