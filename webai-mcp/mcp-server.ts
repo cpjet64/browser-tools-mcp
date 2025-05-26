@@ -1732,6 +1732,302 @@ server.tool("getSessionStorage", "Get all sessionStorage items", async () => {
   });
 });
 
+// Element Interaction Tools
+server.tool(
+  "clickElement",
+  "Click on an element by CSS selector or coordinates",
+  {
+    selector: z.string().optional().describe("CSS selector to find the element to click (e.g., '#button', '.submit-btn')"),
+    coordinates: z.object({
+      x: z.number().describe("X coordinate to click"),
+      y: z.number().describe("Y coordinate to click")
+    }).optional().describe("Coordinates to click if selector is not provided"),
+    waitForElement: z.boolean().optional().default(true).describe("Wait for element to be visible before clicking (default: true)"),
+    timeout: z.number().optional().default(5000).describe("Timeout in milliseconds to wait for element (default: 5000)"),
+    scrollIntoView: z.boolean().optional().default(true).describe("Scroll element into view before clicking (default: true)")
+  },
+  async ({ selector, coordinates, waitForElement = true, timeout = 5000, scrollIntoView = true }) => {
+    return await withServerConnection(async () => {
+      try {
+        if (!selector && !coordinates) {
+          throw new Error("Either selector or coordinates must be provided");
+        }
+
+        console.log(
+          `Sending POST request to http://${discoveredHost}:${discoveredPort}/click-element`
+        );
+        const response = await fetch(
+          `http://${discoveredHost}:${discoveredPort}/click-element`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({
+              selector,
+              coordinates,
+              waitForElement,
+              timeout,
+              scrollIntoView,
+              source: "mcp_tool",
+              timestamp: Date.now(),
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Server returned ${response.status}: ${errorText}`);
+        }
+
+        const result = await response.json();
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        console.error("Error clicking element:", errorMessage);
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Failed to click element: ${errorMessage}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    }, "click element");
+  }
+);
+
+server.tool(
+  "fillInput",
+  "Fill an input field with text",
+  {
+    selector: z.string().describe("CSS selector to find the input element (e.g., '#email', 'input[name=\"username\"]')"),
+    text: z.string().describe("Text to fill into the input field"),
+    clearFirst: z.boolean().optional().default(true).describe("Clear the input field before filling (default: true)"),
+    waitForElement: z.boolean().optional().default(true).describe("Wait for element to be visible before filling (default: true)"),
+    timeout: z.number().optional().default(5000).describe("Timeout in milliseconds to wait for element (default: 5000)"),
+    triggerEvents: z.boolean().optional().default(true).describe("Trigger input and change events after filling (default: true)")
+  },
+  async ({ selector, text, clearFirst = true, waitForElement = true, timeout = 5000, triggerEvents = true }) => {
+    return await withServerConnection(async () => {
+      try {
+        console.log(
+          `Sending POST request to http://${discoveredHost}:${discoveredPort}/fill-input`
+        );
+        const response = await fetch(
+          `http://${discoveredHost}:${discoveredPort}/fill-input`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({
+              selector,
+              text,
+              clearFirst,
+              waitForElement,
+              timeout,
+              triggerEvents,
+              source: "mcp_tool",
+              timestamp: Date.now(),
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Server returned ${response.status}: ${errorText}`);
+        }
+
+        const result = await response.json();
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        console.error("Error filling input:", errorMessage);
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Failed to fill input: ${errorMessage}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    }, "fill input");
+  }
+);
+
+server.tool(
+  "selectOption",
+  "Select an option from a dropdown or select element",
+  {
+    selector: z.string().describe("CSS selector to find the select element (e.g., '#country', 'select[name=\"category\"]')"),
+    value: z.string().optional().describe("Value of the option to select"),
+    text: z.string().optional().describe("Visible text of the option to select"),
+    index: z.number().optional().describe("Index of the option to select (0-based)"),
+    waitForElement: z.boolean().optional().default(true).describe("Wait for element to be visible before selecting (default: true)"),
+    timeout: z.number().optional().default(5000).describe("Timeout in milliseconds to wait for element (default: 5000)"),
+    triggerEvents: z.boolean().optional().default(true).describe("Trigger change events after selecting (default: true)")
+  },
+  async ({ selector, value, text, index, waitForElement = true, timeout = 5000, triggerEvents = true }) => {
+    return await withServerConnection(async () => {
+      try {
+        if (!value && !text && index === undefined) {
+          throw new Error("Either value, text, or index must be provided");
+        }
+
+        console.log(
+          `Sending POST request to http://${discoveredHost}:${discoveredPort}/select-option`
+        );
+        const response = await fetch(
+          `http://${discoveredHost}:${discoveredPort}/select-option`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({
+              selector,
+              value,
+              text,
+              index,
+              waitForElement,
+              timeout,
+              triggerEvents,
+              source: "mcp_tool",
+              timestamp: Date.now(),
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Server returned ${response.status}: ${errorText}`);
+        }
+
+        const result = await response.json();
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        console.error("Error selecting option:", errorMessage);
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Failed to select option: ${errorMessage}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    }, "select option");
+  }
+);
+
+server.tool(
+  "submitForm",
+  "Submit a form by selector or by clicking a submit button",
+  {
+    formSelector: z.string().optional().describe("CSS selector to find the form element to submit"),
+    submitButtonSelector: z.string().optional().describe("CSS selector to find the submit button to click"),
+    waitForElement: z.boolean().optional().default(true).describe("Wait for element to be visible before submitting (default: true)"),
+    timeout: z.number().optional().default(5000).describe("Timeout in milliseconds to wait for element (default: 5000)"),
+    waitForNavigation: z.boolean().optional().default(false).describe("Wait for page navigation after form submission (default: false)"),
+    navigationTimeout: z.number().optional().default(10000).describe("Timeout for navigation wait (default: 10000)")
+  },
+  async ({ formSelector, submitButtonSelector, waitForElement = true, timeout = 5000, waitForNavigation = false, navigationTimeout = 10000 }) => {
+    return await withServerConnection(async () => {
+      try {
+        if (!formSelector && !submitButtonSelector) {
+          throw new Error("Either formSelector or submitButtonSelector must be provided");
+        }
+
+        console.log(
+          `Sending POST request to http://${discoveredHost}:${discoveredPort}/submit-form`
+        );
+        const response = await fetch(
+          `http://${discoveredHost}:${discoveredPort}/submit-form`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({
+              formSelector,
+              submitButtonSelector,
+              waitForElement,
+              timeout,
+              waitForNavigation,
+              navigationTimeout,
+              source: "mcp_tool",
+              timestamp: Date.now(),
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Server returned ${response.status}: ${errorText}`);
+        }
+
+        const result = await response.json();
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        console.error("Error submitting form:", errorMessage);
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Failed to submit form: ${errorMessage}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    }, "submit form");
+  }
+);
+
 // Add RefreshBrowser tool
 server.tool(
   "refreshBrowser",

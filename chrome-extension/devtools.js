@@ -1861,6 +1861,554 @@ async function setupWebSocket() {
               })
             );
           }
+        } else if (message.type === "click-element") {
+          console.log("Chrome Extension: Clicking element...");
+
+          const { selector, coordinates, waitForElement, timeout, scrollIntoView } = message;
+
+          try {
+            // Build the script to execute
+            let script = `
+              (function() {
+                const timeout = ${timeout || 5000};
+                const waitForElement = ${waitForElement !== false};
+                const scrollIntoView = ${scrollIntoView !== false};
+
+                function clickElement() {
+                  let element = null;
+
+                  // Find element by selector or coordinates
+                  ${selector ? `
+                    element = document.querySelector('${selector.replace(/'/g, "\\'")}');
+                    if (!element) {
+                      throw new Error('Element not found with selector: ${selector.replace(/'/g, "\\'")}');
+                    }
+                  ` : coordinates ? `
+                    element = document.elementFromPoint(${coordinates.x}, ${coordinates.y});
+                    if (!element) {
+                      throw new Error('No element found at coordinates (${coordinates.x}, ${coordinates.y})');
+                    }
+                  ` : `
+                    throw new Error('Either selector or coordinates must be provided');
+                  `}
+
+                  // Scroll into view if requested
+                  if (scrollIntoView) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }
+
+                  // Check if element is visible and clickable
+                  const rect = element.getBoundingClientRect();
+                  if (rect.width === 0 || rect.height === 0) {
+                    throw new Error('Element is not visible (zero dimensions)');
+                  }
+
+                  // Perform the click
+                  element.click();
+
+                  return {
+                    success: true,
+                    message: 'Element clicked successfully',
+                    element: {
+                      tagName: element.tagName,
+                      id: element.id,
+                      className: element.className,
+                      textContent: element.textContent?.substring(0, 100),
+                      rect: {
+                        x: rect.x,
+                        y: rect.y,
+                        width: rect.width,
+                        height: rect.height
+                      }
+                    },
+                    timestamp: Date.now()
+                  };
+                }
+
+                if (waitForElement && ${selector ? 'true' : 'false'}) {
+                  // Wait for element to be available
+                  const startTime = Date.now();
+
+                  function checkElement() {
+                    try {
+                      const element = document.querySelector('${selector ? selector.replace(/'/g, "\\'") : ''}');
+                      if (element) {
+                        return clickElement();
+                      } else if (Date.now() - startTime >= timeout) {
+                        throw new Error('Timeout waiting for element to appear');
+                      } else {
+                        // Continue waiting
+                        setTimeout(checkElement, 100);
+                        return null; // Indicates still waiting
+                      }
+                    } catch (error) {
+                      throw error;
+                    }
+                  }
+
+                  return checkElement();
+                } else {
+                  return clickElement();
+                }
+              })();
+            `;
+
+            chrome.devtools.inspectedWindow.eval(script, (result, isException) => {
+              if (isException) {
+                console.error("Chrome Extension: Error clicking element:", isException);
+                ws.send(
+                  JSON.stringify({
+                    type: "click-element-error",
+                    error: isException.value || "Failed to click element",
+                    requestId: message.requestId,
+                  })
+                );
+              } else if (result === null) {
+                // Still waiting for element, this shouldn't happen with our current implementation
+                console.log("Chrome Extension: Still waiting for element...");
+              } else {
+                console.log("Chrome Extension: Element clicked successfully");
+                ws.send(
+                  JSON.stringify({
+                    type: "click-element-response",
+                    ...result,
+                    requestId: message.requestId,
+                  })
+                );
+              }
+            });
+
+          } catch (error) {
+            console.error("Chrome Extension: Error in click element handler:", error);
+            ws.send(
+              JSON.stringify({
+                type: "click-element-error",
+                error: error.message || "Failed to click element",
+                requestId: message.requestId,
+              })
+            );
+          }
+        } else if (message.type === "fill-input") {
+          console.log("Chrome Extension: Filling input...");
+
+          const { selector, text, clearFirst, waitForElement, timeout, triggerEvents } = message;
+
+          try {
+            let script = `
+              (function() {
+                const timeout = ${timeout || 5000};
+                const waitForElement = ${waitForElement !== false};
+                const clearFirst = ${clearFirst !== false};
+                const triggerEvents = ${triggerEvents !== false};
+                const text = ${JSON.stringify(text)};
+
+                function fillInput() {
+                  const element = document.querySelector('${selector.replace(/'/g, "\\'")}');
+                  if (!element) {
+                    throw new Error('Input element not found with selector: ${selector.replace(/'/g, "\\'")}');
+                  }
+
+                  // Check if it's an input element
+                  if (!['INPUT', 'TEXTAREA'].includes(element.tagName)) {
+                    throw new Error('Element is not an input or textarea');
+                  }
+
+                  // Clear the input if requested
+                  if (clearFirst) {
+                    element.value = '';
+                  }
+
+                  // Set the value
+                  element.value = text;
+
+                  // Trigger events if requested
+                  if (triggerEvents) {
+                    element.dispatchEvent(new Event('input', { bubbles: true }));
+                    element.dispatchEvent(new Event('change', { bubbles: true }));
+                  }
+
+                  return {
+                    success: true,
+                    message: 'Input filled successfully',
+                    element: {
+                      tagName: element.tagName,
+                      id: element.id,
+                      className: element.className,
+                      type: element.type,
+                      value: element.value?.substring(0, 100),
+                      placeholder: element.placeholder
+                    },
+                    timestamp: Date.now()
+                  };
+                }
+
+                if (waitForElement) {
+                  const startTime = Date.now();
+
+                  function checkElement() {
+                    try {
+                      const element = document.querySelector('${selector.replace(/'/g, "\\'")}');
+                      if (element) {
+                        return fillInput();
+                      } else if (Date.now() - startTime >= timeout) {
+                        throw new Error('Timeout waiting for input element to appear');
+                      } else {
+                        setTimeout(checkElement, 100);
+                        return null;
+                      }
+                    } catch (error) {
+                      throw error;
+                    }
+                  }
+
+                  return checkElement();
+                } else {
+                  return fillInput();
+                }
+              })();
+            `;
+
+            chrome.devtools.inspectedWindow.eval(script, (result, isException) => {
+              if (isException) {
+                console.error("Chrome Extension: Error filling input:", isException);
+                ws.send(
+                  JSON.stringify({
+                    type: "fill-input-error",
+                    error: isException.value || "Failed to fill input",
+                    requestId: message.requestId,
+                  })
+                );
+              } else if (result === null) {
+                console.log("Chrome Extension: Still waiting for input element...");
+              } else {
+                console.log("Chrome Extension: Input filled successfully");
+                ws.send(
+                  JSON.stringify({
+                    type: "fill-input-response",
+                    ...result,
+                    requestId: message.requestId,
+                  })
+                );
+              }
+            });
+
+          } catch (error) {
+            console.error("Chrome Extension: Error in fill input handler:", error);
+            ws.send(
+              JSON.stringify({
+                type: "fill-input-error",
+                error: error.message || "Failed to fill input",
+                requestId: message.requestId,
+              })
+            );
+          }
+        } else if (message.type === "select-option") {
+          console.log("Chrome Extension: Selecting option...");
+
+          const { selector, value, text, index, waitForElement, timeout, triggerEvents } = message;
+
+          try {
+            let script = `
+              (function() {
+                const timeout = ${timeout || 5000};
+                const waitForElement = ${waitForElement !== false};
+                const triggerEvents = ${triggerEvents !== false};
+                const value = ${JSON.stringify(value)};
+                const text = ${JSON.stringify(text)};
+                const index = ${index !== undefined ? index : 'undefined'};
+
+                function selectOption() {
+                  const selectElement = document.querySelector('${selector.replace(/'/g, "\\'")}');
+                  if (!selectElement) {
+                    throw new Error('Select element not found with selector: ${selector.replace(/'/g, "\\'")}');
+                  }
+
+                  if (selectElement.tagName !== 'SELECT') {
+                    throw new Error('Element is not a select element');
+                  }
+
+                  let optionToSelect = null;
+
+                  // Find option by value, text, or index
+                  if (value !== null && value !== undefined) {
+                    optionToSelect = selectElement.querySelector(\`option[value="\${value}"]\`);
+                    if (!optionToSelect) {
+                      throw new Error(\`Option with value "\${value}" not found\`);
+                    }
+                  } else if (text !== null && text !== undefined) {
+                    const options = Array.from(selectElement.options);
+                    optionToSelect = options.find(opt => opt.textContent.trim() === text);
+                    if (!optionToSelect) {
+                      throw new Error(\`Option with text "\${text}" not found\`);
+                    }
+                  } else if (index !== undefined) {
+                    if (index < 0 || index >= selectElement.options.length) {
+                      throw new Error(\`Option index \${index} is out of range (0-\${selectElement.options.length - 1})\`);
+                    }
+                    optionToSelect = selectElement.options[index];
+                  } else {
+                    throw new Error('Either value, text, or index must be provided');
+                  }
+
+                  // Select the option
+                  optionToSelect.selected = true;
+                  selectElement.value = optionToSelect.value;
+
+                  // Trigger events if requested
+                  if (triggerEvents) {
+                    selectElement.dispatchEvent(new Event('change', { bubbles: true }));
+                    selectElement.dispatchEvent(new Event('input', { bubbles: true }));
+                  }
+
+                  return {
+                    success: true,
+                    message: 'Option selected successfully',
+                    element: {
+                      tagName: selectElement.tagName,
+                      id: selectElement.id,
+                      className: selectElement.className,
+                      value: selectElement.value,
+                      selectedIndex: selectElement.selectedIndex,
+                      selectedOption: {
+                        value: optionToSelect.value,
+                        text: optionToSelect.textContent,
+                        index: optionToSelect.index
+                      }
+                    },
+                    timestamp: Date.now()
+                  };
+                }
+
+                if (waitForElement) {
+                  const startTime = Date.now();
+
+                  function checkElement() {
+                    try {
+                      const element = document.querySelector('${selector.replace(/'/g, "\\'")}');
+                      if (element) {
+                        return selectOption();
+                      } else if (Date.now() - startTime >= timeout) {
+                        throw new Error('Timeout waiting for select element to appear');
+                      } else {
+                        setTimeout(checkElement, 100);
+                        return null;
+                      }
+                    } catch (error) {
+                      throw error;
+                    }
+                  }
+
+                  return checkElement();
+                } else {
+                  return selectOption();
+                }
+              })();
+            `;
+
+            chrome.devtools.inspectedWindow.eval(script, (result, isException) => {
+              if (isException) {
+                console.error("Chrome Extension: Error selecting option:", isException);
+                ws.send(
+                  JSON.stringify({
+                    type: "select-option-error",
+                    error: isException.value || "Failed to select option",
+                    requestId: message.requestId,
+                  })
+                );
+              } else if (result === null) {
+                console.log("Chrome Extension: Still waiting for select element...");
+              } else {
+                console.log("Chrome Extension: Option selected successfully");
+                ws.send(
+                  JSON.stringify({
+                    type: "select-option-response",
+                    ...result,
+                    requestId: message.requestId,
+                  })
+                );
+              }
+            });
+
+          } catch (error) {
+            console.error("Chrome Extension: Error in select option handler:", error);
+            ws.send(
+              JSON.stringify({
+                type: "select-option-error",
+                error: error.message || "Failed to select option",
+                requestId: message.requestId,
+              })
+            );
+          }
+        } else if (message.type === "submit-form") {
+          console.log("Chrome Extension: Submitting form...");
+
+          const { formSelector, submitButtonSelector, waitForElement, timeout, waitForNavigation, navigationTimeout } = message;
+
+          try {
+            let script = `
+              (function() {
+                const timeout = ${timeout || 5000};
+                const waitForElement = ${waitForElement !== false};
+                const waitForNavigation = ${waitForNavigation || false};
+                const navigationTimeout = ${navigationTimeout || 10000};
+
+                function submitForm() {
+                  let element = null;
+                  let isFormSubmit = false;
+
+                  if (${JSON.stringify(formSelector)}) {
+                    element = document.querySelector('${formSelector ? formSelector.replace(/'/g, "\\'") : ''}');
+                    if (!element) {
+                      throw new Error('Form element not found with selector: ${formSelector ? formSelector.replace(/'/g, "\\'") : ''}');
+                    }
+                    if (element.tagName !== 'FORM') {
+                      throw new Error('Element is not a form element');
+                    }
+                    isFormSubmit = true;
+                  } else if (${JSON.stringify(submitButtonSelector)}) {
+                    element = document.querySelector('${submitButtonSelector ? submitButtonSelector.replace(/'/g, "\\'") : ''}');
+                    if (!element) {
+                      throw new Error('Submit button not found with selector: ${submitButtonSelector ? submitButtonSelector.replace(/'/g, "\\'") : ''}');
+                    }
+                    isFormSubmit = false;
+                  } else {
+                    throw new Error('Either formSelector or submitButtonSelector must be provided');
+                  }
+
+                  // Get element info before submission
+                  const elementInfo = {
+                    tagName: element.tagName,
+                    id: element.id,
+                    className: element.className,
+                    type: element.type || null,
+                    action: isFormSubmit ? element.action : null,
+                    method: isFormSubmit ? element.method : null
+                  };
+
+                  // Submit the form or click the button
+                  if (isFormSubmit) {
+                    element.submit();
+                  } else {
+                    element.click();
+                  }
+
+                  return {
+                    success: true,
+                    message: isFormSubmit ? 'Form submitted successfully' : 'Submit button clicked successfully',
+                    element: elementInfo,
+                    timestamp: Date.now()
+                  };
+                }
+
+                if (waitForElement) {
+                  const startTime = Date.now();
+                  const selector = ${JSON.stringify(formSelector)} || ${JSON.stringify(submitButtonSelector)};
+
+                  function checkElement() {
+                    try {
+                      const element = document.querySelector(selector);
+                      if (element) {
+                        return submitForm();
+                      } else if (Date.now() - startTime >= timeout) {
+                        throw new Error('Timeout waiting for form/submit element to appear');
+                      } else {
+                        setTimeout(checkElement, 100);
+                        return null;
+                      }
+                    } catch (error) {
+                      throw error;
+                    }
+                  }
+
+                  return checkElement();
+                } else {
+                  return submitForm();
+                }
+              })();
+            `;
+
+            chrome.devtools.inspectedWindow.eval(script, (result, isException) => {
+              if (isException) {
+                console.error("Chrome Extension: Error submitting form:", isException);
+                ws.send(
+                  JSON.stringify({
+                    type: "submit-form-error",
+                    error: isException.value || "Failed to submit form",
+                    requestId: message.requestId,
+                  })
+                );
+              } else if (result === null) {
+                console.log("Chrome Extension: Still waiting for form/submit element...");
+              } else {
+                console.log("Chrome Extension: Form submitted successfully");
+
+                // If waitForNavigation is true, wait for page navigation
+                if (waitForNavigation) {
+                  const startTime = Date.now();
+                  const maxWait = navigationTimeout || 10000;
+
+                  const checkNavigation = () => {
+                    chrome.devtools.inspectedWindow.eval(
+                      `document.readyState === 'complete'`,
+                      (isComplete, navException) => {
+                        const elapsed = Date.now() - startTime;
+
+                        if (navException) {
+                          console.error("Chrome Extension: Error checking navigation:", navException);
+                          ws.send(
+                            JSON.stringify({
+                              type: "submit-form-response",
+                              ...result,
+                              message: result.message + " (navigation check failed)",
+                              requestId: message.requestId,
+                            })
+                          );
+                          return;
+                        }
+
+                        if (isComplete || elapsed >= maxWait) {
+                          ws.send(
+                            JSON.stringify({
+                              type: "submit-form-response",
+                              ...result,
+                              message: result.message + (isComplete ? " and navigation completed" : " (navigation timeout)"),
+                              navigationTime: elapsed,
+                              requestId: message.requestId,
+                            })
+                          );
+                        } else {
+                          // Continue checking
+                          setTimeout(checkNavigation, 100);
+                        }
+                      }
+                    );
+                  };
+
+                  // Start checking after a brief delay
+                  setTimeout(checkNavigation, 500);
+                } else {
+                  // Don't wait for navigation
+                  ws.send(
+                    JSON.stringify({
+                      type: "submit-form-response",
+                      ...result,
+                      requestId: message.requestId,
+                    })
+                  );
+                }
+              }
+            });
+
+          } catch (error) {
+            console.error("Chrome Extension: Error in submit form handler:", error);
+            ws.send(
+              JSON.stringify({
+                type: "submit-form-error",
+                error: error.message || "Failed to submit form",
+                requestId: message.requestId,
+              })
+            );
+          }
         }
       } catch (error) {
         console.error(

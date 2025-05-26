@@ -218,11 +218,20 @@ interface RefreshBrowserCallback {
   reject: (reason: Error) => void;
 }
 
+interface ElementInteractionCallback {
+  resolve: (value: { success: boolean; message: string; element?: any; timestamp: number }) => void;
+  reject: (reason: Error) => void;
+}
+
 const screenshotCallbacks = new Map<string, ScreenshotCallback>();
 const cookiesCallbacks = new Map<string, CookiesCallback>();
 const localStorageCallbacks = new Map<string, LocalStorageCallback>();
 const sessionStorageCallbacks = new Map<string, SessionStorageCallback>();
 const refreshBrowserCallbacks = new Map<string, RefreshBrowserCallback>();
+const clickElementCallbacks = new Map<string, ElementInteractionCallback>();
+const fillInputCallbacks = new Map<string, ElementInteractionCallback>();
+const selectOptionCallbacks = new Map<string, ElementInteractionCallback>();
+const submitFormCallbacks = new Map<string, ElementInteractionCallback>();
 
 // Add new state for tracking selector requests
 interface SelectorCallback {
@@ -777,6 +786,59 @@ export class BrowserConnector {
       }
     );
 
+    // Element Interaction endpoints
+    this.app.post(
+      "/click-element",
+      async (req: express.Request, res: express.Response): Promise<void> => {
+        console.log("Browser Connector: Received request to /click-element endpoint");
+        console.log("Browser Connector: Request body:", req.body);
+        console.log(
+          "Browser Connector: Active WebSocket connection:",
+          !!this.activeConnection
+        );
+        await this.clickElement(req, res);
+      }
+    );
+
+    this.app.post(
+      "/fill-input",
+      async (req: express.Request, res: express.Response): Promise<void> => {
+        console.log("Browser Connector: Received request to /fill-input endpoint");
+        console.log("Browser Connector: Request body:", req.body);
+        console.log(
+          "Browser Connector: Active WebSocket connection:",
+          !!this.activeConnection
+        );
+        await this.fillInput(req, res);
+      }
+    );
+
+    this.app.post(
+      "/select-option",
+      async (req: express.Request, res: express.Response): Promise<void> => {
+        console.log("Browser Connector: Received request to /select-option endpoint");
+        console.log("Browser Connector: Request body:", req.body);
+        console.log(
+          "Browser Connector: Active WebSocket connection:",
+          !!this.activeConnection
+        );
+        await this.selectOption(req, res);
+      }
+    );
+
+    this.app.post(
+      "/submit-form",
+      async (req: express.Request, res: express.Response): Promise<void> => {
+        console.log("Browser Connector: Received request to /submit-form endpoint");
+        console.log("Browser Connector: Request body:", req.body);
+        console.log(
+          "Browser Connector: Active WebSocket connection:",
+          !!this.activeConnection
+        );
+        await this.submitForm(req, res);
+      }
+    );
+
     // Add refresh browser endpoint
     this.app.post(
       "/refresh-browser",
@@ -1030,6 +1092,106 @@ export class BrowserConnector {
             if (callback) {
               callback.reject(new Error(data.error || "Failed to refresh browser"));
               refreshBrowserCallbacks.delete(data.requestId);
+            }
+          }
+          // Handle click element response
+          else if (data.type === "click-element-response" && data.requestId) {
+            console.log("Received click element response");
+            const callback = clickElementCallbacks.get(data.requestId);
+            if (callback) {
+              callback.resolve({
+                success: data.success || true,
+                message: data.message || "Element clicked successfully",
+                element: data.element,
+                timestamp: data.timestamp || Date.now()
+              });
+              clickElementCallbacks.delete(data.requestId);
+            } else {
+              console.log("No callback found for click element request:", data.requestId);
+            }
+          }
+          // Handle click element error
+          else if (data.type === "click-element-error" && data.requestId) {
+            console.log("Received click element error:", data.error);
+            const callback = clickElementCallbacks.get(data.requestId);
+            if (callback) {
+              callback.reject(new Error(data.error || "Failed to click element"));
+              clickElementCallbacks.delete(data.requestId);
+            }
+          }
+          // Handle fill input response
+          else if (data.type === "fill-input-response" && data.requestId) {
+            console.log("Received fill input response");
+            const callback = fillInputCallbacks.get(data.requestId);
+            if (callback) {
+              callback.resolve({
+                success: data.success || true,
+                message: data.message || "Input filled successfully",
+                element: data.element,
+                timestamp: data.timestamp || Date.now()
+              });
+              fillInputCallbacks.delete(data.requestId);
+            } else {
+              console.log("No callback found for fill input request:", data.requestId);
+            }
+          }
+          // Handle fill input error
+          else if (data.type === "fill-input-error" && data.requestId) {
+            console.log("Received fill input error:", data.error);
+            const callback = fillInputCallbacks.get(data.requestId);
+            if (callback) {
+              callback.reject(new Error(data.error || "Failed to fill input"));
+              fillInputCallbacks.delete(data.requestId);
+            }
+          }
+          // Handle select option response
+          else if (data.type === "select-option-response" && data.requestId) {
+            console.log("Received select option response");
+            const callback = selectOptionCallbacks.get(data.requestId);
+            if (callback) {
+              callback.resolve({
+                success: data.success || true,
+                message: data.message || "Option selected successfully",
+                element: data.element,
+                timestamp: data.timestamp || Date.now()
+              });
+              selectOptionCallbacks.delete(data.requestId);
+            } else {
+              console.log("No callback found for select option request:", data.requestId);
+            }
+          }
+          // Handle select option error
+          else if (data.type === "select-option-error" && data.requestId) {
+            console.log("Received select option error:", data.error);
+            const callback = selectOptionCallbacks.get(data.requestId);
+            if (callback) {
+              callback.reject(new Error(data.error || "Failed to select option"));
+              selectOptionCallbacks.delete(data.requestId);
+            }
+          }
+          // Handle submit form response
+          else if (data.type === "submit-form-response" && data.requestId) {
+            console.log("Received submit form response");
+            const callback = submitFormCallbacks.get(data.requestId);
+            if (callback) {
+              callback.resolve({
+                success: data.success || true,
+                message: data.message || "Form submitted successfully",
+                element: data.element,
+                timestamp: data.timestamp || Date.now()
+              });
+              submitFormCallbacks.delete(data.requestId);
+            } else {
+              console.log("No callback found for submit form request:", data.requestId);
+            }
+          }
+          // Handle submit form error
+          else if (data.type === "submit-form-error" && data.requestId) {
+            console.log("Received submit form error:", data.error);
+            const callback = submitFormCallbacks.get(data.requestId);
+            if (callback) {
+              callback.reject(new Error(data.error || "Failed to submit form"));
+              submitFormCallbacks.delete(data.requestId);
             }
           }
           else {
@@ -1951,6 +2113,320 @@ export class BrowserConnector {
         error instanceof Error ? error.message : String(error);
       console.error(
         "Browser Connector: Error refreshing browser:",
+        errorMessage
+      );
+      return res.status(500).json({ error: errorMessage });
+    }
+  }
+
+  // Element Interaction Methods
+  async clickElement(req: express.Request, res: express.Response) {
+    if (!this.activeConnection) {
+      console.log(
+        "Browser Connector: No active WebSocket connection to Chrome extension"
+      );
+      return res.status(503).json({ error: "Chrome extension not connected" });
+    }
+
+    try {
+      console.log("Browser Connector: Clicking element");
+      const requestId = Date.now().toString();
+      console.log("Browser Connector: Generated requestId:", requestId);
+
+      const { selector, coordinates, waitForElement, timeout, scrollIntoView } = req.body;
+
+      // Create promise that will resolve when we get the click response
+      const clickPromise = new Promise<{ success: boolean; message: string; element?: any; timestamp: number }>(
+        (resolve, reject) => {
+          console.log(
+            `Browser Connector: Setting up click element callback for requestId: ${requestId}`
+          );
+          // Store callback in map
+          clickElementCallbacks.set(requestId, { resolve, reject });
+
+          // Set timeout to clean up if we don't get a response
+          setTimeout(() => {
+            if (clickElementCallbacks.has(requestId)) {
+              console.log(
+                `Browser Connector: Click element request timed out for requestId: ${requestId}`
+              );
+              clickElementCallbacks.delete(requestId);
+              reject(
+                new Error(
+                  "Click element request timed out - no response from Chrome extension"
+                )
+              );
+            }
+          }, (timeout || 5000) + 5000); // Add 5 seconds buffer to the user timeout
+        }
+      );
+
+      // Send click element request to extension
+      const message = JSON.stringify({
+        type: "click-element",
+        requestId: requestId,
+        selector,
+        coordinates,
+        waitForElement: waitForElement !== false, // Default to true
+        timeout: timeout || 5000,
+        scrollIntoView: scrollIntoView !== false // Default to true
+      });
+      console.log(
+        `Browser Connector: Sending WebSocket message to extension:`,
+        message
+      );
+      this.activeConnection.send(message);
+
+      // Wait for click response
+      console.log("Browser Connector: Waiting for click element response...");
+      const result = await clickPromise;
+      console.log(
+        "Browser Connector: Received click element response, returning result..."
+      );
+
+      // Return the click result
+      res.json(result);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      console.error(
+        "Browser Connector: Error clicking element:",
+        errorMessage
+      );
+      return res.status(500).json({ error: errorMessage });
+    }
+  }
+
+  async fillInput(req: express.Request, res: express.Response) {
+    if (!this.activeConnection) {
+      console.log(
+        "Browser Connector: No active WebSocket connection to Chrome extension"
+      );
+      return res.status(503).json({ error: "Chrome extension not connected" });
+    }
+
+    try {
+      console.log("Browser Connector: Filling input");
+      const requestId = Date.now().toString();
+      console.log("Browser Connector: Generated requestId:", requestId);
+
+      const { selector, text, clearFirst, waitForElement, timeout, triggerEvents } = req.body;
+
+      // Create promise that will resolve when we get the fill response
+      const fillPromise = new Promise<{ success: boolean; message: string; element?: any; timestamp: number }>(
+        (resolve, reject) => {
+          console.log(
+            `Browser Connector: Setting up fill input callback for requestId: ${requestId}`
+          );
+          // Store callback in map
+          fillInputCallbacks.set(requestId, { resolve, reject });
+
+          // Set timeout to clean up if we don't get a response
+          setTimeout(() => {
+            if (fillInputCallbacks.has(requestId)) {
+              console.log(
+                `Browser Connector: Fill input request timed out for requestId: ${requestId}`
+              );
+              fillInputCallbacks.delete(requestId);
+              reject(
+                new Error(
+                  "Fill input request timed out - no response from Chrome extension"
+                )
+              );
+            }
+          }, (timeout || 5000) + 5000); // Add 5 seconds buffer to the user timeout
+        }
+      );
+
+      // Send fill input request to extension
+      const message = JSON.stringify({
+        type: "fill-input",
+        requestId: requestId,
+        selector,
+        text,
+        clearFirst: clearFirst !== false, // Default to true
+        waitForElement: waitForElement !== false, // Default to true
+        timeout: timeout || 5000,
+        triggerEvents: triggerEvents !== false // Default to true
+      });
+      console.log(
+        `Browser Connector: Sending WebSocket message to extension:`,
+        message
+      );
+      this.activeConnection.send(message);
+
+      // Wait for fill response
+      console.log("Browser Connector: Waiting for fill input response...");
+      const result = await fillPromise;
+      console.log(
+        "Browser Connector: Received fill input response, returning result..."
+      );
+
+      // Return the fill result
+      res.json(result);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      console.error(
+        "Browser Connector: Error filling input:",
+        errorMessage
+      );
+      return res.status(500).json({ error: errorMessage });
+    }
+  }
+
+  async selectOption(req: express.Request, res: express.Response) {
+    if (!this.activeConnection) {
+      console.log(
+        "Browser Connector: No active WebSocket connection to Chrome extension"
+      );
+      return res.status(503).json({ error: "Chrome extension not connected" });
+    }
+
+    try {
+      console.log("Browser Connector: Selecting option");
+      const requestId = Date.now().toString();
+      console.log("Browser Connector: Generated requestId:", requestId);
+
+      const { selector, value, text, index, waitForElement, timeout, triggerEvents } = req.body;
+
+      // Create promise that will resolve when we get the select response
+      const selectPromise = new Promise<{ success: boolean; message: string; element?: any; timestamp: number }>(
+        (resolve, reject) => {
+          console.log(
+            `Browser Connector: Setting up select option callback for requestId: ${requestId}`
+          );
+          // Store callback in map
+          selectOptionCallbacks.set(requestId, { resolve, reject });
+
+          // Set timeout to clean up if we don't get a response
+          setTimeout(() => {
+            if (selectOptionCallbacks.has(requestId)) {
+              console.log(
+                `Browser Connector: Select option request timed out for requestId: ${requestId}`
+              );
+              selectOptionCallbacks.delete(requestId);
+              reject(
+                new Error(
+                  "Select option request timed out - no response from Chrome extension"
+                )
+              );
+            }
+          }, (timeout || 5000) + 5000); // Add 5 seconds buffer to the user timeout
+        }
+      );
+
+      // Send select option request to extension
+      const message = JSON.stringify({
+        type: "select-option",
+        requestId: requestId,
+        selector,
+        value,
+        text,
+        index,
+        waitForElement: waitForElement !== false, // Default to true
+        timeout: timeout || 5000,
+        triggerEvents: triggerEvents !== false // Default to true
+      });
+      console.log(
+        `Browser Connector: Sending WebSocket message to extension:`,
+        message
+      );
+      this.activeConnection.send(message);
+
+      // Wait for select response
+      console.log("Browser Connector: Waiting for select option response...");
+      const result = await selectPromise;
+      console.log(
+        "Browser Connector: Received select option response, returning result..."
+      );
+
+      // Return the select result
+      res.json(result);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      console.error(
+        "Browser Connector: Error selecting option:",
+        errorMessage
+      );
+      return res.status(500).json({ error: errorMessage });
+    }
+  }
+
+  async submitForm(req: express.Request, res: express.Response) {
+    if (!this.activeConnection) {
+      console.log(
+        "Browser Connector: No active WebSocket connection to Chrome extension"
+      );
+      return res.status(503).json({ error: "Chrome extension not connected" });
+    }
+
+    try {
+      console.log("Browser Connector: Submitting form");
+      const requestId = Date.now().toString();
+      console.log("Browser Connector: Generated requestId:", requestId);
+
+      const { formSelector, submitButtonSelector, waitForElement, timeout, waitForNavigation, navigationTimeout } = req.body;
+
+      // Create promise that will resolve when we get the submit response
+      const submitPromise = new Promise<{ success: boolean; message: string; element?: any; timestamp: number }>(
+        (resolve, reject) => {
+          console.log(
+            `Browser Connector: Setting up submit form callback for requestId: ${requestId}`
+          );
+          // Store callback in map
+          submitFormCallbacks.set(requestId, { resolve, reject });
+
+          // Set timeout to clean up if we don't get a response
+          const totalTimeout = waitForNavigation ? (navigationTimeout || 10000) : (timeout || 5000);
+          setTimeout(() => {
+            if (submitFormCallbacks.has(requestId)) {
+              console.log(
+                `Browser Connector: Submit form request timed out for requestId: ${requestId}`
+              );
+              submitFormCallbacks.delete(requestId);
+              reject(
+                new Error(
+                  "Submit form request timed out - no response from Chrome extension"
+                )
+              );
+            }
+          }, totalTimeout + 5000); // Add 5 seconds buffer to the user timeout
+        }
+      );
+
+      // Send submit form request to extension
+      const message = JSON.stringify({
+        type: "submit-form",
+        requestId: requestId,
+        formSelector,
+        submitButtonSelector,
+        waitForElement: waitForElement !== false, // Default to true
+        timeout: timeout || 5000,
+        waitForNavigation: waitForNavigation || false,
+        navigationTimeout: navigationTimeout || 10000
+      });
+      console.log(
+        `Browser Connector: Sending WebSocket message to extension:`,
+        message
+      );
+      this.activeConnection.send(message);
+
+      // Wait for submit response
+      console.log("Browser Connector: Waiting for submit form response...");
+      const result = await submitPromise;
+      console.log(
+        "Browser Connector: Received submit form response, returning result..."
+      );
+
+      // Return the submit result
+      res.json(result);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      console.error(
+        "Browser Connector: Error submitting form:",
         errorMessage
       );
       return res.status(500).json({ error: errorMessage });
