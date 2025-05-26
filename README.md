@@ -22,23 +22,54 @@ WebAI-MCP is a comprehensive browser automation and monitoring solution that ena
 - 🔧 **Automated Diagnostics** - System validation and setup workflows
 - 🛡️ **Enhanced Error Handling** - Robust error recovery and reporting
 
-## 🚀 Quick Installation
+## 🚀 Installation Methods
 
-### **Method 1: NPM (Recommended)**
+Choose the installation method that best fits your workflow:
+
+### **Method 1: Temporary Download & Run (Recommended for Testing)**
+
+Always gets the latest version, no permanent installation:
 
 ```bash
-# 1. Install MCP Server (for your IDE)
-npx @cpjet64/webai-mcp@latest
-
-# 2. Install WebAI Server (run in separate terminal)
+# 1. Start WebAI Server (run in separate terminal)
 npx @cpjet64/webai-server@latest
+
+# 2. MCP Server will be auto-started by your IDE when configured
+# Configure your IDE with: npx @cpjet64/webai-mcp@latest
 ```
 
-### **Method 2: Download from Releases**
+### **Method 2: Global Installation (Recommended for Regular Use)**
+
+Install once, run anytime:
+
+```bash
+# 1. Install globally
+npm install -g @cpjet64/webai-mcp@latest
+npm install -g @cpjet64/webai-server@latest
+
+# 2. Run anytime with simple commands
+webai-server
+# MCP server runs automatically when your IDE calls it
+```
+
+### **Method 3: Local Project Installation**
+
+Install in your current project directory:
+
+```bash
+# 1. Install to current project
+npm install @cpjet64/webai-mcp@latest
+npm install @cpjet64/webai-server@latest
+
+# 2. Run with npx
+npx webai-server
+# Configure IDE with: npx @cpjet64/webai-mcp
+```
+
+### **Method 4: Download from Releases**
 
 1. **Chrome Extension**: Download from [Latest Release](https://github.com/cpjet64/webai-mcp/releases/latest)
-2. **MCP Server**: `npx @cpjet64/webai-mcp@latest`
-3. **WebAI Server**: `npx @cpjet64/webai-server@latest`
+2. **Servers**: Use any of the above NPM methods
 
 ### **📋 Setup Steps**
 
@@ -103,10 +134,29 @@ npx @cpjet64/webai-server@latest
 
 Want to try the latest features before they're released?
 
+### **Temporary Download & Run (Dev)**
 ```bash
-# Install development version (may be unstable)
-npx @cpjet64/webai-mcp@dev
+# Always gets latest dev version
 npx @cpjet64/webai-server@dev
+# Configure IDE with: npx @cpjet64/webai-mcp@dev
+```
+
+### **Global Installation (Dev)**
+```bash
+# Install dev versions globally
+npm install -g @cpjet64/webai-mcp@dev
+npm install -g @cpjet64/webai-server@dev
+
+# Update dev versions
+npm update -g @cpjet64/webai-mcp@dev
+npm update -g @cpjet64/webai-server@dev
+```
+
+### **Local Installation (Dev)**
+```bash
+# Install dev versions locally
+npm install @cpjet64/webai-mcp@dev
+npm install @cpjet64/webai-server@dev
 ```
 
 **Note**: Development versions include the latest features but may be unstable. Use `@latest` for production.
