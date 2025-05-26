@@ -114,26 +114,26 @@ npx @cpjet64/browser-tools-server@dev
 ### **💡 Important Notes**
 
 **Two Servers Required**:
-- **`@cpjet64/browser-tools-mcp`** → MCP server for your IDE
-- **`@cpjet64/browser-tools-server`** → Local middleware server
+- **`@cpjet64/webai-mcp`** → MCP server for your IDE
+- **`@cpjet64/webai-server`** → Local middleware server
 
 **Troubleshooting**:
 - Close ALL Chrome windows and restart if having issues
-- Restart the browser-tools-server
+- Restart the webai-server
 - Ensure only ONE DevTools panel is open
 
-After those three steps, open up your chrome dev tools and then the BrowserToolsMCP panel.
+After those three steps, open up your chrome dev tools and then the WebAI-MCP panel.
 
 If you're still having issues try these steps:
 - Quit / close down your browser. Not just the window but all of Chrome itself.
-- Restart the local node server (browser-tools-server)
+- Restart the local node server (webai-server)
 - Make sure you only have ONE instance of chrome dev tools panel open
 
 After that, it should work but if it doesn't let me know and I can share some more steps to gather logs/info about the issue!
 
 ## 🛠️ Complete Feature Set
 
-Browser Tools MCP provides **20+ MCP tools** for comprehensive browser automation:
+WebAI-MCP provides **20+ MCP tools** for comprehensive browser automation:
 
 ### **📊 Browser Monitoring**
 - **Console Logs** - Capture and analyze browser console output
@@ -320,15 +320,15 @@ allow you to create custom tools for any compatible client. MCP clients like Cla
 Desktop, Cursor, Cline or Zed can run an MCP server which "teaches" these clients
 about a new tool that they can use.
 
-These tools can call out to external APIs but in our case, **all logs are stored locally** on your machine and NEVER sent out to any third-party service or API. BrowserTools MCP runs a local instance of a NodeJS API server which communicates with the BrowserTools Chrome Extension.
+These tools can call out to external APIs but in our case, **all logs are stored locally** on your machine and NEVER sent out to any third-party service or API. WebAI-MCP runs a local instance of a NodeJS API server which communicates with the WebAI-MCP Chrome Extension.
 
-All consumers of the BrowserTools MCP Server interface with the same NodeJS API and Chrome extension.
+All consumers of the WebAI-MCP Server interface with the same NodeJS API and Chrome extension.
 
 #### Chrome Extension
 
 - Monitors XHR requests/responses and console logs
 - Tracks selected DOM elements
-- Sends all logs and current element to the BrowserTools Connector
+- Sends all logs and current element to the WebAI Connector
 - Connects to Websocket server to capture/send screenshots
 - Retrieves cookies, localStorage, and sessionStorage data
 - Allows user to configure token/truncation limits + screenshot folder path
@@ -526,7 +526,7 @@ npx @cpjet64/webai-server
 
 ## 🤝 Contributing
 
-Browser Tools MCP is actively maintained and welcomes contributions.
+WebAI-MCP is actively maintained and welcomes contributions.
 
 ### **🐛 Issues & Feature Requests**
 - Open an issue for bugs or feature requests

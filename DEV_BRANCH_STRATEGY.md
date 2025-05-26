@@ -179,12 +179,12 @@ jobs:
 ### **For End Users**
 ```bash
 # Install stable version (recommended)
-npx @cpjet64/browser-tools-mcp@latest
-npx @cpjet64/browser-tools-server@latest
+npx @cpjet64/webai-mcp@latest
+npx @cpjet64/webai-server@latest
 
 # Install development version (latest features, may be unstable)
-npx @cpjet64/browser-tools-mcp@dev
-npx @cpjet64/browser-tools-server@dev
+npx @cpjet64/webai-mcp@dev
+npx @cpjet64/webai-server@dev
 ```
 
 ### **For Contributors**

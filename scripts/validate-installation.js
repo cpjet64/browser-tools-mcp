@@ -192,16 +192,16 @@ class InstallationValidator {
     this.logSection('Project Structure Validation');
 
     const requiredDirectories = [
-      'browser-tools-mcp',
-      'browser-tools-server',
+      'webai-mcp',
+      'webai-server',
       'chrome-extension',
       'scripts'
     ];
 
     const requiredFiles = [
       'package.json',
-      'browser-tools-mcp/package.json',
-      'browser-tools-server/package.json',
+      'webai-mcp/package.json',
+      'webai-server/package.json',
       'chrome-extension/manifest.json',
       'README.md'
     ];
@@ -246,8 +246,8 @@ class InstallationValidator {
     this.logSection('Dependencies Validation');
 
     const packages = [
-      { name: 'MCP Server', path: 'browser-tools-mcp' },
-      { name: 'Browser Tools Server', path: 'browser-tools-server' }
+      { name: 'MCP Server', path: 'webai-mcp' },
+      { name: 'WebAI Server', path: 'webai-server' }
     ];
 
     for (const pkg of packages) {

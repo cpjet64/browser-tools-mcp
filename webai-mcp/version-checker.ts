@@ -332,7 +332,7 @@ export class VersionChecker {
   private static generateRecommendations(result: CompatibilityResult): void {
     if (result.errors.length > 0) {
       result.recommendations.push('Update all components to the same major version');
-      result.recommendations.push('Run: npm run build in both browser-tools-mcp and browser-tools-server directories');
+      result.recommendations.push('Run: npm run build in both webai-mcp and webai-server directories');
     }
 
     if (result.warnings.length > 0) {

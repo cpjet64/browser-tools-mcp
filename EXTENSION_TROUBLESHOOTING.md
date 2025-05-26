@@ -15,7 +15,7 @@ The browser-tools-server is not running or not accessible at the expected addres
    ```bash
    # Make sure you're running the server
    npx @cpjet64/browser-tools-server@latest
-   
+
    # Or for development version
    npx @cpjet64/browser-tools-server@dev
    ```
@@ -70,7 +70,7 @@ The extension cannot communicate with the server for log operations.
    # Terminal 1: Restart server
    npx @cpjet64/browser-tools-server@latest
    ```
-   
+
    Then reload extension in Chrome.
 
 ## 🔧 Step-by-Step Troubleshooting
@@ -183,29 +183,29 @@ If all else fails, perform a complete reset:
 ### **2. Clean Installation**
 ```bash
 # Uninstall packages
-npm uninstall -g @cpjet64/browser-tools-server
-npm uninstall -g @cpjet64/browser-tools-mcp
+npm uninstall -g @cpjet64/webai-server
+npm uninstall -g @cpjet64/webai-mcp
 
 # Clear npm cache
 npm cache clean --force
 
 # Reinstall fresh
-npm install -g @cpjet64/browser-tools-server@latest
-npm install -g @cpjet64/browser-tools-mcp@latest
+npm install -g @cpjet64/webai-server@latest
+npm install -g @cpjet64/webai-mcp@latest
 ```
 
 ### **3. Reset Chrome Extension**
 1. **Go to `chrome://extensions/`**
-2. **Remove "BrowserTools MCP Fork by cpjet64"**
+2. **Remove "WebAI-MCP by cpjet64"**
 3. **Download fresh extension from GitHub releases**
 4. **Load unpacked extension**
 
 ### **4. Test Fresh Setup**
 ```bash
 # Start server
-npx @cpjet64/browser-tools-server@latest
+npx @cpjet64/webai-server@latest
 
-# Open Chrome → DevTools → BrowserToolsMCP panel
+# Open Chrome → DevTools → WebAI-MCP panel
 # Should connect without errors
 ```
 
@@ -214,11 +214,11 @@ npx @cpjet64/browser-tools-server@latest
 ### **Check Installation**
 ```bash
 # Verify packages
-which browser-tools-server
+which webai-server
 npm list -g | grep cpjet64
 
 # Check versions
-npx @cpjet64/browser-tools-server@latest --version
+npx @cpjet64/webai-server@latest --version
 ```
 
 ### **Test Network Connectivity**
@@ -251,7 +251,7 @@ Extension connected via WebSocket
 ### **Chrome DevTools Console:**
 ```
 Chrome Extension: WebSocket connected to ws://localhost:3025/extension-ws
-Server identity confirmed: browser-tools-server v1.4.0
+Server identity confirmed: webai-server v1.4.0
 ```
 
 ### **Extension Panel:**
@@ -276,11 +276,11 @@ If you're still having issues:
    # System info
    node --version
    npm --version
-   
+
    # Package versions
    npm list -g @cpjet64/browser-tools-server
    npm list -g @cpjet64/browser-tools-mcp
-   
+
    # Server test
    curl http://localhost:3025/.identity
    ```

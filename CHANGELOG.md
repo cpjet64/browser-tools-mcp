@@ -15,7 +15,7 @@ This release represents a **complete integration** of all feature branches into 
 
 #### **🔧 Automated Diagnostics System**
 - **System Diagnostics** - Comprehensive system and environment validation
-- **Automated Setup** - Intelligent setup and configuration workflows  
+- **Automated Setup** - Intelligent setup and configuration workflows
 - **Installation Validation** - Verify installation integrity and dependencies
 - **Platform Detection** - Cross-platform compatibility checking
 - **Interactive Diagnostic Workflows** - User-friendly diagnostic processes
@@ -122,7 +122,7 @@ This release represents a **complete integration** of all feature branches into 
 ### 🔄 **Migration**
 
 #### **Breaking Changes**
-- **Package Names** - Updated to `@cpjet64/browser-tools-mcp` and `@cpjet64/browser-tools-server`
+- **Package Names** - Updated to `@cpjet64/webai-mcp` and `@cpjet64/webai-server`
 - **Configuration Format** - Enhanced configuration options for new features
 - **API Endpoints** - New proxy and diagnostic endpoints added
 

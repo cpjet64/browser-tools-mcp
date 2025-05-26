@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 /**
- * Browser Tools MCP Setup Automation Script
+ * WebAI-MCP Setup Automation Script
  *
- * Automates the setup process for browser-tools-mcp including:
+ * Automates the setup process for webai-mcp including:
  * - Dependency installation
  * - Building packages
  * - Validation

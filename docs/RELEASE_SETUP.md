@@ -100,8 +100,8 @@ The **🧪 Test** workflow runs automatically on:
 
 ### Package Names
 Edit the `name` field in:
-- `browser-tools-mcp/package.json`
-- `browser-tools-server/package.json`
+- `webai-mcp/package.json`
+- `webai-server/package.json`
 
 ### Release Notes
 Modify the release notes template in:
