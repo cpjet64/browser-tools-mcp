@@ -105,8 +105,8 @@ Want to try the latest features before they're released?
 
 ```bash
 # Install development version (may be unstable)
-npx @cpjet64/browser-tools-mcp@dev
-npx @cpjet64/browser-tools-server@dev
+npx @cpjet64/webai-mcp@dev
+npx @cpjet64/webai-server@dev
 ```
 
 **Note**: Development versions include the latest features but may be unstable. Use `@latest` for production.
@@ -546,9 +546,9 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## 🙏 Acknowledgments
 
 - **Original Project**: [AgentDeskAI/browser-tools-mcp](https://github.com/AgentDeskAI/browser-tools-mcp)
-- **Community Contributors**: All PR authors whose work is integrated in this fork
+- **Community Contributors**: All contributors who have helped improve this project
 - **MCP Protocol**: [Anthropic's Model Context Protocol](https://modelcontextprotocol.io/)
 
 ---
 
-**Made with ❤️ by cpjet64** | **Enhanced Fork** | **v1.4.0** | **Fully Integrated**
+**Made with ❤️ by cpjet64** | **Independent Project** | **v1.4.0** | **Fully Integrated**
