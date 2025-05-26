@@ -1,0 +1,14 @@
+{
+  "version": "1.4.2",
+  "components": {
+    "extension": "1.4.2",
+    "server": "1.4.2",
+    "mcp": "1.4.2"
+  },
+  "buildDate": "2025-05-26",
+  "description": "Unified version configuration for WebAI-MCP components",
+  "features": {
+    "refreshBrowser": "1.4.2",
+    "phaseOneImplementation": "partial"
+  }
+}
