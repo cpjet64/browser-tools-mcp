@@ -157,7 +157,7 @@ jobs:
           VERSION="${{ needs.check-version.outputs.new_version }}"
 
           cat > release-notes.md << EOF
-          # 🚀 Browser Tools MCP v${VERSION}
+          # 🚀 WebAI-MCP v${VERSION}
 
           ## 📋 What's New
 
@@ -168,14 +168,14 @@ jobs:
           ### Quick Start
           \`\`\`bash
           # Install MCP Server
-          npx @cpjet64/browser-tools-mcp@${VERSION}
+          npx @cpjet64/webai-mcp@${VERSION}
 
-          # Install Browser Tools Server
-          npx @cpjet64/browser-tools-server@${VERSION}
+          # Install WebAI Server
+          npx @cpjet64/webai-server@${VERSION}
           \`\`\`
 
           ### Chrome Extension
-          1. Download \`browser-tools-chrome-extension-v${VERSION}.zip\`
+          1. Download \`webai-chrome-extension-v${VERSION}.zip\`
           2. Extract the zip file
           3. Open Chrome → Extensions → Developer mode → Load unpacked
           4. Select the extracted folder
@@ -199,23 +199,23 @@ jobs:
 
           ---
 
-          📚 **Documentation**: [Browser Tools MCP Docs](https://github.com/cpjet64/browser-tools-mcp)
-          🐛 **Issues**: [Report bugs](https://github.com/cpjet64/browser-tools-mcp/issues)
-          💬 **Discussions**: [Community](https://github.com/cpjet64/browser-tools-mcp/discussions)
+          📚 **Documentation**: [WebAI-MCP Docs](https://github.com/cpjet64/WebAI-MCP)
+          🐛 **Issues**: [Report bugs](https://github.com/cpjet64/WebAI-MCP/issues)
+          💬 **Discussions**: [Community](https://github.com/cpjet64/WebAI-MCP/discussions)
           EOF
 
       - name: 🏷️ Create Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.check-version.outputs.new_version }}
-          name: "🚀 Browser Tools MCP v${{ needs.check-version.outputs.new_version }}"
+          name: "🚀 WebAI-MCP v${{ needs.check-version.outputs.new_version }}"
           body_path: release-notes.md
           draft: false
           prerelease: ${{ github.event.inputs.prerelease == 'true' }}
           files: |
-            browser-tools-chrome-extension-v${{ needs.check-version.outputs.new_version }}.zip
-            browser-tools-mcp-v${{ needs.check-version.outputs.new_version }}.tgz
-            browser-tools-server-v${{ needs.check-version.outputs.new_version }}.tgz
+            webai-chrome-extension-v${{ needs.check-version.outputs.new_version }}.zip
+            webai-mcp-v${{ needs.check-version.outputs.new_version }}.tgz
+            webai-server-v${{ needs.check-version.outputs.new_version }}.tgz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -249,41 +249,41 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
           cache-dependency-path: |
-            browser-tools-mcp/package-lock.json
-            browser-tools-server/package-lock.json
+            webai-mcp/package-lock.json
+            webai-server/package-lock.json
 
       - name: 🔧 Install dependencies (MCP)
         run: |
-          cd browser-tools-mcp
+          cd webai-mcp
           npm ci
 
       - name: 🔧 Install dependencies (Server)
         run: |
-          cd browser-tools-server
+          cd webai-server
           npm ci
 
       - name: 🏗️ Build MCP Server
         run: |
-          cd browser-tools-mcp
+          cd webai-mcp
           npm run build
 
-      - name: 🏗️ Build Browser Tools Server
+      - name: 🏗️ Build WebAI Server
         run: |
-          cd browser-tools-server
+          cd webai-server
           npm run build
 
       - name: 📤 Publish MCP Server to NPM
         run: |
-          cd browser-tools-mcp
+          cd webai-mcp
           echo "🚀 Publishing MCP Server to NPM..."
           npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY }}
 
-      - name: 📤 Publish Server to NPM
+      - name: 📤 Publish WebAI Server to NPM
         run: |
-          cd browser-tools-server
-          echo "🚀 Publishing Browser Tools Server to NPM..."
+          cd webai-server
+          echo "🚀 Publishing WebAI Server to NPM..."
           npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY }}
@@ -293,11 +293,11 @@ jobs:
           echo "## 📦 NPM Publishing Complete!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          cd browser-tools-mcp
+          cd webai-mcp
           MCP_VERSION=$(node -p "require('./package.json').version")
           MCP_NAME=$(node -p "require('./package.json').name")
 
-          cd ../browser-tools-server
+          cd ../webai-server
           SERVER_VERSION=$(node -p "require('./package.json').version")
           SERVER_NAME=$(node -p "require('./package.json').name")
 
@@ -310,6 +310,6 @@ jobs:
           echo "# Install MCP Server" >> $GITHUB_STEP_SUMMARY
           echo "npx $MCP_NAME@$MCP_VERSION" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "# Install Browser Tools Server" >> $GITHUB_STEP_SUMMARY
+          echo "# Install WebAI Server" >> $GITHUB_STEP_SUMMARY
           echo "npx $SERVER_NAME@$SERVER_VERSION" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

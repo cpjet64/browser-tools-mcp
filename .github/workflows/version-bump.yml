@@ -35,8 +35,8 @@ jobs:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: |
-            browser-tools-mcp/package-lock.json
-            browser-tools-server/package-lock.json
+            webai-mcp/package-lock.json
+            webai-server/package-lock.json
 
       - name: 🔧 Configure Git
         run: |
@@ -46,7 +46,7 @@ jobs:
       - name: 📈 Bump MCP Server Version
         id: bump-mcp
         run: |
-          cd browser-tools-mcp
+          cd webai-mcp
           OLD_VERSION=$(node -p "require('./package.json').version")
           npm version ${{ github.event.inputs.version_type }} --no-git-tag-version
           NEW_VERSION=$(node -p "require('./package.json').version")
@@ -55,7 +55,7 @@ jobs:
 
       - name: 📈 Bump Server Version
         run: |
-          cd browser-tools-server
+          cd webai-server
           npm version ${{ steps.bump-mcp.outputs.new_version }} --no-git-tag-version
 
       - name: 📈 Bump Chrome Extension Version
@@ -72,13 +72,13 @@ jobs:
       - name: 📝 Update README versions
         run: |
           NEW_VERSION="${{ steps.bump-mcp.outputs.new_version }}"
-          
+
           # Update main README
           sed -i "s/v[0-9]\+\.[0-9]\+\.[0-9]\+/v$NEW_VERSION/g" README.md
-          
+
           # Update MCP README
-          sed -i "s/v[0-9]\+\.[0-9]\+\.[0-9]\+/v$NEW_VERSION/g" browser-tools-mcp/README.md
-          
+          sed -i "s/v[0-9]\+\.[0-9]\+\.[0-9]\+/v$NEW_VERSION/g" webai-mcp/README.md
+
           # Update Chinese README
           sed -i "s/v[0-9]\+\.[0-9]\+\.[0-9]\+/v$NEW_VERSION/g" docs/i18n/README_CN.md
 
@@ -106,11 +106,11 @@ jobs:
           echo "**Bump Type:** ${{ github.event.inputs.version_type }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📦 Updated Files:" >> $GITHUB_STEP_SUMMARY
-          echo "- \`browser-tools-mcp/package.json\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`browser-tools-server/package.json\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`webai-mcp/package.json\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`webai-server/package.json\`" >> $GITHUB_STEP_SUMMARY
           echo "- \`chrome-extension/manifest.json\`" >> $GITHUB_STEP_SUMMARY
           echo "- \`README.md\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`browser-tools-mcp/README.md\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`webai-mcp/README.md\`" >> $GITHUB_STEP_SUMMARY
           echo "- \`docs/i18n/README_CN.md\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "🚀 **Next:** The release workflow will automatically trigger and create a new release!"

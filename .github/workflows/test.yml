@@ -92,7 +92,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### ✅ Completed Tests:" >> $GITHUB_STEP_SUMMARY
           echo "- MCP Server build & smoke test" >> $GITHUB_STEP_SUMMARY
-          echo "- Browser Tools Server build & smoke test" >> $GITHUB_STEP_SUMMARY
+          echo "- WebAI Server build & smoke test" >> $GITHUB_STEP_SUMMARY
           echo "- Chrome Extension manifest validation" >> $GITHUB_STEP_SUMMARY
 
   lint:
@@ -107,27 +107,27 @@ jobs:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: |
-            browser-tools-mcp/package-lock.json
-            browser-tools-server/package-lock.json
+            webai-mcp/package-lock.json
+            webai-server/package-lock.json
 
       - name: 🔧 Install dependencies (MCP)
         run: |
-          cd browser-tools-mcp
+          cd webai-mcp
           npm ci
 
       - name: 🔧 Install dependencies (Server)
         run: |
-          cd browser-tools-server
+          cd webai-server
           npm ci
 
       - name: 🧹 TypeScript Check (MCP)
         run: |
-          cd browser-tools-mcp
+          cd webai-mcp
           npx tsc --noEmit
 
       - name: 🧹 TypeScript Check (Server)
         run: |
-          cd browser-tools-server
+          cd webai-server
           npx tsc --noEmit
 
       - name: 📋 Lint Summary
@@ -136,4 +136,4 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### ✅ Completed Checks:" >> $GITHUB_STEP_SUMMARY
           echo "- TypeScript compilation (MCP Server)" >> $GITHUB_STEP_SUMMARY
-          echo "- TypeScript compilation (Browser Tools Server)" >> $GITHUB_STEP_SUMMARY
+          echo "- TypeScript compilation (WebAI Server)" >> $GITHUB_STEP_SUMMARY

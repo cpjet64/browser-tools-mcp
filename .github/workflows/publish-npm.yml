@@ -34,54 +34,54 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
           cache-dependency-path: |
-            browser-tools-mcp/package-lock.json
-            browser-tools-server/package-lock.json
+            webai-mcp/package-lock.json
+            webai-server/package-lock.json
 
       - name: 🔧 Install dependencies (MCP)
         run: |
-          cd browser-tools-mcp
+          cd webai-mcp
           npm ci
 
       - name: 🔧 Install dependencies (Server)
         run: |
-          cd browser-tools-server
+          cd webai-server
           npm ci
 
       - name: 🏗️ Build MCP Server
         run: |
-          cd browser-tools-mcp
+          cd webai-mcp
           npm run build
 
-      - name: 🏗️ Build Browser Tools Server
+      - name: 🏗️ Build WebAI Server
         run: |
-          cd browser-tools-server
+          cd webai-server
           npm run build
 
       - name: 🧪 Test MCP Server
         run: |
-          cd browser-tools-mcp
+          cd webai-mcp
           # Basic smoke test
           node dist/mcp-server.js --help || echo "No help flag, that's ok"
           echo "✅ MCP Server builds and runs"
 
-      - name: 🧪 Test Browser Tools Server
+      - name: 🧪 Test WebAI Server
         run: |
-          cd browser-tools-server
+          cd webai-server
           # Basic smoke test - start server and stop after 5 seconds
           timeout 5s node dist/browser-connector.js || echo "Server started and stopped successfully"
-          echo "✅ Browser Tools Server builds and runs"
+          echo "✅ WebAI Server builds and runs"
 
       - name: 📋 Pre-publish Info
         run: |
           echo "## 📦 Publishing Information" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          cd browser-tools-mcp
+          cd webai-mcp
           MCP_VERSION=$(node -p "require('./package.json').version")
           MCP_NAME=$(node -p "require('./package.json').name")
           echo "**MCP Package:** \`$MCP_NAME@$MCP_VERSION\`" >> $GITHUB_STEP_SUMMARY
 
-          cd ../browser-tools-server
+          cd ../webai-server
           SERVER_VERSION=$(node -p "require('./package.json').version")
           SERVER_NAME=$(node -p "require('./package.json').name")
           echo "**Server Package:** \`$SERVER_NAME@$SERVER_VERSION\`" >> $GITHUB_STEP_SUMMARY
@@ -95,7 +95,7 @@ jobs:
 
       - name: 📤 Publish MCP Server to NPM
         run: |
-          cd browser-tools-mcp
+          cd webai-mcp
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             echo "🧪 Dry run: npm publish --dry-run"
             npm publish --dry-run
@@ -106,9 +106,9 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY }}
 
-      - name: 📤 Publish Server to NPM
+      - name: 📤 Publish WebAI Server to NPM
         run: |
-          cd browser-tools-server
+          cd webai-server
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             echo "🧪 Dry run: npm publish --dry-run"
             npm publish --dry-run
@@ -126,11 +126,11 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           if [ "${{ github.event.inputs.dry_run }}" != "true" ]; then
-            cd browser-tools-mcp
+            cd webai-mcp
             MCP_VERSION=$(node -p "require('./package.json').version")
             MCP_NAME=$(node -p "require('./package.json').name")
 
-            cd ../browser-tools-server
+            cd ../webai-server
             SERVER_VERSION=$(node -p "require('./package.json').version")
             SERVER_NAME=$(node -p "require('./package.json').name")
 
@@ -143,7 +143,7 @@ jobs:
             echo "# Install MCP Server" >> $GITHUB_STEP_SUMMARY
             echo "npx $MCP_NAME@$MCP_VERSION" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "# Install Browser Tools Server" >> $GITHUB_STEP_SUMMARY
+            echo "# Install WebAI Server" >> $GITHUB_STEP_SUMMARY
             echo "npx $SERVER_NAME@$SERVER_VERSION" >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           else
