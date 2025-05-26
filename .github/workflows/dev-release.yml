@@ -1,0 +1,225 @@
+name: 🧪 Dev Release
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+jobs:
+  publish-dev:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+          cache-dependency-path: |
+            webai-mcp/package-lock.json
+            webai-server/package-lock.json
+
+      - name: 🔧 Install dependencies (MCP)
+        run: |
+          cd webai-mcp
+          npm ci
+
+      - name: 🔧 Install dependencies (Server)
+        run: |
+          cd webai-server
+          npm ci
+
+      - name: 🏗️ Build packages
+        run: |
+          cd webai-mcp
+          npm run build
+          cd ../webai-server
+          npm run build
+
+      - name: 📈 Get current version and increment dev version
+        id: version
+        run: |
+          cd webai-server
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+
+          # Check if this is already a dev version
+          if [[ $CURRENT_VERSION == *"-dev."* ]]; then
+            # Increment the dev number
+            npm version prerelease --preid=dev --no-git-tag-version
+          else
+            # Create first dev version
+            npm version prerelease --preid=dev --no-git-tag-version
+          fi
+
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+          # Update webai-mcp to same version
+          cd ../webai-mcp
+          npm version $NEW_VERSION --no-git-tag-version
+
+          # Update chrome extension manifest version
+          cd ../chrome-extension
+          node -e "
+            const fs = require('fs');
+            const manifest = JSON.parse(fs.readFileSync('manifest.json', 'utf8'));
+            manifest.version = '$NEW_VERSION'.replace('-dev.', '.');
+            fs.writeFileSync('manifest.json', JSON.stringify(manifest, null, 2) + '\n');
+          "
+
+      - name: 📦 Create Chrome Extension Package
+        run: |
+          cd chrome-extension
+          zip -r ../webai-chrome-extension-v${{ steps.version.outputs.new_version }}.zip . \
+            -x "*.git*" "node_modules/*" "*.DS_Store*"
+
+      - name: 📦 Create MCP Server Package
+        run: |
+          cd webai-mcp
+          npm pack
+          mv *.tgz ../webai-mcp-v${{ steps.version.outputs.new_version }}.tgz
+
+      - name: 📦 Create Server Package
+        run: |
+          cd webai-server
+          npm pack
+          mv *.tgz ../webai-server-v${{ steps.version.outputs.new_version }}.tgz
+
+      - name: 📤 Publish webai-server to NPM (dev tag)
+        run: |
+          cd webai-server
+          npm publish --tag dev --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY }}
+
+      - name: 📤 Publish webai-mcp to NPM (dev tag)
+        run: |
+          cd webai-mcp
+          npm publish --tag dev --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY }}
+
+      - name: 📝 Generate Release Notes
+        id: release-notes
+        run: |
+          VERSION="${{ steps.version.outputs.new_version }}"
+
+          cat > dev-release-notes.md << EOF
+          ## ⚠️ Development Release Warning
+
+          This is a **development release** with the latest features and improvements. It may contain experimental functionality and could be unstable. For production use, please install the latest stable release with \`@latest\`.
+
+          ## 📦 Installation
+
+          ### Quick Start (Development Version)
+          \`\`\`bash
+          # Install MCP Server (dev)
+          npx @cpjet64/webai-mcp@dev
+
+          # Install WebAI Server (dev)
+          npx @cpjet64/webai-server@dev
+          \`\`\`
+
+          ### Chrome Extension (Development)
+          1. Download \`webai-chrome-extension-v${VERSION}.zip\`
+          2. Extract the zip file
+          3. Open Chrome → Extensions → Developer mode → Load unpacked
+          4. Select the extracted folder
+
+          ## 🆕 What's New in Development
+
+          - Latest development features including RefreshBrowser tool
+          - Bug fixes and improvements
+          - Experimental functionality
+          - Enhanced cross-platform support
+
+          ## 🛠️ Features (Development Build)
+
+          - ✅ **18+ MCP Tools** for browser automation
+          - ✅ **RefreshBrowser Tool** - Phase 1 implementation
+          - ✅ **Storage Access** - cookies, localStorage, sessionStorage
+          - ✅ **Element Inspection** - CSS selectors + computed styles
+          - ✅ **Enhanced Screenshots** - works with separate DevTools
+          - ✅ **Audit & Debug Modes** - comprehensive analysis
+          - ✅ **Windows Compatibility** - full cross-platform support
+          - ✅ **Multi-language Documentation** - English + Chinese
+
+          ## 🔧 Compatibility
+
+          - Node.js 18+
+          - Chrome/Chromium browsers
+          - Windows, macOS, Linux
+          - MCP clients: Cursor, Claude Desktop, Cline, Zed
+
+          ## 📋 Development Notes
+
+          - This version includes the latest commits from the \`dev\` branch
+          - Features may change before stable release
+          - Report issues on GitHub for quick fixes
+          - Feedback welcome for new features
+
+          **Full Changelog**: https://github.com/cpjet64/WebAI-MCP/compare/main...dev
+
+          ---
+
+          📚 **Documentation**: [WebAI-MCP Docs](https://github.com/cpjet64/WebAI-MCP)
+          🐛 **Issues**: [Report bugs](https://github.com/cpjet64/WebAI-MCP/issues)
+          💬 **Discussions**: [Community](https://github.com/cpjet64/WebAI-MCP/discussions)
+          EOF
+
+      - name: 🏷️ Create dev release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.new_version }}
+          name: "🧪 WebAI-MCP v${{ steps.version.outputs.new_version }} (Dev)"
+          body_path: dev-release-notes.md
+          draft: false
+          prerelease: true
+          files: |
+            webai-chrome-extension-v${{ steps.version.outputs.new_version }}.zip
+            webai-mcp-v${{ steps.version.outputs.new_version }}.tgz
+            webai-server-v${{ steps.version.outputs.new_version }}.tgz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 💾 Commit version changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add webai-server/package.json webai-mcp/package.json chrome-extension/manifest.json
+          git commit -m "chore: bump dev version to ${{ steps.version.outputs.new_version }}" || exit 0
+          git push
+
+      - name: 📊 Dev Release Summary
+        run: |
+          echo "## 🧪 Dev Release Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** v${{ steps.version.outputs.new_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Type:** Development Release (Prerelease)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Completed Steps:" >> $GITHUB_STEP_SUMMARY
+          echo "- Built and tested packages" >> $GITHUB_STEP_SUMMARY
+          echo "- Published to NPM with @dev tag" >> $GITHUB_STEP_SUMMARY
+          echo "- Created GitHub prerelease" >> $GITHUB_STEP_SUMMARY
+          echo "- Updated version numbers" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Published Packages:" >> $GITHUB_STEP_SUMMARY
+          echo "- [\`@cpjet64/webai-mcp@dev\`](https://www.npmjs.com/package/@cpjet64/webai-mcp)" >> $GITHUB_STEP_SUMMARY
+          echo "- [\`@cpjet64/webai-server@dev\`](https://www.npmjs.com/package/@cpjet64/webai-server)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🚀 Installation:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "npx @cpjet64/webai-mcp@dev" >> $GITHUB_STEP_SUMMARY
+          echo "npx @cpjet64/webai-server@dev" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
