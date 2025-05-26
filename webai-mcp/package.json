@@ -1,7 +1,7 @@
 {
   "name": "@cpjet64/webai-mcp",
   "version": "1.4.1",
-  "description": "MCP (Model Context Protocol) server for WebAI browser integration",
+  "description": "MCP (Model Context Protocol) server for WebAI browser integration - v1.4.1 stable release",
   "main": "dist/mcp-server.js",
   "bin": {
     "webai-mcp": "dist/mcp-server.js"
