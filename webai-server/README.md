@@ -1,446 +1,183 @@
-# Browser Tools Server
+# @cpjet64/webai-server
 
-A powerful browser tools server for capturing and managing browser events, logs, and screenshots. This server works in conjunction with the Browser Tools Chrome Extension to provide comprehensive browser debugging capabilities.
+WebAI server for capturing and managing browser events, logs, and screenshots
 
-## Features
+[![npm version](https://badge.fury.io/js/@cpjet64%2Fwebai-server.svg)](https://www.npmjs.com/package/@cpjet64/webai-server)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-- Console log capture
-- Network request monitoring
-- Screenshot capture
-- Element selection tracking
-- Browser storage access (cookies, localStorage, sessionStorage)
-- WebSocket real-time communication
-- Configurable log limits and settings
-- Lighthouse-powered accessibility, performance, SEO, and best practices audits
+## 🚀 Quick Start
 
-## Installation
+### Installation & Launch
 
 ```bash
-npx @cpjet64/browser-tools-server
+# Run directly with npx (recommended)
+npx @cpjet64/webai-server
+
+# Or install globally
+npm install -g @cpjet64/webai-server
+webai-server
 ```
 
-Or install globally:
+The server will start on `http://localhost:3000` by default.
+
+### Verify Installation
 
 ```bash
-npm install -g @cpjet64/browser-tools-server
+# Check server status
+curl http://localhost:3000/.identity
+
+# Expected response:
+# {"signature": "mcp-browser-connector-24x7", "version": "1.4.1"}
 ```
 
-## Usage
+## 🛠️ Features
 
-1. Start the server:
+- **🌐 Browser Event Capture** - Real-time browser data collection
+- **📸 Screenshot Management** - High-quality image capture and processing
+- **📊 Network Monitoring** - HTTP request/response logging and analysis
+- **🍪 Storage Management** - Cookie, localStorage, and sessionStorage access
+- **🔍 Element Inspection** - DOM element analysis with computed styles
+- **🧪 Lighthouse Integration** - Performance, accessibility, and SEO audits
+- **🌐 Proxy Support** - HTTP/HTTPS and SOCKS proxy configuration
+- **🛡️ Enhanced Error Handling** - Intelligent error recovery and reporting
+
+## ⚙️ Configuration
+
+### Environment Variables
 
 ```bash
-npx @cpjet64/browser-tools-server
+# Server configuration
+PORT=3000                    # Server port (default: 3000)
+HOST=localhost              # Server host (default: localhost)
+
+# Network configuration
+NETWORK_TIMEOUT=30000       # Request timeout in ms
+NETWORK_RETRIES=3           # Number of retry attempts
+USER_AGENT=WebAI-MCP/1.4.1  # Custom user agent
+
+# Proxy configuration (optional)
+PROXY_HOST=proxy.example.com
+PROXY_PORT=8080
+PROXY_PROTOCOL=http         # http, https, socks4, socks5
+PROXY_USERNAME=user         # Optional proxy auth
+PROXY_PASSWORD=pass         # Optional proxy auth
 ```
 
-2. The server will start on port 3025 by default
+### Command Line Options
 
-3. Install and enable the Browser Tools Chrome Extension
+```bash
+# Start with custom port
+webai-server --port 8080
 
-4. The server exposes the following endpoints:
+# Start with custom host
+webai-server --host 0.0.0.0
 
-- `/console-logs` - Get console logs
-- `/console-errors` - Get console errors
-- `/network-errors` - Get network error logs
-- `/network-success` - Get successful network requests
-- `/all-xhr` - Get all network requests
-- `/screenshot` - Capture screenshots
-- `/selected-element` - Get currently selected DOM element
-- `/accessibility-audit` - Run accessibility audit on current page
-- `/performance-audit` - Run performance audit on current page
-- `/seo-audit` - Run SEO audit on current page
-- `/cookies` - Get cookies from the current page
-- `/local-storage` - Get localStorage data
-- `/session-storage` - Get sessionStorage data
+# Enable debug mode
+webai-server --debug
 
-## API Documentation
+# Show help
+webai-server --help
+```
 
-### GET Endpoints
+## 🔌 API Endpoints
 
-- `GET /console-logs` - Returns recent console logs
-- `GET /console-errors` - Returns recent console errors
-- `GET /network-errors` - Returns recent network errors
-- `GET /network-success` - Returns recent successful network requests
-- `GET /all-xhr` - Returns all recent network requests
-- `GET /selected-element` - Returns the currently selected DOM element
-- `GET /cookies` - Returns cookies from the current page
-- `GET /local-storage` - Returns localStorage data
-- `GET /session-storage` - Returns sessionStorage data
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/.identity` | GET | Server identity and version |
+| `/screenshot` | POST | Capture browser screenshot |
+| `/console-logs` | GET | Retrieve console logs |
+| `/network-logs` | GET | Get network request logs |
+| `/cookies` | GET | Access browser cookies |
+| `/storage/local` | GET | Get localStorage data |
+| `/storage/session` | GET | Get sessionStorage data |
+| `/audit/accessibility` | POST | Run accessibility audit |
+| `/audit/performance` | POST | Run performance audit |
+| `/audit/seo` | POST | Run SEO audit |
 
-### POST Endpoints
+## 🔧 Requirements
 
-- `POST /extension-log` - Receive logs from the extension
-- `POST /screenshot` - Capture and save screenshots
-- `POST /selected-element` - Update the selected element
-- `POST /wipelogs` - Clear all stored logs
-- `POST /accessibility-audit` - Run a WCAG-compliant accessibility audit on the current page
-- `POST /performance-audit` - Run a performance audit on the current page
-- `POST /seo-audit` - Run a SEO audit on the current page
+- **Node.js**: 18+
+- **Browser**: Chrome/Chromium with WebAI Chrome Extension
+- **Operating System**: Windows, macOS, or Linux
 
-# Audit Functionality
+## 📦 Complete WebAI-MCP Setup
 
-The server provides Lighthouse-powered audit capabilities through four AI-optimized endpoints. These audits have been specifically tailored for AI consumption, with structured data, clear categorization, and smart prioritization.
+1. **Install MCP Server**:
+   ```bash
+   npx @cpjet64/webai-mcp
+   ```
 
-## Smart Limit Implementation
+2. **Install WebAI Server** (this package):
+   ```bash
+   npx @cpjet64/webai-server
+   ```
 
-All audit tools implement a "smart limit" approach to provide the most relevant information based on impact severity:
+3. **Install Chrome Extension**:
+   - Download from [WebAI-MCP Releases](https://github.com/cpjet64/WebAI-MCP/releases)
+   - Load unpacked in Chrome Developer Mode
 
-- **Critical issues**: No limit (all issues are shown)
-- **Serious issues**: Up to 15 items per issue
-- **Moderate issues**: Up to 10 items per issue
-- **Minor issues**: Up to 3 items per issue
+4. **Configure MCP Client**:
+   ```json
+   {
+     "mcpServers": {
+       "webai-mcp": {
+         "command": "npx",
+         "args": ["@cpjet64/webai-mcp"]
+       }
+     }
+   }
+   ```
 
-This ensures that the most important issues are always included in the response, while less important ones are limited to maintain a manageable response size for AI processing.
+## 🌐 Network & Proxy Support
 
-## Common Audit Response Structure
+### Automatic Proxy Detection
+The server automatically detects system proxy settings.
 
-All audit responses follow a similar structure:
+### Manual Proxy Configuration
+```javascript
+// Programmatic configuration
+const { ProxyManager } = require('@cpjet64/webai-server');
 
-```json
-{
-  "metadata": {
-    "url": "https://example.com",
-    "timestamp": "2025-03-06T16:28:30.930Z",
-    "device": "desktop",
-    "lighthouseVersion": "11.7.1"
-  },
-  "report": {
-    "score": 88,
-    "audit_counts": {
-      "failed": 2,
-      "passed": 17,
-      "manual": 10,
-      "informative": 0,
-      "not_applicable": 42
-    }
-    // Audit-specific content
-    // ...
+const proxyManager = new ProxyManager({
+  proxy: {
+    enabled: true,
+    protocol: 'http',
+    host: 'proxy.example.com',
+    port: 8080,
+    username: 'user',
+    password: 'pass'
   }
-}
+});
 ```
 
-## Accessibility Audit (`/accessibility-audit`)
+## 🧪 Testing & Diagnostics
 
-The accessibility audit evaluates web pages against WCAG standards, identifying issues that affect users with disabilities.
+```bash
+# Run system diagnostics
+npx @cpjet64/webai-server --diagnose
 
-### Response Format
+# Test server connectivity
+curl -f http://localhost:3000/.identity || echo "Server not running"
 
-```json
-{
-  "metadata": {
-    "url": "https://example.com",
-    "timestamp": "2025-03-06T16:28:30.930Z",
-    "device": "desktop",
-    "lighthouseVersion": "11.7.1"
-  },
-  "report": {
-    "score": 88,
-    "audit_counts": {
-      "failed": 2,
-      "passed": 17,
-      "manual": 10,
-      "informative": 0,
-      "not_applicable": 42
-    },
-    "issues": [
-      {
-        "id": "meta-viewport",
-        "title": "`[user-scalable=\"no\"]` is used in the `<meta name=\"viewport\">` element or the `[maximum-scale]` attribute is less than 5.",
-        "impact": "critical",
-        "category": "a11y-best-practices",
-        "elements": [
-          {
-            "selector": "head > meta",
-            "snippet": "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0\">",
-            "label": "head > meta",
-            "issue_description": "Fix any of the following: user-scalable on <meta> tag disables zooming on mobile devices"
-          }
-        ],
-        "score": 0
-      }
-    ],
-    "categories": {
-      "a11y-navigation": { "score": 0, "issues_count": 0 },
-      "a11y-aria": { "score": 0, "issues_count": 1 },
-      "a11y-best-practices": { "score": 0, "issues_count": 1 }
-    },
-    "critical_elements": [
-      {
-        "selector": "head > meta",
-        "snippet": "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0\">",
-        "label": "head > meta",
-        "issue_description": "Fix any of the following: user-scalable on <meta> tag disables zooming on mobile devices"
-      }
-    ],
-    "prioritized_recommendations": [
-      "Fix ARIA attributes and roles",
-      "Fix 1 issues in a11y-best-practices"
-    ]
-  }
-}
+# Check Chrome extension connection
+curl http://localhost:3000/extension-status
 ```
 
-### Key Features
+## 📚 Documentation
 
-- **Issues Categorized by Impact**: Critical, serious, moderate, and minor
-- **Element-Specific Information**: Selectors, snippets, and labels for affected elements
-- **Issue Categories**: ARIA, navigation, color contrast, forms, keyboard access, etc.
-- **Critical Elements List**: Quick access to the most serious issues
-- **Prioritized Recommendations**: Actionable advice in order of importance
+- **Main Repository**: [WebAI-MCP](https://github.com/cpjet64/WebAI-MCP)
+- **Issues**: [Report bugs](https://github.com/cpjet64/WebAI-MCP/issues)
+- **API Documentation**: [Server API Guide](https://github.com/cpjet64/WebAI-MCP#api-reference)
 
-## Performance Audit (`/performance-audit`)
+## 🔗 Related Packages
 
-The performance audit analyzes page load speed, Core Web Vitals, and optimization opportunities.
+- **[@cpjet64/webai-mcp](https://www.npmjs.com/package/@cpjet64/webai-mcp)** - MCP server for AI clients
+- **[WebAI Chrome Extension](https://github.com/cpjet64/WebAI-MCP/releases)** - Browser integration
 
-### Response Format
+## 📄 License
 
-```json
-{
-  "metadata": {
-    "url": "https://example.com",
-    "timestamp": "2025-03-06T16:27:44.900Z",
-    "device": "desktop",
-    "lighthouseVersion": "11.7.1"
-  },
-  "report": {
-    "score": 60,
-    "audit_counts": {
-      "failed": 11,
-      "passed": 21,
-      "manual": 0,
-      "informative": 20,
-      "not_applicable": 8
-    },
-    "metrics": [
-      {
-        "id": "lcp",
-        "score": 0,
-        "value_ms": 14149,
-        "passes_core_web_vital": false,
-        "element_selector": "div.heading > span",
-        "element_type": "text",
-        "element_content": "Welcome to Example"
-      },
-      {
-        "id": "fcp",
-        "score": 0.53,
-        "value_ms": 1542,
-        "passes_core_web_vital": false
-      },
-      {
-        "id": "si",
-        "score": 0,
-        "value_ms": 6883
-      },
-      {
-        "id": "tti",
-        "score": 0,
-        "value_ms": 14746
-      },
-      {
-        "id": "cls",
-        "score": 1,
-        "value_ms": 0.001,
-        "passes_core_web_vital": true
-      },
-      {
-        "id": "tbt",
-        "score": 1,
-        "value_ms": 43,
-        "passes_core_web_vital": true
-      }
-    ],
-    "opportunities": [
-      {
-        "id": "render_blocking_resources",
-        "savings_ms": 1270,
-        "severity": "serious",
-        "resources": [
-          {
-            "url": "styles.css",
-            "savings_ms": 781
-          }
-        ]
-      }
-    ],
-    "page_stats": {
-      "total_size_kb": 2190,
-      "total_requests": 108,
-      "resource_counts": {
-        "js": 86,
-        "css": 1,
-        "img": 3,
-        "font": 3,
-        "other": 15
-      },
-      "third_party_size_kb": 2110,
-      "main_thread_blocking_time_ms": 693
-    },
-    "prioritized_recommendations": ["Improve Largest Contentful Paint (LCP)"]
-  }
-}
-```
+MIT License - see [LICENSE](https://github.com/cpjet64/WebAI-MCP/blob/main/LICENSE) for details.
 
-### Key Features
+---
 
-- **Core Web Vitals Analysis**: LCP, FCP, CLS, TBT with pass/fail status
-- **Element Information for LCP**: Identifies what's causing the largest contentful paint
-- **Optimization Opportunities**: Specific actions to improve performance with estimated time savings
-- **Resource Breakdown**: By type, size, and origin (first vs. third party)
-- **Main Thread Analysis**: Blocking time metrics to identify JavaScript performance issues
-- **Resource-Specific Recommendations**: For each optimization opportunity
-
-## SEO Audit (`/seo-audit`)
-
-The SEO audit checks search engine optimization best practices and identifies issues that could affect search ranking.
-
-### Response Format
-
-```json
-{
-  "metadata": {
-    "url": "https://example.com",
-    "timestamp": "2025-03-06T16:29:12.455Z",
-    "device": "desktop",
-    "lighthouseVersion": "11.7.1"
-  },
-  "report": {
-    "score": 91,
-    "audit_counts": {
-      "failed": 1,
-      "passed": 10,
-      "manual": 1,
-      "informative": 0,
-      "not_applicable": 3
-    },
-    "issues": [
-      {
-        "id": "is-crawlable",
-        "title": "Page is blocked from indexing",
-        "impact": "critical",
-        "category": "crawlability",
-        "score": 0
-      }
-    ],
-    "categories": {
-      "content": { "score": 0, "issues_count": 0 },
-      "mobile": { "score": 0, "issues_count": 0 },
-      "crawlability": { "score": 0, "issues_count": 1 },
-      "other": { "score": 0, "issues_count": 0 }
-    },
-    "prioritized_recommendations": [
-      "Fix crawlability issues (1 issues): robots.txt, sitemaps, and redirects"
-    ]
-  }
-}
-```
-
-### Key Features
-
-- **Issues Categorized by Impact**: Critical, serious, moderate, and minor
-- **SEO Categories**: Content, mobile friendliness, crawlability
-- **Issue Details**: Information about what's causing each SEO problem
-- **Prioritized Recommendations**: Actionable advice in order of importance
-
-## Best Practices Audit (`/best-practices-audit`)
-
-The best practices audit evaluates adherence to web development best practices related to security, trust, user experience, and browser compatibility.
-
-### Response Format
-
-```json
-{
-  "metadata": {
-    "url": "https://example.com",
-    "timestamp": "2025-03-06T17:01:38.029Z",
-    "device": "desktop",
-    "lighthouseVersion": "11.7.1"
-  },
-  "report": {
-    "score": 74,
-    "audit_counts": {
-      "failed": 4,
-      "passed": 10,
-      "manual": 0,
-      "informative": 2,
-      "not_applicable": 1
-    },
-    "issues": [
-      {
-        "id": "deprecations",
-        "title": "Uses deprecated APIs",
-        "impact": "critical",
-        "category": "security",
-        "score": 0,
-        "details": [
-          {
-            "value": "UnloadHandler"
-          }
-        ]
-      },
-      {
-        "id": "errors-in-console",
-        "title": "Browser errors were logged to the console",
-        "impact": "serious",
-        "category": "user-experience",
-        "score": 0,
-        "details": [
-          {
-            "source": "console.error",
-            "description": "ReferenceError: variable is not defined"
-          }
-        ]
-      }
-    ],
-    "categories": {
-      "security": { "score": 75, "issues_count": 1 },
-      "trust": { "score": 100, "issues_count": 0 },
-      "user-experience": { "score": 50, "issues_count": 1 },
-      "browser-compat": { "score": 100, "issues_count": 0 },
-      "other": { "score": 75, "issues_count": 2 }
-    },
-    "prioritized_recommendations": [
-      "Address 1 security issues: vulnerabilities, CSP, deprecations",
-      "Improve 1 user experience issues: console errors, user interactions"
-    ]
-  }
-}
-```
-
-### Key Features
-
-- **Issues Categorized by Impact**: Critical, serious, moderate, and minor
-- **Best Practice Categories**: Security, trust, user experience, browser compatibility
-- **Detailed Issue Information**: Specific problems affecting best practices compliance
-- **Security Focus**: Special attention to security vulnerabilities and deprecated APIs
-- **Prioritized Recommendations**: Actionable advice in order of importance
-
-## License
-
-MIT
-
-# Puppeteer Service
-
-A comprehensive browser automation service built on Puppeteer to provide reliable cross-platform browser control capabilities.
-
-## Features
-
-- **Cross-Platform Browser Support**:
-
-  - Windows, macOS, and Linux support
-  - Chrome, Edge, Brave, and Firefox detection
-  - Fallback strategy for finding browser executables
-
-- **Smart Browser Management**:
-
-  - Singleton browser instance with automatic cleanup
-  - Connection retry mechanisms
-  - Temporary user data directories with cleanup
-
-- **Rich Configuration Options**:
-  - Custom browser paths
-  - Network condition emulation
-  - Device emulation (mobile, tablet, desktop)
-  - Resource blocking
-  - Cookies and headers customization
-  - Locale and timezone emulation
+**Made with ❤️ by cpjet64** | **v1.4.1** | **Independent Project**
