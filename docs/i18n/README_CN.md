@@ -63,7 +63,7 @@ npx @cpjet64/webai-server@latest
    - 打开新终端并运行：`npx @cpjet64/webai-server@latest`
 
 4. **打开开发工具**：
-   - 打开Chrome开发工具 → BrowserToolsMCP面板
+   - 打开Chrome开发工具 → WebAI MCP面板
    - 确保连接已建立
 
 ### **💡 重要说明**
@@ -77,7 +77,7 @@ npx @cpjet64/webai-server@latest
 - 重新启动webai-server
 - 确保只有一个开发工具面板打开
 
-完成上述步骤后，打开Chrome的开发工具并进入BrowserToolsMCP面板。
+完成上述步骤后，打开Chrome的开发工具并进入WebAI MCP面板。
 
 如果仍然存在问题，请尝试以下步骤：
 - 关闭浏览器。不仅仅是当前窗口，而是整个Chrome。

@@ -498,14 +498,22 @@ async function checkWebSocketConnectivity(host, port) {
       const ws = new WebSocket(`ws://${host}:${port}/extension-ws`);
 
       const timeout = setTimeout(() => {
-        ws.close();
+        try {
+          ws.close();
+        } catch (e) {
+          // Ignore close errors
+        }
         resolve(false);
       }, 3000); // 3 second timeout
 
       ws.onopen = () => {
         clearTimeout(timeout);
         websocketConnected = true;
-        ws.close();
+        try {
+          ws.close(1000, "Connection test complete");
+        } catch (e) {
+          // Ignore close errors
+        }
         resolve(true);
       };
 
@@ -527,7 +535,7 @@ async function checkWebSocketConnectivity(host, port) {
   });
 }
 
-// Periodically check WebSocket connectivity
+// Periodically check WebSocket connectivity (less frequently to reduce spam)
 setInterval(async () => {
   chrome.storage.local.get(["browserConnectorSettings"], async (result) => {
     const settings = result.browserConnectorSettings || {
@@ -535,7 +543,10 @@ setInterval(async () => {
       serverPort: 3025,
     };
 
-    const connected = await checkWebSocketConnectivity(settings.serverHost, settings.serverPort);
-    websocketConnected = connected;
+    // Only check if we think we're disconnected to avoid unnecessary connections
+    if (!websocketConnected) {
+      const connected = await checkWebSocketConnectivity(settings.serverHost, settings.serverPort);
+      websocketConnected = connected;
+    }
   });
-}, 10000); // Check every 10 seconds
+}, 30000); // Check every 30 seconds (reduced from 10 seconds)

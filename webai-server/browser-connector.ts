@@ -176,7 +176,7 @@ let currentSettings = {
   networkConfig: {
     timeout: parseInt(process.env.NETWORK_TIMEOUT || "30000"),
     retries: parseInt(process.env.NETWORK_RETRIES || "3"),
-    userAgent: process.env.USER_AGENT || "Browser-Tools-MCP/1.3.0",
+    userAgent: process.env.USER_AGENT || "WebAI-MCP/1.4.0",
   } as NetworkConfig,
 };
 
@@ -576,6 +576,7 @@ app.get("/.port", (req, res) => {
 app.get("/.identity", (req, res) => {
   // Read version from package.json
   let version = "unknown";
+  let packageName = "webai-server";
   try {
     // Try multiple possible paths for package.json
     const possiblePaths = [
@@ -587,8 +588,13 @@ app.get("/.identity", (req, res) => {
     for (const packagePath of possiblePaths) {
       if (fs.existsSync(packagePath)) {
         const packageJson = JSON.parse(fs.readFileSync(packagePath, "utf8"));
-        if (packageJson.name && packageJson.name.includes("browser-tools-server")) {
+        if (packageJson.name && (
+          packageJson.name.includes("webai-server") ||
+          packageJson.name.includes("browser-tools-server")
+        )) {
           version = packageJson.version;
+          packageName = packageJson.name;
+          console.log(`Found package.json: ${packageName} v${version} at ${packagePath}`);
           break;
         }
       }
@@ -599,7 +605,7 @@ app.get("/.identity", (req, res) => {
 
   res.json({
     port: PORT,
-    name: "browser-tools-server",
+    name: packageName,
     version: version,
     signature: "mcp-browser-connector-24x7",
     uptime: process.uptime(),
@@ -2594,7 +2600,7 @@ export class BrowserConnector {
 // Use an async IIFE to allow for async/await in the initial setup
 (async () => {
   try {
-    console.log(`Starting Browser Tools Server...`);
+    console.log(`Starting WebAI Server...`);
     console.log(`Requested port: ${REQUESTED_PORT}`);
 
     // Find an available port

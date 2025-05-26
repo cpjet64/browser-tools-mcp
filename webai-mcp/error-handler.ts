@@ -199,11 +199,11 @@ export class ErrorHandler {
 
       case 'server':
         solutions.push({
-          title: 'Restart Browser Tools Server',
+          title: 'Restart WebAI Server',
           description: 'Stop any running instances and start fresh.',
           commands: [
-            'pkill -f browser-tools',
-            'npx @cpjet64/browser-tools-server'
+            'pkill -f webai-server',
+            'npx @cpjet64/webai-server'
           ],
           priority: 'high'
         });
