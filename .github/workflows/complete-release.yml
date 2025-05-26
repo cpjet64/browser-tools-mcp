@@ -104,6 +104,7 @@ jobs:
         run: |
           cd webai-mcp && npm ci
           cd ../webai-server && npm ci
+          npm ci  # Install root dependencies for changelog automation
 
       - name: 🏗️ Build Packages
         run: |
@@ -130,7 +131,7 @@ jobs:
             console.log('✅ Chrome Extension test passed');
           "
 
-      - name: 📝 Update Documentation
+      - name: 📝 Update Documentation and Changelog
         run: |
           NEW_VERSION="${{ steps.version.outputs.new_version }}"
 
@@ -147,11 +148,61 @@ jobs:
             sed -i "s/v[0-9]\+\.[0-9]\+\.[0-9]\+/v$NEW_VERSION/g" docs/i18n/README_CN.md
           fi
 
-      - name: 💾 Commit Version Changes
+          # Generate production changelog entry
+          TODAY=$(date +%Y-%m-%d)
+          LAST_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+
+          # Get changes since last release
+          if [ -n "$LAST_TAG" ]; then
+            CHANGES=$(git log $LAST_TAG..HEAD --oneline --pretty=format:"- %s" --no-merges | grep -E "^- (feat|fix|docs|style|refactor|perf|test|chore|ci|build):" | head -20)
+          else
+            CHANGES=$(git log --oneline --pretty=format:"- %s" --no-merges | grep -E "^- (feat|fix|docs|style|refactor|perf|test|chore|ci|build):" | head -20)
+          fi
+
+          # Create production changelog entry
+          cat > temp_changelog.md << EOF
+          ## [${NEW_VERSION}] - ${TODAY}
+
+          ### 🚀 **Production Release**
+
+          #### **✨ What's New**
+          ${CHANGES}
+
+          #### **📦 Installation**
+          \`\`\`bash
+          npx @cpjet64/webai-mcp@latest
+          npx @cpjet64/webai-server@latest
+          \`\`\`
+
+          #### **🔗 Links**
+          - [GitHub Release](https://github.com/cpjet64/WebAI-MCP/releases/tag/v${NEW_VERSION})
+          - [NPM Package (MCP)](https://www.npmjs.com/package/@cpjet64/webai-mcp)
+          - [NPM Package (Server)](https://www.npmjs.com/package/@cpjet64/webai-server)
+
+          ---
+
+          EOF
+
+          # Update CHANGELOG.md by replacing [Unreleased] with new version
+          if grep -q "## \[Unreleased\]" CHANGELOG.md; then
+            # Replace [Unreleased] with new version
+            sed -i "s/## \[Unreleased\] - Development/## [${NEW_VERSION}] - ${TODAY}/" CHANGELOG.md
+
+            # Add new [Unreleased] section at the top
+            sed -i "/^## \[${NEW_VERSION}\]/i\\## [Unreleased] - Development\n\n### 🚀 **Future Features (In Development)**\n\nUpcoming features and improvements will be listed here.\n\n---\n" CHANGELOG.md
+          else
+            # No [Unreleased] section, prepend new release
+            cat temp_changelog.md CHANGELOG.md > temp_full_changelog.md
+            mv temp_full_changelog.md CHANGELOG.md
+          fi
+
+          rm -f temp_changelog.md
+
+      - name: 💾 Commit Version and Changelog Changes
         run: |
           NEW_VERSION="${{ steps.version.outputs.new_version }}"
           git add .
-          git commit -m "chore: release v$NEW_VERSION - automated release with version bump, tests, and NPM publishing"
+          git commit -m "chore: release v$NEW_VERSION - automated release with version bump, changelog update, tests, and NPM publishing"
 
           git tag "v$NEW_VERSION"
           git push origin main

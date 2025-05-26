@@ -39,6 +39,9 @@ jobs:
           cd webai-server
           npm ci
 
+      - name: 🔧 Install root dependencies (for changelog automation)
+        run: npm ci
+
       - name: 🏗️ Build packages
         run: |
           cd webai-mcp
@@ -77,6 +80,62 @@ jobs:
             manifest.version = '$NEW_VERSION'.replace('-dev.', '.');
             fs.writeFileSync('manifest.json', JSON.stringify(manifest, null, 2) + '\n');
           "
+
+      - name: 📝 Update CHANGELOG.md automatically
+        run: |
+          # Generate changelog for unreleased changes
+          npm run changelog:update
+
+          # Add dev release entry to changelog
+          NEW_VERSION="${{ steps.version.outputs.new_version }}"
+          TODAY=$(date +%Y-%m-%d)
+
+          # Create temporary changelog entry
+          cat > temp_changelog.md << EOF
+          ## [${NEW_VERSION}] - ${TODAY}
+
+          ### 🧪 **Development Release**
+
+          This is an automated development release with the latest features and improvements.
+
+          #### **✨ Recent Changes**
+          $(git log --oneline --pretty=format:"- %s" $(git describe --tags --abbrev=0 2>/dev/null || echo "HEAD~10")..HEAD | head -10)
+
+          #### **🚀 Installation**
+          \`\`\`bash
+          npx @cpjet64/webai-mcp@dev
+          npx @cpjet64/webai-server@dev
+          \`\`\`
+
+          ---
+
+          EOF
+
+          # Insert new entry after [Unreleased] section
+          if grep -q "## \[Unreleased\]" CHANGELOG.md; then
+            # Find line number of [Unreleased] section
+            UNRELEASED_LINE=$(grep -n "## \[Unreleased\]" CHANGELOG.md | cut -d: -f1)
+            # Find next release section
+            NEXT_RELEASE_LINE=$(tail -n +$((UNRELEASED_LINE + 1)) CHANGELOG.md | grep -n "^## \[" | head -1 | cut -d: -f1)
+            if [ -n "$NEXT_RELEASE_LINE" ]; then
+              NEXT_RELEASE_LINE=$((UNRELEASED_LINE + NEXT_RELEASE_LINE))
+              # Insert new release before next release
+              head -n $((NEXT_RELEASE_LINE - 1)) CHANGELOG.md > temp_full_changelog.md
+              cat temp_changelog.md >> temp_full_changelog.md
+              tail -n +$NEXT_RELEASE_LINE CHANGELOG.md >> temp_full_changelog.md
+              mv temp_full_changelog.md CHANGELOG.md
+            else
+              # No other releases, append at end
+              cat CHANGELOG.md temp_changelog.md > temp_full_changelog.md
+              mv temp_full_changelog.md CHANGELOG.md
+            fi
+          else
+            # No [Unreleased] section, prepend to file
+            cat temp_changelog.md CHANGELOG.md > temp_full_changelog.md
+            mv temp_full_changelog.md CHANGELOG.md
+          fi
+
+          rm -f temp_changelog.md
 
       - name: 📦 Create Chrome Extension Package
         run: |
@@ -193,12 +252,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 💾 Commit version changes
+      - name: 💾 Commit version and changelog changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add webai-server/package.json webai-mcp/package.json chrome-extension/manifest.json
-          git commit -m "chore: bump dev version to ${{ steps.version.outputs.new_version }}" || exit 0
+          git add webai-server/package.json webai-mcp/package.json chrome-extension/manifest.json CHANGELOG.md
+          git commit -m "chore: bump dev version to ${{ steps.version.outputs.new_version }} and update changelog" || exit 0
           git push
 
       - name: 📊 Dev Release Summary

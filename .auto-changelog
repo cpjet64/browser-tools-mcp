@@ -1,0 +1,42 @@
+{
+  "output": "CHANGELOG.md",
+  "template": "keepachangelog",
+  "unreleased": true,
+  "commitLimit": false,
+  "backfillLimit": false,
+  "tagPrefix": "v",
+  "sortCommits": "date",
+  "includeBranch": ["main", "dev"],
+  "ignoreCommitPattern": "^(chore|docs): (bump|update) (dev )?version",
+  "replaceText": {
+    "feat": "✨ **Added**",
+    "fix": "🐛 **Fixed**", 
+    "docs": "📚 **Documentation**",
+    "style": "💄 **Style**",
+    "refactor": "♻️ **Refactor**",
+    "perf": "⚡ **Performance**",
+    "test": "✅ **Tests**",
+    "chore": "🔧 **Chore**",
+    "ci": "👷 **CI/CD**",
+    "build": "📦 **Build**"
+  },
+  "commitTransform": {
+    "feat": "Added",
+    "fix": "Fixed",
+    "docs": "Documentation", 
+    "style": "Style",
+    "refactor": "Changed",
+    "perf": "Performance",
+    "test": "Tests",
+    "chore": "Maintenance",
+    "ci": "CI/CD",
+    "build": "Build"
+  },
+  "issueUrl": "https://github.com/cpjet64/WebAI-MCP/issues/{id}",
+  "compareUrl": "https://github.com/cpjet64/WebAI-MCP/compare/{from}...{to}",
+  "releaseUrl": "https://github.com/cpjet64/WebAI-MCP/releases/tag/{tag}",
+  "handlebarsHelpers": {
+    "formatDate": "function(date) { return new Date(date).toISOString().split('T')[0]; }",
+    "formatCommitType": "function(type) { const types = { feat: '✨ Added', fix: '🐛 Fixed', docs: '📚 Documentation', style: '💄 Style', refactor: '♻️ Refactor', perf: '⚡ Performance', test: '✅ Tests', chore: '🔧 Chore', ci: '👷 CI/CD', build: '📦 Build' }; return types[type] || '🔄 Changed'; }"
+  }
+}

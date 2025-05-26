@@ -1,0 +1,48 @@
+{
+  "name": "webai-mcp-workspace",
+  "version": "1.4.3",
+  "private": true,
+  "description": "WebAI-MCP workspace for automated changelog and release management",
+  "scripts": {
+    "changelog": "auto-changelog --config .auto-changelog",
+    "changelog:update": "auto-changelog --config .auto-changelog --unreleased",
+    "version:bump": "npm run changelog && git add CHANGELOG.md",
+    "build": "npm run build --workspace=webai-mcp && npm run build --workspace=webai-server",
+    "test": "npm run test --workspace=webai-mcp && npm run test --workspace=webai-server",
+    "dev": "concurrently \"npm run start --workspace=webai-server\" \"npm run start --workspace=webai-mcp\"",
+    "clean": "npm run clean --workspace=webai-mcp && npm run clean --workspace=webai-server"
+  },
+  "workspaces": [
+    "webai-mcp",
+    "webai-server"
+  ],
+  "devDependencies": {
+    "auto-changelog": "^2.4.0",
+    "concurrently": "^8.2.2",
+    "conventional-changelog-cli": "^4.1.0",
+    "conventional-changelog-conventionalcommits": "^7.0.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cpjet64/WebAI-MCP.git"
+  },
+  "keywords": [
+    "mcp",
+    "browser-automation",
+    "chrome-extension",
+    "ai-tools",
+    "webai"
+  ],
+  "author": "cpjet64",
+  "license": "MIT",
+  "auto-changelog": {
+    "output": "CHANGELOG.md",
+    "template": "keepachangelog",
+    "unreleased": true,
+    "commitLimit": false,
+    "backfillLimit": false,
+    "handlebarsHelpers": {
+      "formatCommitType": "function(type) { const types = { feat: '✨ Added', fix: '🐛 Fixed', docs: '📚 Documentation', style: '💄 Style', refactor: '♻️ Refactor', perf: '⚡ Performance', test: '✅ Tests', chore: '🔧 Chore', ci: '👷 CI/CD', build: '📦 Build' }; return types[type] || '🔄 Changed'; }"
+    }
+  }
+}
