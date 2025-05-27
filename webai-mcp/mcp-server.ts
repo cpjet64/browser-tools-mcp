@@ -2097,7 +2097,7 @@ server.tool(
 // Add version compatibility check tool
 server.tool(
   "checkVersionCompatibility",
-  "Check version compatibility between MCP server, Browser Tools server, and Chrome extension",
+  "Check version compatibility between MCP server, WebAI server, and Chrome extension",
   {},
   async () => {
     try {
@@ -2119,6 +2119,83 @@ server.tool(
           {
             type: "text",
             text: `Failed to check version compatibility: ${errorMessage}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  }
+);
+
+// Add comprehensive version information tool
+server.tool(
+  "getVersionInfo",
+  "Get comprehensive version information for all WebAI-MCP components including update availability",
+  {},
+  async () => {
+    try {
+      const versionInfo = await VersionChecker.getVersionInfo();
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: VersionChecker.formatVersionReport(versionInfo),
+          },
+        ],
+        isError: false,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Failed to get version information: ${errorMessage}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  }
+);
+
+// Add quick version check tool
+server.tool(
+  "getVersions",
+  "Get current versions of all WebAI-MCP components (quick check)",
+  {},
+  async () => {
+    try {
+      const result = await VersionChecker.checkCompatibility();
+
+      let report = '📋 WebAI-MCP Component Versions\n';
+      report += '===============================\n\n';
+      report += `• MCP Server: ${result.mcpServer.version} ${result.mcpServer.isValid ? '✅' : '❌'}\n`;
+      report += `• WebAI Server: ${result.webaiServer.version} ${result.webaiServer.isValid ? '✅' : '❌'}\n`;
+      report += `• Chrome Extension: ${result.chromeExtension.version} ${result.chromeExtension.isValid ? '✅' : '❌'}\n`;
+
+      if (result.systemInfo) {
+        report += `\n🖥️  System: ${result.systemInfo.platform} (${result.systemInfo.arch})\n`;
+        report += `📦 Node.js: ${result.systemInfo.nodeVersion} | NPM: ${result.systemInfo.npmVersion}\n`;
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: report,
+          },
+        ],
+        isError: false,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Failed to get versions: ${errorMessage}`,
           },
         ],
         isError: true,

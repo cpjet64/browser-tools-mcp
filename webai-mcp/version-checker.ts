@@ -25,6 +25,25 @@ interface CompatibilityResult {
   errors: string[];
   warnings: string[];
   recommendations: string[];
+  systemInfo?: SystemInfo;
+}
+
+interface SystemInfo {
+  nodeVersion: string;
+  npmVersion: string;
+  platform: string;
+  arch: string;
+  timestamp: string;
+}
+
+interface VersionInfo {
+  current: ComponentVersion[];
+  latest: {
+    mcpServer: string;
+    webaiServer: string;
+  };
+  updateAvailable: boolean;
+  updateCommands: string[];
 }
 
 export class VersionChecker {
@@ -47,7 +66,8 @@ export class VersionChecker {
       chromeExtension: await this.getChromeExtensionVersion(),
       errors: [],
       warnings: [],
-      recommendations: []
+      recommendations: [],
+      systemInfo: await this.getSystemInfo()
     };
 
     // Validate versions
@@ -55,6 +75,50 @@ export class VersionChecker {
     this.generateRecommendations(result);
 
     return result;
+  }
+
+  /**
+   * Get comprehensive version information
+   */
+  static async getVersionInfo(): Promise<VersionInfo> {
+    const mcpServer = await this.getMcpServerVersion();
+    const webaiServer = await this.getWebaiServerVersion();
+    const chromeExtension = await this.getChromeExtensionVersion();
+
+    const current = [mcpServer, webaiServer, chromeExtension];
+    const latest = await this.getLatestVersions();
+
+    const updateAvailable = this.checkForUpdates(current, latest);
+    const updateCommands = this.generateUpdateCommands(current, latest);
+
+    return {
+      current,
+      latest,
+      updateAvailable,
+      updateCommands
+    };
+  }
+
+  /**
+   * Get system information
+   */
+  private static async getSystemInfo(): Promise<SystemInfo> {
+    const { execSync } = require('child_process');
+
+    let npmVersion = 'unknown';
+    try {
+      npmVersion = execSync('npm --version', { encoding: 'utf8' }).trim();
+    } catch (error) {
+      // npm not available
+    }
+
+    return {
+      nodeVersion: process.version,
+      npmVersion,
+      platform: process.platform,
+      arch: process.arch,
+      timestamp: new Date().toISOString()
+    };
   }
 
   /**
@@ -253,6 +317,69 @@ export class VersionChecker {
   }
 
   /**
+   * Get latest available versions from NPM
+   */
+  private static async getLatestVersions(): Promise<{ mcpServer: string; webaiServer: string }> {
+    const { execSync } = require('child_process');
+
+    let mcpServer = 'unknown';
+    let webaiServer = 'unknown';
+
+    try {
+      const mcpResult = execSync('npm view @cpjet64/webai-mcp version', { encoding: 'utf8' });
+      mcpServer = mcpResult.trim();
+    } catch (error) {
+      // Package not found or npm error
+    }
+
+    try {
+      const serverResult = execSync('npm view @cpjet64/webai-server version', { encoding: 'utf8' });
+      webaiServer = serverResult.trim();
+    } catch (error) {
+      // Package not found or npm error
+    }
+
+    return { mcpServer, webaiServer };
+  }
+
+  /**
+   * Check if updates are available
+   */
+  private static checkForUpdates(current: ComponentVersion[], latest: { mcpServer: string; webaiServer: string }): boolean {
+    const mcpCurrent = current.find(c => c.component === 'MCP Server');
+    const serverCurrent = current.find(c => c.component === 'WebAI Server');
+
+    if (!mcpCurrent?.isValid || !serverCurrent?.isValid) {
+      return false;
+    }
+
+    return mcpCurrent.version !== latest.mcpServer || serverCurrent.version !== latest.webaiServer;
+  }
+
+  /**
+   * Generate update commands
+   */
+  private static generateUpdateCommands(current: ComponentVersion[], latest: { mcpServer: string; webaiServer: string }): string[] {
+    const commands: string[] = [];
+    const mcpCurrent = current.find(c => c.component === 'MCP Server');
+    const serverCurrent = current.find(c => c.component === 'WebAI Server');
+
+    if (mcpCurrent?.isValid && mcpCurrent.version !== latest.mcpServer) {
+      commands.push('npm update -g @cpjet64/webai-mcp@latest');
+    }
+
+    if (serverCurrent?.isValid && serverCurrent.version !== latest.webaiServer) {
+      commands.push('npm update -g @cpjet64/webai-server@latest');
+    }
+
+    if (commands.length === 0) {
+      commands.push('All components are up to date');
+    }
+
+    return commands;
+  }
+
+  /**
    * Format compatibility results as a string report
    */
   static formatCompatibilityReport(result: CompatibilityResult): string {
@@ -263,6 +390,14 @@ export class VersionChecker {
     report += `  • MCP Server: ${result.mcpServer.version} ${result.mcpServer.isValid ? '✅' : '❌'}\n`;
     report += `  • WebAI Server: ${result.webaiServer.version} ${result.webaiServer.isValid ? '✅' : '❌'}\n`;
     report += `  • Chrome Extension: ${result.chromeExtension.version} ${result.chromeExtension.isValid ? '✅' : '❌'}\n`;
+
+    if (result.systemInfo) {
+      report += '\n🖥️  System Information:\n';
+      report += `  • Node.js: ${result.systemInfo.nodeVersion}\n`;
+      report += `  • NPM: ${result.systemInfo.npmVersion}\n`;
+      report += `  • Platform: ${result.systemInfo.platform} (${result.systemInfo.arch})\n`;
+      report += `  • Timestamp: ${result.systemInfo.timestamp}\n`;
+    }
 
     if (result.errors.length > 0) {
       report += '\n❌ Errors:\n';
@@ -282,6 +417,35 @@ export class VersionChecker {
     report += `\n🎯 Overall Compatibility: ${result.isCompatible ? '✅ Compatible' : '❌ Issues Found'}\n`;
     report += '==========================================\n';
 
+    return report;
+  }
+
+  /**
+   * Format version information as a string report
+   */
+  static formatVersionReport(versionInfo: VersionInfo): string {
+    let report = '📋 WebAI-MCP Version Information\n';
+    report += '=================================\n\n';
+
+    report += '📦 Current Versions:\n';
+    versionInfo.current.forEach(component => {
+      report += `  • ${component.component}: ${component.version} ${component.isValid ? '✅' : '❌'}\n`;
+    });
+
+    report += '\n🌐 Latest Available:\n';
+    report += `  • MCP Server: ${versionInfo.latest.mcpServer}\n`;
+    report += `  • WebAI Server: ${versionInfo.latest.webaiServer}\n`;
+
+    if (versionInfo.updateAvailable) {
+      report += '\n🔄 Updates Available:\n';
+      versionInfo.updateCommands.forEach(cmd => {
+        report += `  • ${cmd}\n`;
+      });
+    } else {
+      report += '\n✅ All components are up to date!\n';
+    }
+
+    report += '\n=================================\n';
     return report;
   }
 
