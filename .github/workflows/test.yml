@@ -14,7 +14,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         node-version: [18, 20, 22]
-      fail-fast: false  # Continue testing other combinations even if one fails
+      fail-fast: true  # Stop all testing immediately if any combination fails
 
     steps:
       - name: 📥 Checkout
