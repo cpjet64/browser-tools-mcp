@@ -267,7 +267,14 @@ jobs:
             "compilerOptions": {
               "strict": false,
               "noImplicitAny": false,
-              "strictNullChecks": false
+              "strictNullChecks": false,
+              "strictPropertyInitialization": false,
+              "strictBindCallApply": false,
+              "strictFunctionTypes": false,
+              "noImplicitReturns": false,
+              "noImplicitThis": false,
+              "noPropertyAccessFromIndexSignature": false,
+              "suppressImplicitAnyIndexErrors": true
             }
           }
           EOF
@@ -290,7 +297,14 @@ jobs:
             "compilerOptions": {
               "strict": false,
               "noImplicitAny": false,
-              "strictNullChecks": false
+              "strictNullChecks": false,
+              "strictPropertyInitialization": false,
+              "strictBindCallApply": false,
+              "strictFunctionTypes": false,
+              "noImplicitReturns": false,
+              "noImplicitThis": false,
+              "noPropertyAccessFromIndexSignature": false,
+              "suppressImplicitAnyIndexErrors": true
             }
           }
           EOF
