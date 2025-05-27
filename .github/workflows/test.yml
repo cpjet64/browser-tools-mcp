@@ -251,16 +251,24 @@ jobs:
         run: |
           cd webai-mcp
           echo "🔍 Running TypeScript checks for MCP Server..."
-          # Use the local TypeScript installation from node_modules
-          npx --package=typescript tsc --noEmit --pretty
+          echo "📦 Checking installed packages..."
+          ls -la node_modules/@types/ || echo "No @types directory found"
+          echo "🔍 TypeScript version:"
+          npx tsc --version
+          echo "🔍 Running TypeScript compilation..."
+          npx tsc --noEmit --pretty
           echo "✅ MCP TypeScript checks passed"
 
       - name: 🧹 TypeScript Check (Server)
         run: |
           cd webai-server
           echo "🔍 Running TypeScript checks for WebAI Server..."
-          # Use the local TypeScript installation from node_modules
-          npx --package=typescript tsc --noEmit --pretty
+          echo "📦 Checking installed packages..."
+          ls -la node_modules/@types/ || echo "No @types directory found"
+          echo "🔍 TypeScript version:"
+          npx tsc --version
+          echo "🔍 Running TypeScript compilation..."
+          npx tsc --noEmit --pretty
           echo "✅ Server TypeScript checks passed"
 
       - name: 🔍 ESLint Check (if available)

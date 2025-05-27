@@ -4,12 +4,15 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "outDir": "./dist",
     "rootDir": ".",
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "typeRoots": ["./node_modules/@types"]
+    "lib": ["ES2020"],
+    "types": ["node"],
+    "typeRoots": ["./node_modules/@types", "../node_modules/@types"]
   },
   "include": ["*.ts"],
   "exclude": ["node_modules", "dist"]
