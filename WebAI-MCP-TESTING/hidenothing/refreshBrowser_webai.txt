@@ -1,0 +1,14 @@
+Tool: refreshBrowser_webai
+Command: refreshBrowser_webai(waitForLoad=true, timeout=10000, clearCache=false, preserveScrollPosition=false)
+Parameters:
+- waitForLoad: true (wait for page to fully load after refresh)
+- timeout: 10000 (timeout in milliseconds for page load)
+- clearCache: false (clear browser cache before refresh)
+- preserveScrollPosition: false (attempt to preserve scroll position)
+
+Output:
+<error>Failed to refresh browser: Server returned 500: {"error":"Failed to check page load state"}</error>
+
+Description: Refreshes the current browser page. Can optionally clear cache and preserve scroll position. Returns success status or error if refresh fails.
+
+Settings Used: Hide Nothing (All data will be sent to the server, including potentially sensitive information)

@@ -1,0 +1,10 @@
+Tool: getNetworkErrors_webai
+Command: getNetworkErrors_webai()
+Parameters: None
+
+Output:
+<error>[]</error>
+
+Description: Retrieves network error logs from the browser. Returns an empty array when no network errors are present.
+
+Settings Used: Hide Only Sensitive Data (Sensitive cookies and storage filtered out, but other cookies and storage will be sent)

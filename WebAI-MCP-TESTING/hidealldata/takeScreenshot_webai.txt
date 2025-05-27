@@ -1,0 +1,8 @@
+Tool: takeScreenshot_webai
+Command: takeScreenshot_webai()
+Parameters: None
+
+Output:
+Successfully saved screenshot
+
+Description: Takes a screenshot of the current browser tab and saves it. Returns a success message when completed.

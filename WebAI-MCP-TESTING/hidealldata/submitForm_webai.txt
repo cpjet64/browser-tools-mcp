@@ -1,0 +1,24 @@
+Tool: submitForm_webai
+Command: submitForm_webai(formSelector="form", waitForElement=true, timeout=5000, waitForNavigation=false)
+Parameters:
+- formSelector: "form" (CSS selector to find the form element to submit)
+- waitForElement: true (wait for element to be visible before submitting)
+- timeout: 5000 (timeout in milliseconds to wait for element)
+- waitForNavigation: false (wait for page navigation after form submission)
+
+Output:
+{
+  "success": true,
+  "message": "Form submitted successfully",
+  "element": {
+    "tagName": "FORM",
+    "id": "search",
+    "className": "_13c93d41 relative flex bg-transparent ph3 ph2 pv2 ph0-ns pv0-ns bt b--black-10 bn-ns",
+    "type": null,
+    "action": "https://www.npmjs.com/search",
+    "method": "get"
+  },
+  "timestamp": 1748316227241
+}
+
+Description: Submits a form by selector or by clicking a submit button. Returns success status, form element information including action and method, and operation details.

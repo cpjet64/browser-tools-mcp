@@ -1,0 +1,25 @@
+Tool: runNextJSAudit_webai
+Command: runNextJSAudit_webai()
+Parameters: None
+
+Output:
+You are an expert in SEO and web development with NextJS. Given the following procedures for analyzing my codebase, please perform a comprehensive - page by page analysis of our NextJS application to identify any issues or areas of improvement for SEO.
+
+After each iteration of changes, reinvoke this tool to re-fetch our SEO audit procedures and then scan our codebase again to identify additional areas of improvement.
+
+When no more areas of improvement are found, return "No more areas of improvement found, your NextJS application is optimized for SEO!".
+
+Start by analyzing each of the following aspects of our codebase:
+1. Meta tags - provides information about your website to search engines and social media platforms.
+2. JSON-LD Schema
+3. Sitemap
+4. robots.txt
+5. Link tags
+6. Script optimization
+7. Image optimization
+
+[Detailed procedures for each aspect follow...]
+
+Description: Provides comprehensive NextJS SEO audit procedures and guidelines. This tool returns detailed instructions for analyzing and optimizing NextJS applications for SEO, covering meta tags, structured data, sitemaps, robots.txt, and more.
+
+Settings Used: Hide Nothing (All data will be sent to the server, including potentially sensitive information)

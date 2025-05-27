@@ -1,0 +1,47 @@
+Tool: runPerformanceAudit_webai
+Command: runPerformanceAudit_webai()
+Parameters: None
+
+Output:
+{
+  "url": "https://www.npmjs.com/package/@cpjet64/webai-server#main",
+  "timestamp": "2025-05-27T03:42:36.019Z",
+  "device": "desktop",
+  "lighthouseVersion": "12.6.0",
+  "score": 60,
+  "audit_counts": {
+    "failed": 22,
+    "passed": 24,
+    "manual": 0,
+    "informative": 17,
+    "not_applicable": 10
+  },
+  "metrics": [
+    {
+      "id": "lcp",
+      "score": 0.1,
+      "value_ms": 4739,
+      "passes_core_web_vital": false,
+      "element_selector": "article > div#readme > div.highlight > pre",
+      "element_type": "text",
+      "element_content": "# Run directly with npx (recommended)\nnpx @cpjet64/webai-server\n\n# Or install g…"
+    }
+  ],
+  "opportunities": [
+    {
+      "id": "render_blocking_resources",
+      "savings_ms": 1874,
+      "severity": "serious",
+      "resources": [
+        {
+          "url": "styles.60bfb8445a405788b47e.css",
+          "savings_ms": 1105
+        }
+      ]
+    }
+  ]
+}
+
+Description: Runs a comprehensive performance audit using Lighthouse. Returns performance score, Core Web Vitals metrics, optimization opportunities, and page statistics.
+
+Settings Used: Hide Nothing (All data will be sent to the server, including potentially sensitive information)

@@ -1,0 +1,45 @@
+Tool: runBestPracticesAudit_webai
+Command: runBestPracticesAudit_webai()
+Parameters: None
+
+Output:
+{
+  "url": "https://www.npmjs.com/package/@cpjet64/webai-mcp?activeTab=readme",
+  "timestamp": "2025-05-27T03:21:12.888Z",
+  "device": "desktop",
+  "lighthouseVersion": "12.6.0",
+  "score": 100,
+  "audit_counts": {
+    "failed": 0,
+    "passed": 14,
+    "manual": 0,
+    "informative": 3,
+    "not_applicable": 4
+  },
+  "issues": [],
+  "categories": {
+    "security": {
+      "score": 100,
+      "issues_count": 0
+    },
+    "trust": {
+      "score": 100,
+      "issues_count": 0
+    },
+    "user-experience": {
+      "score": 100,
+      "issues_count": 0
+    },
+    "browser-compat": {
+      "score": 100,
+      "issues_count": 0
+    },
+    "other": {
+      "score": 100,
+      "issues_count": 0
+    }
+  },
+  "prioritized_recommendations": []
+}
+
+Description: Runs a best practices audit using Lighthouse. Returns scores for security, trust, user experience, browser compatibility, and other best practices with detailed recommendations.

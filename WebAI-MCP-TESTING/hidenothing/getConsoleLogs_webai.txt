@@ -1,0 +1,23 @@
+Tool: getConsoleLogs_webai
+Command: getConsoleLogs_webai()
+Parameters: None
+
+Output:
+[
+  {
+    "type": "console-log",
+    "level": "log",
+    "message": "easyBlockStorageObject retrieved: {\"webpage\":\"https://www.npmjs.com\",\"ebay\":{\"base_url\":\"\",\"hideSellersFewerThanReviews\":0,\"hideSellersLowerThanReviews\":0,\"hideSponsored\":false,\"items\":[],\"sellers\":[]},\"amazon\":{\"base_url\":\"\",\"items\":[]}}",
+    "timestamp": 1748317004803
+  },
+  {
+    "type": "console-log",
+    "level": "log",
+    "message": "easyBlockStorageObject saved: {\"webpage\":\"https://www.npmjs.com\",\"ebay\":{\"base_url\":\"\",\"hideSellersFewerThanReviews\":0,\"hideSellersLowerThanReviews\":0,\"hideSponsored\":false,\"items\":[],\"sellers\":[]},\"amazon\":{\"base_url\":\"\",\"items\":[]}}",
+    "timestamp": 1748317004832
+  }
+]
+
+Description: Retrieves all console logs from the browser. Returns an array of log objects with type, level, message, and timestamp.
+
+Settings Used: Hide Nothing (All data will be sent to the server, including potentially sensitive information)

@@ -1,0 +1,18 @@
+Tool: getVersions_webai
+Command: getVersions_webai()
+Parameters: None
+
+Output:
+📋 WebAI-MCP Component Versions
+===============================
+
+• MCP Server: 1.5.0-dev.2 ✅
+• WebAI Server: unknown ❌
+• Chrome Extension: unknown ❌
+
+🖥️  System: win32 (x64)
+📦 Node.js: v22.14.0 | NPM: 10.9.2
+
+Description: Gets current versions of all WebAI-MCP components (quick check). Returns component versions and basic system information.
+
+Settings Used: Hide Only Sensitive Data (Sensitive cookies and storage filtered out, but other cookies and storage will be sent)

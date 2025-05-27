@@ -1,0 +1,44 @@
+Tool: runSEOAudit_webai
+Command: runSEOAudit_webai()
+Parameters: None
+
+Output:
+{
+  "metadata": {
+    "url": "https://www.npmjs.com/package/@cpjet64/webai-mcp?activeTab=readme",
+    "timestamp": "2025-05-27T03:20:04.472Z",
+    "device": "desktop",
+    "lighthouseVersion": "12.6.0"
+  },
+  "report": {
+    "score": 100,
+    "audit_counts": {
+      "failed": 0,
+      "passed": 9,
+      "manual": 1,
+      "informative": 0,
+      "not_applicable": 1
+    },
+    "issues": [],
+    "categories": {
+      "content": {
+        "score": 0,
+        "issues_count": 0
+      },
+      "mobile": {
+        "score": 0,
+        "issues_count": 0
+      },
+      "crawlability": {
+        "score": 0,
+        "issues_count": 0
+      },
+      "other": {
+        "score": 0,
+        "issues_count": 0
+      }
+    }
+  }
+}
+
+Description: Runs an SEO audit using Lighthouse. Returns SEO score, issues, and categorized recommendations for search engine optimization.

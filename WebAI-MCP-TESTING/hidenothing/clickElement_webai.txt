@@ -1,0 +1,30 @@
+Tool: clickElement_webai
+Command: clickElement_webai(selector="a[href=\"#main\"]", waitForElement=true, scrollIntoView=true, timeout=5000)
+Parameters:
+- selector: "a[href=\"#main\"]" (CSS selector to find the element to click)
+- waitForElement: true (wait for element to be visible before clicking)
+- scrollIntoView: true (scroll element into view before clicking)
+- timeout: 5000 (timeout in milliseconds to wait for element)
+
+Output:
+{
+  "success": true,
+  "message": "Element clicked successfully",
+  "element": {
+    "tagName": "A",
+    "id": "",
+    "className": "d6d0dbcf",
+    "textContent": "content",
+    "rect": {
+      "x": 280.0546875,
+      "y": -91.9765625,
+      "width": 51.671875,
+      "height": 20
+    }
+  },
+  "timestamp": 1748317495934
+}
+
+Description: Clicks on an element by CSS selector or coordinates. Returns success status, element information, and click details including position and dimensions.
+
+Settings Used: Hide Nothing (All data will be sent to the server, including potentially sensitive information)

@@ -205,6 +205,37 @@ function filterSensitiveStorage(storage) {
   return result;
 }
 
+function filterSensitiveInString(text) {
+  if (typeof text !== "string") return text;
+
+  // If hide-all mode, redact everything that looks sensitive
+  if (settings.sensitiveDataMode === "hide-all") {
+    // Replace potential sensitive patterns with redacted text
+    return text
+      .replace(/ey[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g, "[JWT_TOKEN_REDACTED]")
+      .replace(/sk-[A-Za-z0-9]{32,}/g, "[API_KEY_REDACTED]")
+      .replace(/AKIA[0-9A-Z]{16}/g, "[AWS_KEY_REDACTED]")
+      .replace(/gh[pousr]_[A-Za-z0-9_]{36,255}/g, "[GITHUB_TOKEN_REDACTED]")
+      .replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, "[EMAIL_REDACTED]")
+      .replace(/\d{3}-\d{2}-\d{4}/g, "[SSN_REDACTED]")
+      .replace(/(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|6(?:011|5[0-9]{2})[0-9]{12})/g, "[CREDIT_CARD_REDACTED]");
+  }
+
+  // If hide-sensitive mode, only redact obvious sensitive patterns
+  if (settings.sensitiveDataMode === "hide-sensitive") {
+    return text
+      .replace(/ey[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g, "[JWT_TOKEN_REDACTED]")
+      .replace(/sk-[A-Za-z0-9]{32,}/g, "[API_KEY_REDACTED]")
+      .replace(/AKIA[0-9A-Z]{16}/g, "[AWS_KEY_REDACTED]")
+      .replace(/gh[pousr]_[A-Za-z0-9_]{36,255}/g, "[GITHUB_TOKEN_REDACTED]")
+      .replace(/\d{3}-\d{2}-\d{4}/g, "[SSN_REDACTED]")
+      .replace(/(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|6(?:011|5[0-9]{2})[0-9]{12})/g, "[CREDIT_CARD_REDACTED]");
+  }
+
+  // If show-all mode, return original text
+  return text;
+}
+
 // Load saved settings on startup
 chrome.storage.local.get(["browserConnectorSettings"], (result) => {
   if (result.browserConnectorSettings) {
@@ -452,6 +483,13 @@ async function sendToBrowserConnector(logData) {
         "Request body size before:",
         processedData.requestBody.length
       );
+
+      // Apply sensitive data filtering to request bodies
+      if (settings.sensitiveDataMode !== "show-all") {
+        console.log("Chrome Extension: Filtering sensitive request body data");
+        processedData.requestBody = filterSensitiveInString(processedData.requestBody);
+      }
+
       processedData.requestBody = processJsonString(
         processedData.requestBody,
         settings.stringSizeLimit
@@ -463,6 +501,13 @@ async function sendToBrowserConnector(logData) {
         "Response body size before:",
         processedData.responseBody.length
       );
+
+      // Apply sensitive data filtering to response bodies
+      if (settings.sensitiveDataMode !== "show-all") {
+        console.log("Chrome Extension: Filtering sensitive response body data");
+        processedData.responseBody = filterSensitiveInString(processedData.responseBody);
+      }
+
       processedData.responseBody = processJsonString(
         processedData.responseBody,
         settings.stringSizeLimit
@@ -479,6 +524,13 @@ async function sendToBrowserConnector(logData) {
     console.log("Processing console message");
     if (processedData.message) {
       console.log("Message size before:", processedData.message.length);
+
+      // Apply sensitive data filtering to console messages
+      if (settings.sensitiveDataMode !== "show-all") {
+        console.log("Chrome Extension: Filtering sensitive console data");
+        processedData.message = filterSensitiveInString(processedData.message);
+      }
+
       processedData.message = processJsonString(
         processedData.message,
         settings.stringSizeLimit

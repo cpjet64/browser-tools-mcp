@@ -1,0 +1,10 @@
+Tool: getCookies_webai
+Command: getCookies_webai()
+Parameters: None
+
+Output:
+[]
+
+Description: Retrieves all cookies from the browser. Returns an empty array when no cookies are present, or an array of cookie objects with details like name, value, domain, path, etc.
+
+Settings Used: Hide Nothing (All data will be sent to the server, including potentially sensitive information)
