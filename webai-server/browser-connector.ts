@@ -694,7 +694,7 @@ interface ScreenshotMessage {
 
 export class BrowserConnector {
   private wss: WebSocketServer;
-  private activeConnection: WebSocket | null = null;
+  private activeConnections: Set<WebSocket> = new Set();
   private app: express.Application;
   private server: any;
   private urlRequestCallbacks: Map<string, (url: string) => void> = new Map();
@@ -718,8 +718,8 @@ export class BrowserConnector {
         );
         console.log("Browser Connector: Request body:", req.body);
         console.log(
-          "Browser Connector: Active WebSocket connection:",
-          !!this.activeConnection
+          "Browser Connector: Active WebSocket connections:",
+          this.activeConnections.size
         );
         await this.captureScreenshot(req, res);
       }
@@ -755,8 +755,8 @@ export class BrowserConnector {
       async (req: express.Request, res: express.Response): Promise<void> => {
         console.log("Browser Connector: Received request to /cookies endpoint");
         console.log(
-          "Browser Connector: Active WebSocket connection:",
-          !!this.activeConnection
+          "Browser Connector: Active WebSocket connections:",
+          this.activeConnections.size
         );
         await this.getCookies(req, res);
       }
@@ -770,8 +770,8 @@ export class BrowserConnector {
           "Browser Connector: Received request to /local-storage endpoint"
         );
         console.log(
-          "Browser Connector: Active WebSocket connection:",
-          !!this.activeConnection
+          "Browser Connector: Active WebSocket connections:",
+          this.activeConnections.size
         );
         await this.getLocalStorage(req, res);
       }
@@ -785,8 +785,8 @@ export class BrowserConnector {
           "Browser Connector: Received request to /session-storage endpoint"
         );
         console.log(
-          "Browser Connector: Active WebSocket connection:",
-          !!this.activeConnection
+          "Browser Connector: Active WebSocket connections:",
+          this.activeConnections.size
         );
         await this.getSessionStorage(req, res);
       }
@@ -799,8 +799,8 @@ export class BrowserConnector {
         console.log("Browser Connector: Received request to /click-element endpoint");
         console.log("Browser Connector: Request body:", req.body);
         console.log(
-          "Browser Connector: Active WebSocket connection:",
-          !!this.activeConnection
+          "Browser Connector: Active WebSocket connections:",
+          this.activeConnections.size
         );
         await this.clickElement(req, res);
       }
@@ -812,8 +812,8 @@ export class BrowserConnector {
         console.log("Browser Connector: Received request to /fill-input endpoint");
         console.log("Browser Connector: Request body:", req.body);
         console.log(
-          "Browser Connector: Active WebSocket connection:",
-          !!this.activeConnection
+          "Browser Connector: Active WebSocket connections:",
+          this.activeConnections.size
         );
         await this.fillInput(req, res);
       }
@@ -825,8 +825,8 @@ export class BrowserConnector {
         console.log("Browser Connector: Received request to /select-option endpoint");
         console.log("Browser Connector: Request body:", req.body);
         console.log(
-          "Browser Connector: Active WebSocket connection:",
-          !!this.activeConnection
+          "Browser Connector: Active WebSocket connections:",
+          this.activeConnections.size
         );
         await this.selectOption(req, res);
       }
@@ -838,8 +838,8 @@ export class BrowserConnector {
         console.log("Browser Connector: Received request to /submit-form endpoint");
         console.log("Browser Connector: Request body:", req.body);
         console.log(
-          "Browser Connector: Active WebSocket connection:",
-          !!this.activeConnection
+          "Browser Connector: Active WebSocket connections:",
+          this.activeConnections.size
         );
         await this.submitForm(req, res);
       }
@@ -852,8 +852,8 @@ export class BrowserConnector {
         console.log("Browser Connector: Received request to /refresh-browser endpoint");
         console.log("Browser Connector: Request body:", req.body);
         console.log(
-          "Browser Connector: Active WebSocket connection:",
-          !!this.activeConnection
+          "Browser Connector: Active WebSocket connections:",
+          this.activeConnections.size
         );
         await this.refreshBrowser(req, res);
       }
@@ -875,8 +875,9 @@ export class BrowserConnector {
     );
 
     this.wss.on("connection", (ws: WebSocket) => {
-      console.log("Chrome extension connected via WebSocket");
-      this.activeConnection = ws;
+      console.log("New client connected via WebSocket");
+      this.activeConnections.add(ws);
+      console.log(`Total active connections: ${this.activeConnections.size}`);
 
       ws.on("message", (message: string | Buffer | ArrayBuffer | Buffer[]) => {
         try {
@@ -1209,10 +1210,9 @@ export class BrowserConnector {
       });
 
       ws.on("close", () => {
-        console.log("Chrome extension disconnected");
-        if (this.activeConnection === ws) {
-          this.activeConnection = null;
-        }
+        console.log("Client disconnected");
+        this.activeConnections.delete(ws);
+        console.log(`Total active connections: ${this.activeConnections.size}`);
       });
     });
 
@@ -1272,8 +1272,8 @@ export class BrowserConnector {
   }
 
   private async handleScreenshot(req: express.Request, res: express.Response) {
-    if (!this.activeConnection) {
-      return res.status(503).json({ error: "Chrome extension not connected" });
+    if (this.activeConnections.size === 0) {
+      return res.status(503).json({ error: "No clients connected" });
     }
 
     try {
@@ -1320,21 +1320,22 @@ export class BrowserConnector {
           } catch (error) {
             reject(error);
           } finally {
-            this.activeConnection?.removeListener("message", messageHandler);
+            // Note: This method appears to be unused/legacy - keeping for compatibility
           }
         };
 
+        // Note: This method appears to be unused/legacy - keeping for compatibility
         // Add temporary message handler
-        this.activeConnection?.on("message", messageHandler);
+        // this.activeConnection?.on("message", messageHandler);
 
         // Request screenshot
-        this.activeConnection?.send(
-          JSON.stringify({ type: "take-screenshot" })
-        );
+        // this.activeConnection?.send(
+        //   JSON.stringify({ type: "take-screenshot" })
+        // );
 
         // Set timeout
         setTimeout(() => {
-          this.activeConnection?.removeListener("message", messageHandler);
+          // this.activeConnection?.removeListener("message", messageHandler);
           reject(new Error("Screenshot timeout"));
         }, 30000); // 30 second timeout
       });
@@ -1392,7 +1393,32 @@ export class BrowserConnector {
 
   // Public method to check if there's an active connection
   public hasActiveConnection(): boolean {
-    return this.activeConnection !== null;
+    return this.activeConnections.size > 0;
+  }
+
+  // Helper method to get the first available connection
+  private getFirstActiveConnection(): WebSocket | null {
+    for (const connection of this.activeConnections) {
+      if (connection.readyState === WebSocket.OPEN) {
+        return connection;
+      }
+    }
+    return null;
+  }
+
+  // Helper method to broadcast a message to all active connections
+  private broadcastToAllConnections(message: string): void {
+    for (const connection of this.activeConnections) {
+      if (connection.readyState === WebSocket.OPEN) {
+        try {
+          connection.send(message);
+        } catch (error) {
+          console.error("Error sending message to connection:", error);
+          // Remove dead connections
+          this.activeConnections.delete(connection);
+        }
+      }
+    }
   }
 
   // Add new endpoint for programmatic screenshot capture
@@ -1401,11 +1427,12 @@ export class BrowserConnector {
     console.log("Browser Connector: Request headers:", req.headers);
     console.log("Browser Connector: Request method:", req.method);
 
-    if (!this.activeConnection) {
+    const activeConnection = this.getFirstActiveConnection();
+    if (!activeConnection) {
       console.log(
-        "Browser Connector: No active WebSocket connection to Chrome extension"
+        "Browser Connector: No active WebSocket connection available"
       );
-      return res.status(503).json({ error: "Chrome extension not connected" });
+      return res.status(503).json({ error: "No clients connected" });
     }
 
     try {
@@ -1456,7 +1483,7 @@ export class BrowserConnector {
         `Browser Connector: Sending WebSocket message to extension:`,
         message
       );
-      this.activeConnection.send(message);
+      activeConnection.send(message);
 
       // Wait for screenshot data
       console.log("Browser Connector: Waiting for screenshot data...");
@@ -1572,37 +1599,38 @@ export class BrowserConnector {
     return new Promise<void>((resolve) => {
       console.log("Shutting down WebSocket server...");
 
-      // Send close message to client if connection is active
-      if (
-        this.activeConnection &&
-        this.activeConnection.readyState === WebSocket.OPEN
-      ) {
-        console.log("Notifying client to close connection...");
-        try {
-          this.activeConnection.send(
-            JSON.stringify({ type: "server-shutdown" })
-          );
-        } catch (err) {
-          console.error("Error sending shutdown message to client:", err);
-        }
+      // Send close message to all active connections
+      if (this.activeConnections.size > 0) {
+        console.log(`Notifying ${this.activeConnections.size} clients to close connections...`);
+        this.broadcastToAllConnections(
+          JSON.stringify({ type: "server-shutdown" })
+        );
       }
 
       // Set a timeout to force close after 2 seconds
       const forceCloseTimeout = setTimeout(() => {
         console.log("Force closing connections after timeout...");
-        if (this.activeConnection) {
-          this.activeConnection.terminate(); // Force close the connection
-          this.activeConnection = null;
+        for (const connection of this.activeConnections) {
+          try {
+            connection.terminate(); // Force close the connection
+          } catch (err) {
+            console.error("Error force closing connection:", err);
+          }
         }
+        this.activeConnections.clear();
         this.wss.close();
         resolve();
       }, 2000);
 
-      // Close active WebSocket connection if exists
-      if (this.activeConnection) {
-        this.activeConnection.close(1000, "Server shutting down");
-        this.activeConnection = null;
+      // Close all active WebSocket connections
+      for (const connection of this.activeConnections) {
+        try {
+          connection.close(1000, "Server shutting down");
+        } catch (err) {
+          console.error("Error closing connection:", err);
+        }
       }
+      this.activeConnections.clear();
 
       // Close WebSocket server
       this.wss.close(() => {
@@ -1717,8 +1745,9 @@ export class BrowserConnector {
 
   // Add method to handle elements with styles requests
   private async inspectElementsBySelector(req: express.Request, res: express.Response) {
-    if (!this.activeConnection) {
-      return res.status(503).json({ error: "Chrome extension not connected" });
+    const activeConnection = this.getFirstActiveConnection();
+    if (!activeConnection) {
+      return res.status(503).json({ error: "No clients connected" });
     }
 
     const { selector, resultLimit = 1, includeComputedStyles = [] } = req.body;
@@ -1756,7 +1785,7 @@ export class BrowserConnector {
               if (callback) {
                 callback.resolve(response.data);
                 elementsBySelectorCallbacks.delete(requestId);
-                this.activeConnection?.removeEventListener("message", messageHandler);
+                activeConnection.removeEventListener("message", messageHandler);
               }
             }
             else if (response.type === "inspect-elements-error" && response.requestId === requestId) {
@@ -1765,7 +1794,7 @@ export class BrowserConnector {
               if (callback) {
                 callback.reject(new Error(response.error || "Failed to get inspect-elements-by-selector"));
                 elementsBySelectorCallbacks.delete(requestId);
-                this.activeConnection?.removeEventListener("message", messageHandler);
+                activeConnection.removeEventListener("message", messageHandler);
               }
             }
           } catch (error) {
@@ -1774,7 +1803,7 @@ export class BrowserConnector {
         };
 
         // Add the message listener
-        this.activeConnection?.addEventListener("message", messageHandler);
+        activeConnection.addEventListener("message", messageHandler);
 
         // Set timeout to clean up if we don't get a response
         setTimeout(() => {
@@ -1783,8 +1812,8 @@ export class BrowserConnector {
               `Browser Connector: inspect-elements-by-selector request timed out for requestId: ${requestId}`
             );
             elementsBySelectorCallbacks.delete(requestId);
-            this.activeConnection?.removeEventListener("message", messageHandler);
-            reject(new Error("inspect-elements-by-selector request timed out - no response from Chrome extension"));
+            activeConnection.removeEventListener("message", messageHandler);
+            reject(new Error("inspect-elements-by-selector request timed out - no response from client"));
           }
         }, 10000); // 10 second timeout
       });
@@ -1801,7 +1830,7 @@ export class BrowserConnector {
         `Browser Connector: Sending WebSocket message to extension:`,
         message
       );
-      this.activeConnection.send(message);
+      activeConnection.send(message);
 
       // Wait for inspect-elements-by-selector data
       console.log("Browser Connector: Waiting for inspect-elements-by-selector response...");
@@ -1824,11 +1853,12 @@ export class BrowserConnector {
 
   // Add method to get cookies
   async getCookies(req: express.Request, res: express.Response) {
-    if (!this.activeConnection) {
+    const activeConnection = this.getFirstActiveConnection();
+    if (!activeConnection) {
       console.log(
-        "Browser Connector: No active WebSocket connection to Chrome extension"
+        "Browser Connector: No active WebSocket connection available"
       );
-      return res.status(503).json({ error: "Chrome extension not connected" });
+      return res.status(503).json({ error: "No clients connected" });
     }
 
     try {
@@ -1858,7 +1888,7 @@ export class BrowserConnector {
               cookiesCallbacks.delete(requestId);
               reject(
                 new Error(
-                  "Cookies request timed out - no response from Chrome extension"
+                  "Cookies request timed out - no response from client"
                 )
               );
             }
@@ -1875,7 +1905,7 @@ export class BrowserConnector {
         `Browser Connector: Sending WebSocket message to extension:`,
         message
       );
-      this.activeConnection.send(message);
+      activeConnection.send(message);
 
       // Wait for cookies data
       console.log("Browser Connector: Waiting for cookies data...");
@@ -1896,11 +1926,12 @@ export class BrowserConnector {
 
   // Add method to get localStorage
   async getLocalStorage(req: express.Request, res: express.Response) {
-    if (!this.activeConnection) {
+    const activeConnection = this.getFirstActiveConnection();
+    if (!activeConnection) {
       console.log(
-        "Browser Connector: No active WebSocket connection to Chrome extension"
+        "Browser Connector: No active WebSocket connection available"
       );
-      return res.status(503).json({ error: "Chrome extension not connected" });
+      return res.status(503).json({ error: "No clients connected" });
     }
 
     try {
@@ -1930,7 +1961,7 @@ export class BrowserConnector {
               localStorageCallbacks.delete(requestId);
               reject(
                 new Error(
-                  "LocalStorage request timed out - no response from Chrome extension"
+                  "LocalStorage request timed out - no response from client"
                 )
               );
             }
@@ -1947,7 +1978,7 @@ export class BrowserConnector {
         `Browser Connector: Sending WebSocket message to extension:`,
         message
       );
-      this.activeConnection.send(message);
+      activeConnection.send(message);
 
       // Wait for localStorage data
       console.log("Browser Connector: Waiting for localStorage data...");
@@ -1971,11 +2002,12 @@ export class BrowserConnector {
 
   // Add method to get sessionStorage
   async getSessionStorage(req: express.Request, res: express.Response) {
-    if (!this.activeConnection) {
+    const activeConnection = this.getFirstActiveConnection();
+    if (!activeConnection) {
       console.log(
-        "Browser Connector: No active WebSocket connection to Chrome extension"
+        "Browser Connector: No active WebSocket connection available"
       );
-      return res.status(503).json({ error: "Chrome extension not connected" });
+      return res.status(503).json({ error: "No clients connected" });
     }
 
     try {
@@ -2005,7 +2037,7 @@ export class BrowserConnector {
               sessionStorageCallbacks.delete(requestId);
               reject(
                 new Error(
-                  "SessionStorage request timed out - no response from Chrome extension"
+                  "SessionStorage request timed out - no response from client"
                 )
               );
             }
@@ -2022,7 +2054,7 @@ export class BrowserConnector {
         `Browser Connector: Sending WebSocket message to extension:`,
         message
       );
-      this.activeConnection.send(message);
+      activeConnection.send(message);
 
       // Wait for sessionStorage data
       console.log("Browser Connector: Waiting for sessionStorage data...");
@@ -2046,11 +2078,12 @@ export class BrowserConnector {
 
   // Add method to refresh browser
   async refreshBrowser(req: express.Request, res: express.Response) {
-    if (!this.activeConnection) {
+    const activeConnection = this.getFirstActiveConnection();
+    if (!activeConnection) {
       console.log(
-        "Browser Connector: No active WebSocket connection to Chrome extension"
+        "Browser Connector: No active WebSocket connection available"
       );
-      return res.status(503).json({ error: "Chrome extension not connected" });
+      return res.status(503).json({ error: "No clients connected" });
     }
 
     try {
@@ -2082,7 +2115,7 @@ export class BrowserConnector {
               refreshBrowserCallbacks.delete(requestId);
               reject(
                 new Error(
-                  "Refresh browser request timed out - no response from Chrome extension"
+                  "Refresh browser request timed out - no response from client"
                 )
               );
             }
@@ -2103,7 +2136,7 @@ export class BrowserConnector {
         `Browser Connector: Sending WebSocket message to extension:`,
         message
       );
-      this.activeConnection.send(message);
+      activeConnection.send(message);
 
       // Wait for refresh response
       console.log("Browser Connector: Waiting for refresh browser response...");
@@ -2127,11 +2160,12 @@ export class BrowserConnector {
 
   // Element Interaction Methods
   async clickElement(req: express.Request, res: express.Response) {
-    if (!this.activeConnection) {
+    const activeConnection = this.getFirstActiveConnection();
+    if (!activeConnection) {
       console.log(
-        "Browser Connector: No active WebSocket connection to Chrome extension"
+        "Browser Connector: No active WebSocket connection available"
       );
-      return res.status(503).json({ error: "Chrome extension not connected" });
+      return res.status(503).json({ error: "No clients connected" });
     }
 
     try {
@@ -2159,7 +2193,7 @@ export class BrowserConnector {
               clickElementCallbacks.delete(requestId);
               reject(
                 new Error(
-                  "Click element request timed out - no response from Chrome extension"
+                  "Click element request timed out - no response from client"
                 )
               );
             }
@@ -2181,7 +2215,7 @@ export class BrowserConnector {
         `Browser Connector: Sending WebSocket message to extension:`,
         message
       );
-      this.activeConnection.send(message);
+      activeConnection.send(message);
 
       // Wait for click response
       console.log("Browser Connector: Waiting for click element response...");
@@ -2204,11 +2238,12 @@ export class BrowserConnector {
   }
 
   async fillInput(req: express.Request, res: express.Response) {
-    if (!this.activeConnection) {
+    const activeConnection = this.getFirstActiveConnection();
+    if (!activeConnection) {
       console.log(
-        "Browser Connector: No active WebSocket connection to Chrome extension"
+        "Browser Connector: No active WebSocket connection available"
       );
-      return res.status(503).json({ error: "Chrome extension not connected" });
+      return res.status(503).json({ error: "No clients connected" });
     }
 
     try {
@@ -2236,7 +2271,7 @@ export class BrowserConnector {
               fillInputCallbacks.delete(requestId);
               reject(
                 new Error(
-                  "Fill input request timed out - no response from Chrome extension"
+                  "Fill input request timed out - no response from client"
                 )
               );
             }
@@ -2259,7 +2294,7 @@ export class BrowserConnector {
         `Browser Connector: Sending WebSocket message to extension:`,
         message
       );
-      this.activeConnection.send(message);
+      activeConnection.send(message);
 
       // Wait for fill response
       console.log("Browser Connector: Waiting for fill input response...");
@@ -2282,11 +2317,12 @@ export class BrowserConnector {
   }
 
   async selectOption(req: express.Request, res: express.Response) {
-    if (!this.activeConnection) {
+    const activeConnection = this.getFirstActiveConnection();
+    if (!activeConnection) {
       console.log(
-        "Browser Connector: No active WebSocket connection to Chrome extension"
+        "Browser Connector: No active WebSocket connection available"
       );
-      return res.status(503).json({ error: "Chrome extension not connected" });
+      return res.status(503).json({ error: "No clients connected" });
     }
 
     try {
@@ -2314,7 +2350,7 @@ export class BrowserConnector {
               selectOptionCallbacks.delete(requestId);
               reject(
                 new Error(
-                  "Select option request timed out - no response from Chrome extension"
+                  "Select option request timed out - no response from client"
                 )
               );
             }
@@ -2338,7 +2374,7 @@ export class BrowserConnector {
         `Browser Connector: Sending WebSocket message to extension:`,
         message
       );
-      this.activeConnection.send(message);
+      activeConnection.send(message);
 
       // Wait for select response
       console.log("Browser Connector: Waiting for select option response...");
@@ -2361,11 +2397,12 @@ export class BrowserConnector {
   }
 
   async submitForm(req: express.Request, res: express.Response) {
-    if (!this.activeConnection) {
+    const activeConnection = this.getFirstActiveConnection();
+    if (!activeConnection) {
       console.log(
-        "Browser Connector: No active WebSocket connection to Chrome extension"
+        "Browser Connector: No active WebSocket connection available"
       );
-      return res.status(503).json({ error: "Chrome extension not connected" });
+      return res.status(503).json({ error: "No clients connected" });
     }
 
     try {
@@ -2394,7 +2431,7 @@ export class BrowserConnector {
               submitFormCallbacks.delete(requestId);
               reject(
                 new Error(
-                  "Submit form request timed out - no response from Chrome extension"
+                  "Submit form request timed out - no response from client"
                 )
               );
             }
@@ -2417,7 +2454,7 @@ export class BrowserConnector {
         `Browser Connector: Sending WebSocket message to extension:`,
         message
       );
-      this.activeConnection.send(message);
+      activeConnection.send(message);
 
       // Wait for submit response
       console.log("Browser Connector: Waiting for submit form response...");

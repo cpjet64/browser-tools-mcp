@@ -11,6 +11,24 @@ import { z } from "zod";
 import { ErrorHandler, type ErrorContext } from "./error-handler.js";
 import { VersionChecker } from "./version-checker.js";
 
+// MCP-safe logging that uses stderr instead of stdout to avoid interfering with MCP protocol
+const mcpLog = {
+  log: (...args: any[]) => {
+    // Only log to stderr in development or when explicitly enabled
+    if (process.env.MCP_DEBUG === 'true') {
+      console.error('[MCP-LOG]', ...args);
+    }
+  },
+  error: (...args: any[]) => {
+    // Always log errors to stderr
+    console.error('[MCP-ERROR]', ...args);
+  },
+  warn: (...args: any[]) => {
+    // Always log warnings to stderr
+    console.error('[MCP-WARN]', ...args);
+  }
+};
+
 // Get version from package.json
 let packageVersion = "1.4.0"; // fallback version
 try {
@@ -20,7 +38,7 @@ try {
     packageVersion = packageJson.version;
   }
 } catch (error) {
-  console.warn("Could not read package.json version, using fallback:", packageVersion);
+  mcpLog.warn("Could not read package.json version, using fallback:", packageVersion);
 }
 
 // Create the MCP server
@@ -54,7 +72,7 @@ function getDefaultServerPort(): number {
       }
     }
   } catch (err) {
-    console.error("Error reading port file:", err);
+    mcpLog.error("Error reading port file:", err);
   }
 
   // Default port if no configuration found
@@ -74,7 +92,7 @@ function getDefaultServerHost(): string {
 
 // Server discovery function - similar to what you have in the Chrome extension
 async function discoverServer(): Promise<boolean> {
-  console.log("Starting server discovery process");
+  mcpLog.log("Starting server discovery process");
 
   // Common hosts to try
   const hosts = [getDefaultServerHost(), "127.0.0.1", "localhost"];
@@ -90,14 +108,14 @@ async function discoverServer(): Promise<boolean> {
     }
   }
 
-  console.log(`Will try hosts: ${hosts.join(", ")}`);
-  console.log(`Will try ports: ${ports.join(", ")}`);
+  mcpLog.log(`Will try hosts: ${hosts.join(", ")}`);
+  mcpLog.log(`Will try ports: ${ports.join(", ")}`);
 
   // Try to find the server
   for (const host of hosts) {
     for (const port of ports) {
       try {
-        console.log(`Checking ${host}:${port}...`);
+        mcpLog.log(`Checking ${host}:${port}...`);
 
         // Use the identity endpoint for validation
         const response = await fetch(`http://${host}:${port}/.identity`, {
@@ -109,7 +127,7 @@ async function discoverServer(): Promise<boolean> {
 
           // Verify this is actually our server by checking the signature
           if (identity.signature === "mcp-browser-connector-24x7") {
-            console.log(`Successfully found server at ${host}:${port}`);
+            mcpLog.log(`Successfully found server at ${host}:${port}`);
 
             // Save the discovered connection
             discoveredHost = host;
@@ -121,12 +139,12 @@ async function discoverServer(): Promise<boolean> {
         }
       } catch (error: any) {
         // Ignore connection errors during discovery
-        console.error(`Error checking ${host}:${port}: ${error.message}`);
+        mcpLog.log(`Error checking ${host}:${port}: ${error.message}`);
       }
     }
   }
 
-  console.error("No server found during discovery");
+  mcpLog.error("No server found during discovery");
   return false;
 }
 
@@ -171,7 +189,7 @@ async function withServerConnection<T>(
     return await apiCall();
   } catch (error: any) {
     // If the request fails, try rediscovering the server once
-    console.error(
+    mcpLog.error(
       `API call failed: ${error.message}. Attempting rediscovery...`
     );
 
@@ -179,7 +197,7 @@ async function withServerConnection<T>(
     serverDiscovered = false;
 
     if (await discoverServer()) {
-      console.error("Rediscovery successful. Retrying API call...");
+      mcpLog.log("Rediscovery successful. Retrying API call...");
       try {
         // Update context with rediscovered connection
         context.host = discoveredHost;
@@ -188,7 +206,7 @@ async function withServerConnection<T>(
         // Retry the API call with the newly discovered connection
         return await apiCall();
       } catch (retryError: any) {
-        console.error(`Retry failed: ${retryError.message}`);
+        mcpLog.error(`Retry failed: ${retryError.message}`);
 
         const enhancedError = ErrorHandler.analyzeError(
           retryError,
@@ -206,7 +224,7 @@ async function withServerConnection<T>(
         };
       }
     } else {
-      console.error("Rediscovery failed. Could not reconnect to server.");
+      mcpLog.error("Rediscovery failed. Could not reconnect to server.");
 
       const enhancedError = ErrorHandler.analyzeError(
         originalError,
@@ -432,7 +450,7 @@ server.tool(
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        console.error("Error inspecting elements by selector:", errorMessage);
+        mcpLog.error("Error inspecting elements by selector:", errorMessage);
         return {
           content: [
             {
@@ -485,7 +503,7 @@ server.tool(
     return await withServerConnection(async () => {
       try {
         // Simplified approach - let the browser connector handle the current tab and URL
-        console.log(
+        mcpLog.log(
           `Sending POST request to http://${discoveredHost}:${discoveredPort}/accessibility-audit`
         );
         const response = await fetch(
@@ -505,11 +523,11 @@ server.tool(
         );
 
         // Log the response status
-        console.log(`Accessibility audit response status: ${response.status}`);
+        mcpLog.log(`Accessibility audit response status: ${response.status}`);
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error(`Accessibility audit error: ${errorText}`);
+          mcpLog.error(`Accessibility audit error: ${errorText}`);
           throw new Error(`Server returned ${response.status}: ${errorText}`);
         }
 
@@ -545,7 +563,7 @@ server.tool(
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
-        console.error("Error in accessibility audit:", errorMessage);
+        mcpLog.error("Error in accessibility audit:", errorMessage);
         return {
           content: [
             {
@@ -568,7 +586,7 @@ server.tool(
     return await withServerConnection(async () => {
       try {
         // Simplified approach - let the browser connector handle the current tab and URL
-        console.log(
+        mcpLog.log(
           `Sending POST request to http://${discoveredHost}:${discoveredPort}/performance-audit`
         );
         const response = await fetch(
@@ -588,11 +606,11 @@ server.tool(
         );
 
         // Log the response status
-        console.log(`Performance audit response status: ${response.status}`);
+        mcpLog.log(`Performance audit response status: ${response.status}`);
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error(`Performance audit error: ${errorText}`);
+          mcpLog.error(`Performance audit error: ${errorText}`);
           throw new Error(`Server returned ${response.status}: ${errorText}`);
         }
 
@@ -628,7 +646,7 @@ server.tool(
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
-        console.error("Error in performance audit:", errorMessage);
+        mcpLog.error("Error in performance audit:", errorMessage);
         return {
           content: [
             {
@@ -650,7 +668,7 @@ server.tool(
   async () => {
     return await withServerConnection(async () => {
       try {
-        console.log(
+        mcpLog.log(
           `Sending POST request to http://${discoveredHost}:${discoveredPort}/seo-audit`
         );
         const response = await fetch(
@@ -670,11 +688,11 @@ server.tool(
         );
 
         // Log the response status
-        console.log(`SEO audit response status: ${response.status}`);
+        mcpLog.log(`SEO audit response status: ${response.status}`);
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error(`SEO audit error: ${errorText}`);
+          mcpLog.error(`SEO audit error: ${errorText}`);
           throw new Error(`Server returned ${response.status}: ${errorText}`);
         }
 
@@ -691,7 +709,7 @@ server.tool(
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
-        console.error("Error in SEO audit:", errorMessage);
+        mcpLog.error("Error in SEO audit:", errorMessage);
         return {
           content: [
             {
@@ -1482,7 +1500,7 @@ server.tool(
   async () => {
     return await withServerConnection(async () => {
       try {
-        console.log(
+        mcpLog.log(
           `Sending POST request to http://${discoveredHost}:${discoveredPort}/best-practices-audit`
         );
         const response = await fetch(
@@ -1538,7 +1556,7 @@ server.tool(
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
-        console.error("Error in Best Practices audit:", errorMessage);
+        mcpLog.error("Error in Best Practices audit:", errorMessage);
         return {
           content: [
             {
@@ -1753,7 +1771,7 @@ server.tool(
           throw new Error("Either selector or coordinates must be provided");
         }
 
-        console.log(
+        mcpLog.log(
           `Sending POST request to http://${discoveredHost}:${discoveredPort}/click-element`
         );
         const response = await fetch(
@@ -1793,7 +1811,7 @@ server.tool(
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
-        console.error("Error clicking element:", errorMessage);
+        mcpLog.error("Error clicking element:", errorMessage);
         return {
           content: [
             {
@@ -1822,7 +1840,7 @@ server.tool(
   async ({ selector, text, clearFirst = true, waitForElement = true, timeout = 5000, triggerEvents = true }) => {
     return await withServerConnection(async () => {
       try {
-        console.log(
+        mcpLog.log(
           `Sending POST request to http://${discoveredHost}:${discoveredPort}/fill-input`
         );
         const response = await fetch(
@@ -1863,7 +1881,7 @@ server.tool(
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
-        console.error("Error filling input:", errorMessage);
+        mcpLog.error("Error filling input:", errorMessage);
         return {
           content: [
             {
@@ -1897,7 +1915,7 @@ server.tool(
           throw new Error("Either value, text, or index must be provided");
         }
 
-        console.log(
+        mcpLog.log(
           `Sending POST request to http://${discoveredHost}:${discoveredPort}/select-option`
         );
         const response = await fetch(
@@ -1939,7 +1957,7 @@ server.tool(
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
-        console.error("Error selecting option:", errorMessage);
+        mcpLog.error("Error selecting option:", errorMessage);
         return {
           content: [
             {
@@ -1972,7 +1990,7 @@ server.tool(
           throw new Error("Either formSelector or submitButtonSelector must be provided");
         }
 
-        console.log(
+        mcpLog.log(
           `Sending POST request to http://${discoveredHost}:${discoveredPort}/submit-form`
         );
         const response = await fetch(
@@ -2013,7 +2031,7 @@ server.tool(
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
-        console.error("Error submitting form:", errorMessage);
+        mcpLog.error("Error submitting form:", errorMessage);
         return {
           content: [
             {
@@ -2041,7 +2059,7 @@ server.tool(
   async ({ waitForLoad = true, timeout = 10000, preserveScrollPosition = false, clearCache = false }) => {
     return await withServerConnection(async () => {
       try {
-        console.log(
+        mcpLog.log(
           `Sending POST request to http://${discoveredHost}:${discoveredPort}/refresh-browser`
         );
         const response = await fetch(
@@ -2079,7 +2097,7 @@ server.tool(
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        console.error("Error in refresh browser:", errorMessage);
+        mcpLog.error("Error in refresh browser:", errorMessage);
         return {
           content: [
             {
@@ -2208,14 +2226,14 @@ server.tool(
 (async () => {
   try {
     // Attempt initial server discovery
-    console.error("Attempting initial server discovery on startup...");
+    mcpLog.error("Attempting initial server discovery on startup...");
     await discoverServer();
     if (serverDiscovered) {
-      console.error(
+      mcpLog.error(
         `Successfully discovered server at ${discoveredHost}:${discoveredPort}`
       );
     } else {
-      console.error(
+      mcpLog.error(
         "Initial server discovery failed. Will try again when tools are used."
       );
     }
@@ -2234,7 +2252,7 @@ server.tool(
 
     await server.connect(transport);
   } catch (error) {
-    console.error("Failed to initialize MCP server:", error);
+    mcpLog.error("Failed to initialize MCP server:", error);
     process.exit(1);
   }
 })();
