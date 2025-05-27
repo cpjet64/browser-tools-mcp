@@ -1,6 +1,6 @@
 {
   "name": "webai-mcp-workspace",
-  "version": "1.4.3",
+  "version": "1.5.0",
   "private": true,
   "description": "WebAI-MCP workspace for automated changelog and release management",
   "scripts": {

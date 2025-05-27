@@ -1,6 +1,6 @@
 {
   "name": "@cpjet64/webai-server",
-  "version": "1.4.3-dev.7",
+  "version": "1.5.0-dev.1",
   "description": "WebAI server for capturing and managing browser events, logs, and screenshots",
   "type": "module",
   "main": "dist/browser-connector.js",
