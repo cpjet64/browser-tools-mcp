@@ -1,6 +1,6 @@
 {
   "name": "WebAI-MCP by cpjet64",
-  "version": "1.5.0.4",
+  "version": "1.5.1.1",
   "description": "WebAI-MCP tool for AI code editors to capture data from a browser such as console logs, network requests, screenshots and more",
   "manifest_version": 3,
   "devtools_page": "devtools.html",

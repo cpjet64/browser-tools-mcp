@@ -2225,6 +2225,9 @@ server.tool(
 // Start receiving messages on stdio
 (async () => {
   try {
+    // Print version information on startup
+    mcpLog.error(`Starting WebAI MCP Server v${packageVersion}...`);
+
     // Attempt initial server discovery
     mcpLog.error("Attempting initial server discovery on startup...");
     await discoverServer();

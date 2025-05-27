@@ -2634,10 +2634,25 @@ export class BrowserConnector {
   }
 }
 
+// Function to get version from package.json
+function getServerVersion(): string {
+  try {
+    const packagePath = path.join(__dirname, "..", "package.json");
+    if (fs.existsSync(packagePath)) {
+      const packageJson = JSON.parse(fs.readFileSync(packagePath, "utf8"));
+      return packageJson.version || "unknown";
+    }
+  } catch (error) {
+    console.error("Could not read package.json version:", error);
+  }
+  return "unknown";
+}
+
 // Use an async IIFE to allow for async/await in the initial setup
 (async () => {
   try {
-    console.log(`Starting WebAI Server...`);
+    const serverVersion = getServerVersion();
+    console.log(`Starting WebAI Server v${serverVersion}...`);
     console.log(`Requested port: ${REQUESTED_PORT}`);
 
     // Find an available port
@@ -2657,7 +2672,7 @@ export class BrowserConnector {
 
     // Create the server with the available port
     const server = app.listen(PORT, currentSettings.serverHost, () => {
-      console.log(`\n=== Browser Tools Server Started ===`);
+      console.log(`\n=== WebAI Server v${serverVersion} Started ===`);
       console.log(
         `Aggregator listening on http://${currentSettings.serverHost}:${PORT}`
       );

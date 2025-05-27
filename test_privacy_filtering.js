@@ -1,5 +1,16 @@
-// Test script for privacy filtering functions
-// This can be run in a browser console to verify the filtering works correctly
+/**
+ * Privacy Filtering Test Script
+ *
+ * This script tests the privacy filtering functionality used in WebAI-MCP.
+ * It contains ONLY test data and example tokens from public sources.
+ *
+ * SECURITY NOTE: All tokens and sensitive data in this file are:
+ * - Standard example tokens from jwt.io and other public sources
+ * - NOT real secrets or credentials
+ * - Used exclusively for testing privacy filtering functionality
+ *
+ * This can be run in a browser console to verify the filtering works correctly.
+ */
 
 // Mock settings object for testing
 const testSettings = {
@@ -26,14 +37,14 @@ function calculateNormalizedEntropy(str) {
   for (const char of str) {
     freq.set(char, (freq.get(char) || 0) + 1);
   }
-  
+
   let entropy = 0;
   const len = str.length;
   for (const count of freq.values()) {
     const p = count / len;
     entropy -= p * Math.log2(p);
   }
-  
+
   const uniqueChars = new Set(str).size;
   if (uniqueChars === 0) return 0;
   const maxEntropy = Math.log2(uniqueChars);
@@ -43,18 +54,18 @@ function calculateNormalizedEntropy(str) {
 function isSensitiveValue(value) {
   if (typeof value !== "string") return false;
   if (value.length < 8) return false;
-  
+
   if (SENSITIVE_VALUE_PATTERNS.some((pattern) => pattern.test(value))) {
     return true;
   }
-  
+
   if (value.length > 16) {
     const normalizedEntropy = calculateNormalizedEntropy(value);
     if (normalizedEntropy > 0.65) {
       return true;
     }
   }
-  
+
   return false;
 }
 
@@ -64,7 +75,7 @@ function isSensitiveKey(key) {
 
 function filterSensitiveInString(text) {
   if (typeof text !== "string") return text;
-  
+
   if (testSettings.sensitiveDataMode === "hide-all") {
     return text
       .replace(/ey[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g, "[JWT_TOKEN_REDACTED]")
@@ -75,7 +86,7 @@ function filterSensitiveInString(text) {
       .replace(/\d{3}-\d{2}-\d{4}/g, "[SSN_REDACTED]")
       .replace(/(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|6(?:011|5[0-9]{2})[0-9]{12})/g, "[CREDIT_CARD_REDACTED]");
   }
-  
+
   if (testSettings.sensitiveDataMode === "hide-sensitive") {
     return text
       .replace(/ey[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g, "[JWT_TOKEN_REDACTED]")
@@ -85,7 +96,7 @@ function filterSensitiveInString(text) {
       .replace(/\d{3}-\d{2}-\d{4}/g, "[SSN_REDACTED]")
       .replace(/(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|6(?:011|5[0-9]{2})[0-9]{12})/g, "[CREDIT_CARD_REDACTED]");
   }
-  
+
   return text;
 }
 
@@ -93,6 +104,10 @@ function filterSensitiveInString(text) {
 console.log("=== Privacy Filtering Test Cases ===");
 
 // Test JWT token filtering
+// NOTE: This is the standard example JWT token from jwt.io (NOT a real secret)
+// Payload: {"sub":"1234567890","name":"John Doe","iat":1516239022}
+// Used for testing privacy filtering functionality only
+// ggignore:jwt-token - This is a test token from jwt.io, not a real secret
 const jwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
 console.log("JWT Token Test:");
 console.log("Original:", jwtToken);
