@@ -237,15 +237,19 @@ jobs:
         run: |
           cd webai-mcp
           echo "📦 Installing MCP dependencies for linting..."
-          npm ci --prefer-offline
+          npm install
           echo "✅ MCP dependencies installed"
+          echo "📦 Verifying @types installation..."
+          ls -la node_modules/@types/ || echo "❌ @types directory still missing"
 
       - name: 🔧 Install dependencies (Server)
         run: |
           cd webai-server
           echo "📦 Installing Server dependencies for linting..."
-          npm ci --prefer-offline
+          npm install
           echo "✅ Server dependencies installed"
+          echo "📦 Verifying @types installation..."
+          ls -la node_modules/@types/ || echo "❌ @types directory still missing"
 
       - name: 🧹 TypeScript Check (MCP)
         run: |
@@ -254,9 +258,9 @@ jobs:
           echo "📦 Checking installed packages..."
           ls -la node_modules/@types/ || echo "No @types directory found"
           echo "🔍 TypeScript version:"
-          npx tsc --version
+          ./node_modules/.bin/tsc --version || npx typescript --version
           echo "🔍 Running TypeScript compilation..."
-          npx tsc --noEmit --pretty
+          ./node_modules/.bin/tsc --noEmit --pretty || npx typescript tsc --noEmit --pretty
           echo "✅ MCP TypeScript checks passed"
 
       - name: 🧹 TypeScript Check (Server)
@@ -266,9 +270,9 @@ jobs:
           echo "📦 Checking installed packages..."
           ls -la node_modules/@types/ || echo "No @types directory found"
           echo "🔍 TypeScript version:"
-          npx tsc --version
+          ./node_modules/.bin/tsc --version || npx typescript --version
           echo "🔍 Running TypeScript compilation..."
-          npx tsc --noEmit --pretty
+          ./node_modules/.bin/tsc --noEmit --pretty || npx typescript tsc --noEmit --pretty
           echo "✅ Server TypeScript checks passed"
 
       - name: 🔍 ESLint Check (if available)
