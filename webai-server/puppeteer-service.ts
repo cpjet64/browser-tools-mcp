@@ -814,8 +814,10 @@ export async function connectToHeadlessBrowser(
 
     // Set locale and timezone if provided
     if (options.locale) {
-      await page.evaluateOnNewDocument((locale) => {
+      await page.evaluateOnNewDocument((locale: string) => {
+        // @ts-ignore - navigator is available in browser context
         Object.defineProperty(navigator, "language", { get: () => locale });
+        // @ts-ignore - navigator is available in browser context
         Object.defineProperty(navigator, "languages", { get: () => [locale] });
       }, options.locale);
       console.log(`Set locale to ${options.locale}`);
