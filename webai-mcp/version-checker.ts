@@ -295,7 +295,7 @@ export class VersionChecker {
    */
   private static getMajorVersion(version: string): string {
     const match = version.match(/^(\d+)/);
-    return match ? match[1] : '0';
+    return match?.[1] ?? '0';
   }
 
   /**

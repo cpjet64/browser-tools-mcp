@@ -11,6 +11,38 @@ import { z } from "zod";
 import { ErrorHandler, type ErrorContext } from "./error-handler.js";
 import { VersionChecker } from "./version-checker.js";
 
+// TypeScript interfaces for proper type safety
+interface ApiResponse {
+  error?: string;
+  message?: string;
+  data?: any;
+  success?: boolean;
+  [key: string]: any;
+}
+
+interface IdentityResponse {
+  signature?: string;
+  name?: string;
+  version?: string;
+  [key: string]: any;
+}
+
+interface AuditResponse {
+  metadata?: {
+    timestamp?: string;
+    category?: string;
+    source?: string;
+    [key: string]: any;
+  };
+  report?: {
+    score?: number;
+    audits?: any;
+    categories?: any;
+    [key: string]: any;
+  };
+  [key: string]: any;
+}
+
 // MCP-safe logging that uses stderr instead of stdout to avoid interfering with MCP protocol
 const mcpLog = {
   log: (...args: any[]) => {
@@ -123,7 +155,7 @@ async function discoverServer(): Promise<boolean> {
         });
 
         if (response.ok) {
-          const identity = await response.json();
+          const identity = await response.json() as IdentityResponse;
 
           // Verify this is actually our server by checking the signature
           if (identity.signature === "mcp-browser-connector-24x7") {
@@ -255,7 +287,7 @@ server.tool("getConsoleLogs", "Check our browser logs", async () => {
       throw new Error(`Server returned ${response.status}: ${response.statusText}`);
     }
 
-    const json = await response.json();
+    const json = await response.json() as ApiResponse;
     return {
       content: [
         {
@@ -280,7 +312,7 @@ server.tool(
         throw new Error(`Server returned ${response.status}: ${response.statusText}`);
       }
 
-      const json = await response.json();
+      const json = await response.json() as ApiResponse;
       return {
         content: [
           {
@@ -303,7 +335,7 @@ server.tool("getNetworkErrors", "Check our network ERROR logs", async () => {
       throw new Error(`Server returned ${response.status}: ${response.statusText}`);
     }
 
-    const json = await response.json();
+    const json = await response.json() as ApiResponse;
     return {
       content: [
         {
@@ -326,7 +358,7 @@ server.tool("getNetworkLogs", "Check ALL our network logs", async () => {
       throw new Error(`Server returned ${response.status}: ${response.statusText}`);
     }
 
-    const json = await response.json();
+    const json = await response.json() as ApiResponse;
     return {
       content: [
         {
@@ -351,7 +383,7 @@ server.tool(
           }
         );
 
-        const result = await response.json();
+        const result = await response.json() as ApiResponse;
 
         if (response.ok) {
           return {
@@ -396,7 +428,7 @@ server.tool(
       const response = await fetch(
         `http://${discoveredHost}:${discoveredPort}/selected-element`
       );
-      const json = await response.json();
+      const json = await response.json() as ApiResponse;
       return {
         content: [
           {
@@ -432,7 +464,7 @@ server.tool(
           }
         );
 
-        const result = await response.json().catch(() => null);
+        const result = await response.json().catch(() => null) as ApiResponse | null;
         if (result?.error) {
           throw new Error(result.error);
         }
@@ -473,12 +505,12 @@ server.tool("wipeLogs", "Wipe all browser logs from memory", async () => {
         method: "POST",
       }
     );
-    const json = await response.json();
+    const json = await response.json() as ApiResponse;
     return {
       content: [
         {
           type: "text",
-          text: json.message,
+          text: json.message || "Logs wiped successfully",
         },
       ],
     };
@@ -531,7 +563,7 @@ server.tool(
           throw new Error(`Server returned ${response.status}: ${errorText}`);
         }
 
-        const json = await response.json();
+        const json = await response.json() as AuditResponse;
 
         // flatten it by merging metadata with the report contents
         if (json.report) {
@@ -614,7 +646,7 @@ server.tool(
           throw new Error(`Server returned ${response.status}: ${errorText}`);
         }
 
-        const json = await response.json();
+        const json = await response.json() as AuditResponse;
 
         // flatten it by merging metadata with the report contents
         if (json.report) {
@@ -696,7 +728,7 @@ server.tool(
           throw new Error(`Server returned ${response.status}: ${errorText}`);
         }
 
-        const json = await response.json();
+        const json = await response.json() as AuditResponse;
 
         return {
           content: [
@@ -1524,7 +1556,7 @@ server.tool(
           throw new Error(`Server returned ${response.status}: ${errorText}`);
         }
 
-        const json = await response.json();
+        const json = await response.json() as AuditResponse;
 
         // flatten it by merging metadata with the report contents
         if (json.report) {
@@ -1579,7 +1611,7 @@ server.tool("getCookies", "Get all cookies from the browser", async () => {
       );
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json() as ApiResponse;
         return {
           content: [
             {
@@ -1593,7 +1625,7 @@ server.tool("getCookies", "Get all cookies from the browser", async () => {
         };
       }
 
-      const json = await response.json();
+      const json = await response.json() as ApiResponse;
 
       if (json.error) {
         return {
@@ -1639,7 +1671,7 @@ server.tool("getLocalStorage", "Get all localStorage items", async () => {
       );
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json() as ApiResponse;
         return {
           content: [
             {
@@ -1653,7 +1685,7 @@ server.tool("getLocalStorage", "Get all localStorage items", async () => {
         };
       }
 
-      const json = await response.json();
+      const json = await response.json() as ApiResponse;
 
       if (json.error) {
         return {
@@ -1699,7 +1731,7 @@ server.tool("getSessionStorage", "Get all sessionStorage items", async () => {
       );
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json() as ApiResponse;
         return {
           content: [
             {
@@ -1713,7 +1745,7 @@ server.tool("getSessionStorage", "Get all sessionStorage items", async () => {
         };
       }
 
-      const json = await response.json();
+      const json = await response.json() as ApiResponse;
 
       if (json.error) {
         return {
@@ -1799,7 +1831,7 @@ server.tool(
           throw new Error(`Server returned ${response.status}: ${errorText}`);
         }
 
-        const result = await response.json();
+        const result = await response.json() as ApiResponse;
         return {
           content: [
             {
@@ -1869,7 +1901,7 @@ server.tool(
           throw new Error(`Server returned ${response.status}: ${errorText}`);
         }
 
-        const result = await response.json();
+        const result = await response.json() as ApiResponse;
         return {
           content: [
             {
@@ -1945,7 +1977,7 @@ server.tool(
           throw new Error(`Server returned ${response.status}: ${errorText}`);
         }
 
-        const result = await response.json();
+        const result = await response.json() as ApiResponse;
         return {
           content: [
             {
@@ -2019,7 +2051,7 @@ server.tool(
           throw new Error(`Server returned ${response.status}: ${errorText}`);
         }
 
-        const result = await response.json();
+        const result = await response.json() as ApiResponse;
         return {
           content: [
             {
@@ -2086,7 +2118,7 @@ server.tool(
           throw new Error(`Server returned ${response.status}: ${errorText}`);
         }
 
-        const json = await response.json();
+        const json = await response.json() as ApiResponse;
         return {
           content: [
             {
