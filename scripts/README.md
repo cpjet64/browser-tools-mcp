@@ -4,6 +4,29 @@ This directory contains comprehensive diagnostic, setup, and platform-specific u
 
 ## Available Scripts
 
+### 🔧 `setup-deps.ps1` / `setup-deps.sh` - Dependency Setup (NEW)
+Robust dependency setup scripts with fallback mechanisms for CI/CD reliability.
+
+**Windows PowerShell:**
+```powershell
+.\scripts\setup-deps.ps1          # Basic setup
+.\scripts\setup-deps.ps1 --clean  # Clean setup (removes lock files)
+```
+
+**Unix/Linux/macOS:**
+```bash
+chmod +x scripts/setup-deps.sh
+./scripts/setup-deps.sh           # Basic setup
+./scripts/setup-deps.sh --clean   # Clean setup (removes lock files)
+```
+
+**Features:**
+- Robust npm installation pattern: `npm ci --prefer-offline || (rm -f package-lock.json && npm install)`
+- Automatic lock file regeneration on corruption
+- Build verification
+- Cross-platform compatibility
+- Same pattern used in GitHub Actions workflows
+
 ### 🔍 `diagnose.js` - Diagnostic Tool
 Comprehensive diagnostic tool to identify and troubleshoot common issues.
 
@@ -70,6 +93,26 @@ npm run validate
 - Build artifacts
 - Configuration
 - Functionality
+
+## Enhanced NPM Scripts (NEW)
+
+The root package.json now includes enhanced dependency management scripts:
+
+```bash
+# Install all dependencies across workspaces
+npm run install:all
+
+# Build all packages
+npm run build:all
+
+# Clean all package-lock.json files (cross-platform)
+npm run clean:locks
+
+# Reset dependencies (clean + install)
+npm run reset:deps
+```
+
+These scripts provide the same robust installation patterns used in CI/CD.
 
 ## Quick Start
 

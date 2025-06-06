@@ -13,7 +13,7 @@
     "dev": "concurrently \"npm run start --workspace=webai-server\" \"npm run start --workspace=webai-mcp\"",
     "clean": "npm run clean --workspace=webai-mcp && npm run clean --workspace=webai-server",
     "install:all": "npm install && cd webai-mcp && npm install && cd ../webai-server && npm install",
-    "clean:locks": "find . -name 'package-lock.json' -delete",
+    "clean:locks": "find . -name 'package-lock.json' -delete 2>/dev/null || Remove-Item -Path .\\*\\package-lock.json -Force -ErrorAction SilentlyContinue; Remove-Item -Path .\\package-lock.json -Force -ErrorAction SilentlyContinue",
     "reset:deps": "npm run clean:locks && npm run install:all"
   },
   "workspaces": [
