@@ -21,7 +21,7 @@
     "webai-server"
   ],
   "devDependencies": {
-    "auto-changelog": "^2.4.0",
+    "auto-changelog": "^2.5.0",
     "concurrently": "^8.2.2",
     "conventional-changelog-cli": "^4.1.0",
     "conventional-changelog-conventionalcommits": "^7.0.2"
