@@ -91,6 +91,10 @@ jobs:
         run: |
           echo "🌍 Testing cross-platform compatibility..."
 
+          # Install dependencies for cross-platform tests
+          echo "📦 Installing dependencies for cross-platform tests..."
+          npm ci --prefer-offline || (rm -f package-lock.json && npm install)
+
           # Ensure we have npm context
           echo "📦 Setting up test environment..."
 
@@ -227,6 +231,10 @@ jobs:
         run: |
           echo "🪟 Testing Windows-specific compatibility..."
 
+          # Install dependencies for Windows compatibility tests
+          echo "📦 Installing dependencies for Windows tests..."
+          npm ci --prefer-offline || (rm -f package-lock.json && npm install)
+
           # Test 1: Process spawning (child_process)
           echo "⚙️ Testing process spawning..."
           node -e "
@@ -298,6 +306,10 @@ jobs:
         run: |
           echo "🌐 Testing browser compatibility..."
 
+          # Install dependencies first (needed for this test type)
+          echo "📦 Installing dependencies for browser tests..."
+          npm ci --prefer-offline || (rm -f package-lock.json && npm install)
+
           # Test Chrome in headless mode
           echo "🔍 Testing Chrome headless mode..."
           if command -v google-chrome >/dev/null 2>&1; then
@@ -312,7 +324,6 @@ jobs:
 
           # Test browser automation compatibility
           echo "🤖 Testing browser automation setup..."
-          # Dependencies already installed via workspace
           cd webai-server
           npm run build
 
