@@ -39,7 +39,7 @@ describe('Browser Connector', () => {
     
     // Setup basic routes for testing
     app.get('/.identity', (req: express.Request, res: express.Response) => {
-      return res.json({
+      res.json({
         name: 'WebAI Server',
         version: '1.5.0',
         status: 'running',
@@ -48,15 +48,15 @@ describe('Browser Connector', () => {
     });
 
     app.get('/console-logs', (req: express.Request, res: express.Response) => {
-      return res.json([mockConsoleLog]);
+      res.json([mockConsoleLog]);
     });
 
     app.get('/network-errors', (req: express.Request, res: express.Response) => {
-      return res.json([mockNetworkRequest]);
+      res.json([mockNetworkRequest]);
     });
 
     app.post('/capture-screenshot', (req: express.Request, res: express.Response) => {
-      return res.json({
+      res.json({
         success: true,
         file: 'screenshot.png',
         timestamp: new Date().toISOString()
@@ -122,7 +122,7 @@ describe('Browser Connector', () => {
         const logs = [mockConsoleLog].filter(log =>
           !level || log.level === level
         );
-        return res.json(logs);
+        res.json(logs);
       });
 
       const response = await request(app)
@@ -136,7 +136,7 @@ describe('Browser Connector', () => {
     it('should return console errors only', async () => {
       app.get('/console-errors', (req: express.Request, res: express.Response) => {
         const errorLog = { ...mockConsoleLog, level: 'error' };
-        return res.json([errorLog]);
+        res.json([errorLog]);
       });
 
       const response = await request(app)
@@ -149,7 +149,7 @@ describe('Browser Connector', () => {
 
     it('should handle empty console logs', async () => {
       app.get('/console-logs', (req: express.Request, res: express.Response) => {
-        return res.json([]);
+        res.json([]);
       });
 
       const response = await request(app)
@@ -176,7 +176,7 @@ describe('Browser Connector', () => {
 
     it('should return all network requests', async () => {
       app.get('/all-xhr', (req: express.Request, res: express.Response) => {
-        return res.json([mockNetworkRequest]);
+        res.json([mockNetworkRequest]);
       });
 
       const response = await request(app)
@@ -272,7 +272,7 @@ describe('Browser Connector', () => {
 
     it('should get localStorage', async () => {
       app.get('/local-storage', (req: express.Request, res: express.Response) => {
-        return res.json({
+        res.json({
           user_preferences: '{"theme":"dark"}',
           session_token: 'token123'
         });
@@ -288,7 +288,7 @@ describe('Browser Connector', () => {
 
     it('should get sessionStorage', async () => {
       app.get('/session-storage', (req: express.Request, res: express.Response) => {
-        return res.json({
+        res.json({
           current_page: 'dashboard',
           scroll_position: '150'
         });
@@ -323,7 +323,7 @@ describe('Browser Connector', () => {
     it('should click element by selector', async () => {
       app.post('/click-element', (req: express.Request, res: express.Response) => {
         const { selector } = req.body;
-        return res.json({
+        res.json({
           success: true,
           message: `Clicked element: ${selector}`,
           element: {
@@ -345,7 +345,7 @@ describe('Browser Connector', () => {
     it('should fill input field', async () => {
       app.post('/fill-input', (req: express.Request, res: express.Response) => {
         const { selector, text } = req.body;
-        return res.json({
+        res.json({
           success: true,
           message: `Filled input ${selector} with: ${text}`,
           element: {
@@ -494,12 +494,13 @@ describe('Browser Connector', () => {
     it('should handle missing required parameters', async () => {
       app.post('/click-element', (req: express.Request, res: express.Response) => {
         if (!req.body.selector && !req.body.coordinates) {
-          return res.status(400).json({
+          res.status(400).json({
             error: 'Either selector or coordinates must be provided',
             success: false
           });
+          return;
         }
-        return res.json({ success: true });
+        res.json({ success: true });
       });
 
       const response = await request(app)

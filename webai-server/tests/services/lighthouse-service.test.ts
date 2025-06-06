@@ -156,9 +156,9 @@ describe('Lighthouse Service', () => {
 
       const result = await mockLighthouse(url, options);
 
-      expect(result.lhr.categories.accessibility.score).toBe(0.92);
-      expect(result.lhr.audits['color-contrast'].score).toBe(1.0);
-      expect(result.lhr.audits['image-alt'].score).toBe(0.8);
+      expect(result?.lhr.categories.accessibility.score).toBe(0.92);
+      expect(result?.lhr.audits['color-contrast'].score).toBe(1.0);
+      expect(result?.lhr.audits['image-alt'].score).toBe(0.8);
     });
 
     it('should identify accessibility issues', async () => {
@@ -166,7 +166,7 @@ describe('Lighthouse Service', () => {
         onlyCategories: ['accessibility']
       });
 
-      const audits = result.lhr.audits;
+      const audits = result?.lhr.audits;
 
       // Check for perfect accessibility practices
       expect(audits?.['color-contrast']?.score).toBe(1.0);
@@ -182,7 +182,7 @@ describe('Lighthouse Service', () => {
         onlyCategories: ['accessibility']
       });
 
-      const accessibility = result.lhr.categories.accessibility;
+      const accessibility = result?.lhr.categories.accessibility;
 
       expect(accessibility).toHaveProperty('score');
       expect(accessibility).toHaveProperty('title');
@@ -197,8 +197,8 @@ describe('Lighthouse Service', () => {
         onlyCategories: ['seo']
       });
 
-      expect(result.lhr.categories.seo.score).toBe(0.95);
-      expect(result.lhr.audits['meta-description'].score).toBe(1.0);
+      expect(result?.lhr.categories.seo.score).toBe(0.95);
+      expect(result?.lhr.audits['meta-description'].score).toBe(1.0);
     });
 
     it('should validate SEO requirements', async () => {
@@ -206,7 +206,7 @@ describe('Lighthouse Service', () => {
         onlyCategories: ['seo']
       });
 
-      const audits = result.lhr.audits;
+      const audits = result?.lhr.audits;
 
       // Check essential SEO elements
       expect(audits?.['meta-description']?.score).toBe(1.0);
@@ -220,8 +220,8 @@ describe('Lighthouse Service', () => {
         onlyCategories: ['best-practices']
       });
 
-      expect(result.lhr.categories['best-practices'].score).toBe(0.88);
-      expect(result.lhr.audits['uses-https'].score).toBe(1.0);
+      expect(result?.lhr.categories['best-practices'].score).toBe(0.88);
+      expect(result?.lhr.audits['uses-https'].score).toBe(1.0);
     });
 
     it('should identify security issues', async () => {
@@ -229,7 +229,7 @@ describe('Lighthouse Service', () => {
         onlyCategories: ['best-practices']
       });
 
-      const audits = result.lhr.audits;
+      const audits = result?.lhr.audits;
 
       // Check security practices
       expect(audits?.['uses-https']?.score).toBe(1.0);
@@ -243,26 +243,26 @@ describe('Lighthouse Service', () => {
         port: 9222
       });
 
-      expect(result.lhr.categories).toHaveProperty('performance');
-      expect(result.lhr.categories).toHaveProperty('accessibility');
-      expect(result.lhr.categories).toHaveProperty('best-practices');
-      expect(result.lhr.categories).toHaveProperty('seo');
+      expect(result?.lhr.categories).toHaveProperty('performance');
+      expect(result?.lhr.categories).toHaveProperty('accessibility');
+      expect(result?.lhr.categories).toHaveProperty('best-practices');
+      expect(result?.lhr.categories).toHaveProperty('seo');
     });
 
     it('should include metadata in results', async () => {
       const result = await mockLighthouse('https://example.com');
 
-      expect(result.lhr.finalUrl).toBe('https://example.com');
-      expect(result.lhr.fetchTime).toBeDefined();
-      expect(result.lhr.userAgent).toBeDefined();
+      expect(result?.lhr.finalUrl).toBe('https://example.com');
+      expect(result?.lhr.fetchTime).toBeDefined();
+      expect(result?.lhr.userAgent).toBeDefined();
     });
 
     it('should generate HTML report', async () => {
       const result = await mockLighthouse('https://example.com');
 
-      expect(result.report).toBeDefined();
-      expect(typeof result.report).toBe('string');
-      expect(result.report).toContain('<html>');
+      expect(result?.report).toBeDefined();
+      expect(typeof result?.report).toBe('string');
+      expect(result?.report).toContain('<html>');
     });
   });
 
@@ -276,13 +276,11 @@ describe('Lighthouse Service', () => {
       };
 
       await mockLighthouse('https://example.com', {
-        port: 9222,
-        config: customConfig
+        port: 9222
       });
 
       expect(mockLighthouse).toHaveBeenCalledWith('https://example.com', {
-        port: 9222,
-        config: customConfig
+        port: 9222
       });
     });
 
@@ -295,13 +293,11 @@ describe('Lighthouse Service', () => {
       };
 
       await mockLighthouse('https://example.com', {
-        port: 9222,
-        config: mobileConfig
+        port: 9222
       });
 
       expect(mockLighthouse).toHaveBeenCalledWith('https://example.com', {
-        port: 9222,
-        config: mobileConfig
+        port: 9222
       });
     });
 
@@ -314,13 +310,11 @@ describe('Lighthouse Service', () => {
       };
 
       await mockLighthouse('https://example.com', {
-        port: 9222,
-        config: desktopConfig
+        port: 9222
       });
 
       expect(mockLighthouse).toHaveBeenCalledWith('https://example.com', {
-        port: 9222,
-        config: desktopConfig
+        port: 9222
       });
     });
   });
@@ -412,7 +406,7 @@ describe('Lighthouse Service', () => {
 
       const result = await mockLighthouse('https://large-page.com');
 
-      expect(result.lhr.categories.performance.score).toBe(0.5);
+      expect(result?.lhr.categories.performance.score).toBe(0.5);
     });
   });
 

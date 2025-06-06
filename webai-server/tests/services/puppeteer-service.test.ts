@@ -1,7 +1,7 @@
 import puppeteer from 'puppeteer-core';
-import { 
-  mockAuditResult 
-} from '../setup';
+import {
+  mockAuditResult
+} from '../setup.js';
 
 // Mock puppeteer-core
 jest.mock('puppeteer-core');
@@ -231,8 +231,8 @@ describe('Puppeteer Service', () => {
       mockPage.evaluate.mockResolvedValue(result);
 
       const evalResult = await page.evaluate(() => ({
-        title: document.title,
-        url: window.location.href
+        title: 'Test Page',
+        url: 'https://example.com'
       }));
 
       expect(mockPage.evaluate).toHaveBeenCalled();
@@ -246,9 +246,9 @@ describe('Puppeteer Service', () => {
 
       mockPage.evaluate.mockResolvedValue(element);
 
-      const result = await page.evaluate((sel) => {
-        const el = document.querySelector(sel);
-        return el ? { tagName: el.tagName, id: el.id } : null;
+      const result = await page.evaluate((sel: string) => {
+        // Mock DOM interaction for testing
+        return sel === '#test-element' ? { tagName: 'DIV', id: 'test-element' } : null;
       }, selector);
 
       expect(mockPage.evaluate).toHaveBeenCalledWith(expect.any(Function), selector);
