@@ -95,21 +95,9 @@ jobs:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
-          cache-dependency-path: |
-            webai-mcp/package-lock.json
-            webai-server/package-lock.json
+          cache-dependency-path: package-lock.json
 
-      - name: 🔧 Install dependencies (MCP)
-        run: |
-          cd webai-mcp
-          npm ci --prefer-offline || (rm -f package-lock.json && npm install)
-
-      - name: 🔧 Install dependencies (Server)
-        run: |
-          cd webai-server
-          npm ci --prefer-offline || (rm -f package-lock.json && npm install)
-
-      - name: 🔧 Install root dependencies (for changelog automation)
+      - name: 🔧 Install dependencies (workspace setup)
         run: npm ci --prefer-offline || (rm -f package-lock.json && npm install)
 
       - name: 🏗️ Build packages
