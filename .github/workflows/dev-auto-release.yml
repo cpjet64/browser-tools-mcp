@@ -18,7 +18,7 @@ on:
 jobs:
   publish-dev:
     runs-on: ubuntu-latest
-    # Only run if tests passed (for workflow_run), for direct pushes, PRs, or manual dispatch
+    # Only run if tests passed (for workflow_run), for direct pushes (after waiting for tests), PRs, or manual dispatch
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
     permissions:
       contents: write
@@ -30,6 +30,16 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: ⏳ Wait for tests to complete (if triggered by push)
+        if: github.event_name == 'push'
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          ref: ${{ github.sha }}
+          check-name: 'test'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 30
+          allowed-conclusions: success
 
       - name: 📦 Setup Node.js
         uses: actions/setup-node@v4
