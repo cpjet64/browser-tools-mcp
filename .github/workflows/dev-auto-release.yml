@@ -5,21 +5,19 @@ on:
     workflows: ["🧪 Test"]
     types: [completed]
     branches: [dev]
-  push:
-    branches: [dev]
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-  pull_request:
-    branches: [dev]
-    types: [opened, synchronize, reopened]
   workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: 'Skip test requirement (emergency releases only)'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   publish-dev:
     runs-on: ubuntu-latest
-    # Only run if tests passed (for workflow_run), for direct pushes (after waiting for tests), PRs, or manual dispatch
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
+    # Only run if tests passed OR manual dispatch with skip_tests=true
+    if: ${{ github.event.workflow_run.conclusion == 'success' || (github.event_name == 'workflow_dispatch' && github.event.inputs.skip_tests == 'true') }}
     permissions:
       contents: write
       packages: write
@@ -30,16 +28,6 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: ⏳ Wait for tests to complete (if triggered by push)
-        if: github.event_name == 'push'
-        uses: lewagon/wait-on-check-action@v1.3.4
-        with:
-          ref: ${{ github.sha }}
-          check-name: 'test'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 30
-          allowed-conclusions: success
 
       - name: 📦 Setup Node.js
         uses: actions/setup-node@v4
@@ -78,24 +66,15 @@ jobs:
           CURRENT_VERSION=$(node -p "require('./package.json').version")
           echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
 
-          # Determine if this is a PR or push/merge
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            # PR version: 1.4.0-pr-dev.123
-            BASE_VERSION=$(echo "$CURRENT_VERSION" | sed 's/-dev\.[0-9]*$//' | sed 's/-pr-dev\.[0-9]*$//')
-            PR_NUMBER="${{ github.event.number }}"
-            NEW_VERSION="${BASE_VERSION}-pr-dev.${PR_NUMBER}"
-            echo "Creating PR version: $NEW_VERSION"
+          # Regular dev version: 1.4.0-dev.1, 1.4.0-dev.2, etc.
+          if [[ $CURRENT_VERSION == *"-dev."* ]]; then
+            # Increment the dev number
+            npm version prerelease --preid=dev --no-git-tag-version
           else
-            # Regular dev version: 1.4.0-dev.1, 1.4.0-dev.2, etc.
-            if [[ $CURRENT_VERSION == *"-dev."* ]]; then
-              # Increment the dev number
-              npm version prerelease --preid=dev --no-git-tag-version
-            else
-              # Create first dev version
-              npm version prerelease --preid=dev --no-git-tag-version
-            fi
-            NEW_VERSION=$(node -p "require('./package.json').version")
+            # Create first dev version
+            npm version prerelease --preid=dev --no-git-tag-version
           fi
+          NEW_VERSION=$(node -p "require('./package.json').version")
 
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
@@ -105,8 +84,8 @@ jobs:
 
           # Update chrome extension manifest version
           cd ../chrome-extension
-          # For extension, remove dev/pr suffixes for valid version format
-          MANIFEST_VERSION=$(echo "$NEW_VERSION" | sed 's/-dev\.[0-9]*$//' | sed 's/-pr-dev\.[0-9]*$//')
+          # For extension, remove dev suffixes for valid version format
+          MANIFEST_VERSION=$(echo "$NEW_VERSION" | sed 's/-dev\.[0-9]*$//')
           node -e "
             const fs = require('fs');
             const manifest = JSON.parse(fs.readFileSync('manifest.json', 'utf8'));
@@ -274,7 +253,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.new_version }}
-          name: "${{ github.event_name == 'pull_request' && '🔀' || '🧪' }} WebAI-MCP v${{ steps.version.outputs.new_version }}${{ github.event_name == 'pull_request' && format(' (PR #{0} to dev)', github.event.number) || ' (Dev)' }}"
+          name: "🧪 WebAI-MCP v${{ steps.version.outputs.new_version }} (Dev)"
           body_path: dev-release-notes.md
           draft: false
           prerelease: true
@@ -299,6 +278,8 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Version:** v${{ steps.version.outputs.new_version }}" >> $GITHUB_STEP_SUMMARY
           echo "**Type:** Development Release (Prerelease)" >> $GITHUB_STEP_SUMMARY
+          echo "**Triggered by:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tests Status:** ${{ github.event.workflow_run.conclusion || 'Skipped (Manual)' }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### ✅ Completed Steps:" >> $GITHUB_STEP_SUMMARY
           echo "- Built and tested packages" >> $GITHUB_STEP_SUMMARY
