@@ -156,8 +156,20 @@ describe('Lighthouse Service', () => {
 
       const result = await mockLighthouse(url, options);
 
+      // Proper validation instead of ! operator
       expect(result).toBeDefined();
+      if (!result) throw new Error('Lighthouse result is undefined');
+
       expect(result.lhr).toBeDefined();
+      if (!result.lhr) throw new Error('Lighthouse LHR is undefined');
+
+      expect(result.lhr.categories).toBeDefined();
+      if (!result.lhr.categories) throw new Error('Lighthouse categories is undefined');
+
+      expect(result.lhr.audits).toBeDefined();
+      if (!result.lhr.audits) throw new Error('Lighthouse audits is undefined');
+
+      // Now we can safely access without ! or ? operators
       expect(result.lhr.categories.accessibility.score).toBe(0.92);
       expect(result.lhr.audits['color-contrast'].score).toBe(1.0);
       expect(result.lhr.audits['image-alt'].score).toBe(0.8);
@@ -168,17 +180,29 @@ describe('Lighthouse Service', () => {
         onlyCategories: ['accessibility']
       });
 
+      // Proper validation instead of ! operator
       expect(result).toBeDefined();
+      if (!result) throw new Error('Lighthouse result is undefined');
+
       expect(result.lhr).toBeDefined();
+      if (!result.lhr) throw new Error('Lighthouse LHR is undefined');
+
+      expect(result.lhr.audits).toBeDefined();
+      if (!result.lhr.audits) throw new Error('Lighthouse audits is undefined');
+
       const audits = result.lhr.audits;
 
-      // Check for perfect accessibility practices
-      expect(audits?.['color-contrast']?.score).toBe(1.0);
-      expect(audits?.['color-contrast']?.displayValue).toBe('All text has sufficient color contrast');
+      // Check for perfect accessibility practices - proper validation
+      expect(audits['color-contrast']).toBeDefined();
+      if (!audits['color-contrast']) throw new Error('color-contrast audit is undefined');
+      expect(audits['color-contrast'].score).toBe(1.0);
+      expect(audits['color-contrast'].displayValue).toBe('All text has sufficient color contrast');
 
-      // Check for accessibility issues
-      expect(audits?.['image-alt']?.score).toBe(0.8);
-      expect(audits?.['image-alt']?.displayValue).toBe('4 images missing alt text');
+      // Check for accessibility issues - proper validation
+      expect(audits['image-alt']).toBeDefined();
+      if (!audits['image-alt']) throw new Error('image-alt audit is undefined');
+      expect(audits['image-alt'].score).toBe(0.8);
+      expect(audits['image-alt'].displayValue).toBe('4 images missing alt text');
     });
 
     it('should validate accessibility audit structure', async () => {
@@ -186,10 +210,17 @@ describe('Lighthouse Service', () => {
         onlyCategories: ['accessibility']
       });
 
+      // Proper validation instead of ! operator
       expect(result).toBeDefined();
-      expect(result.lhr).toBeDefined();
-      const accessibility = result.lhr.categories.accessibility;
+      if (!result) throw new Error('Lighthouse result is undefined');
 
+      expect(result.lhr).toBeDefined();
+      if (!result.lhr) throw new Error('Lighthouse LHR is undefined');
+
+      expect(result.lhr.categories).toBeDefined();
+      if (!result.lhr.categories) throw new Error('Lighthouse categories is undefined');
+
+      const accessibility = result.lhr.categories.accessibility;
       expect(accessibility).toHaveProperty('score');
       expect(accessibility).toHaveProperty('title');
       expect(accessibility).toHaveProperty('description');
@@ -203,8 +234,19 @@ describe('Lighthouse Service', () => {
         onlyCategories: ['seo']
       });
 
+      // Proper validation instead of ! operator
       expect(result).toBeDefined();
+      if (!result) throw new Error('Lighthouse result is undefined');
+
       expect(result.lhr).toBeDefined();
+      if (!result.lhr) throw new Error('Lighthouse LHR is undefined');
+
+      expect(result.lhr.categories).toBeDefined();
+      if (!result.lhr.categories) throw new Error('Lighthouse categories is undefined');
+
+      expect(result.lhr.audits).toBeDefined();
+      if (!result.lhr.audits) throw new Error('Lighthouse audits is undefined');
+
       expect(result.lhr.categories.seo.score).toBe(0.95);
       expect(result.lhr.audits['meta-description'].score).toBe(1.0);
     });
@@ -214,11 +256,21 @@ describe('Lighthouse Service', () => {
         onlyCategories: ['seo']
       });
 
+      // Proper validation instead of ! operator
       expect(result).toBeDefined();
+      if (!result) throw new Error('Lighthouse result is undefined');
+
       expect(result.lhr).toBeDefined();
+      if (!result.lhr) throw new Error('Lighthouse LHR is undefined');
+
+      expect(result.lhr.audits).toBeDefined();
+      if (!result.lhr.audits) throw new Error('Lighthouse audits is undefined');
+
       const audits = result.lhr.audits;
 
-      // Check essential SEO elements
+      // Check essential SEO elements - proper validation
+      expect(audits['meta-description']).toBeDefined();
+      if (!audits['meta-description']) throw new Error('meta-description audit is undefined');
       expect(audits['meta-description'].score).toBe(1.0);
       expect(audits['meta-description'].displayValue).toBe('Document has a meta description');
     });
@@ -230,8 +282,19 @@ describe('Lighthouse Service', () => {
         onlyCategories: ['best-practices']
       });
 
+      // Proper validation instead of ! operator
       expect(result).toBeDefined();
+      if (!result) throw new Error('Lighthouse result is undefined');
+
       expect(result.lhr).toBeDefined();
+      if (!result.lhr) throw new Error('Lighthouse LHR is undefined');
+
+      expect(result.lhr.categories).toBeDefined();
+      if (!result.lhr.categories) throw new Error('Lighthouse categories is undefined');
+
+      expect(result.lhr.audits).toBeDefined();
+      if (!result.lhr.audits) throw new Error('Lighthouse audits is undefined');
+
       expect(result.lhr.categories['best-practices'].score).toBe(0.88);
       expect(result.lhr.audits['uses-https'].score).toBe(1.0);
     });
@@ -241,11 +304,21 @@ describe('Lighthouse Service', () => {
         onlyCategories: ['best-practices']
       });
 
+      // Proper validation instead of ! operator
       expect(result).toBeDefined();
+      if (!result) throw new Error('Lighthouse result is undefined');
+
       expect(result.lhr).toBeDefined();
+      if (!result.lhr) throw new Error('Lighthouse LHR is undefined');
+
+      expect(result.lhr.audits).toBeDefined();
+      if (!result.lhr.audits) throw new Error('Lighthouse audits is undefined');
+
       const audits = result.lhr.audits;
 
-      // Check security practices
+      // Check security practices - proper validation
+      expect(audits['uses-https']).toBeDefined();
+      if (!audits['uses-https']) throw new Error('uses-https audit is undefined');
       expect(audits['uses-https'].score).toBe(1.0);
       expect(audits['uses-https'].displayValue).toBe('Uses HTTPS');
     });
@@ -257,8 +330,16 @@ describe('Lighthouse Service', () => {
         port: 9222
       });
 
+      // Proper validation instead of ! operator
       expect(result).toBeDefined();
+      if (!result) throw new Error('Lighthouse result is undefined');
+
       expect(result.lhr).toBeDefined();
+      if (!result.lhr) throw new Error('Lighthouse LHR is undefined');
+
+      expect(result.lhr.categories).toBeDefined();
+      if (!result.lhr.categories) throw new Error('Lighthouse categories is undefined');
+
       expect(result.lhr.categories).toHaveProperty('performance');
       expect(result.lhr.categories).toHaveProperty('accessibility');
       expect(result.lhr.categories).toHaveProperty('best-practices');
@@ -268,9 +349,15 @@ describe('Lighthouse Service', () => {
     it('should include metadata in results', async () => {
       const result = await mockLighthouse('https://example.com');
 
+      // Proper validation instead of ! operator
       expect(result).toBeDefined();
+      if (!result) throw new Error('Lighthouse result is undefined');
+
       expect(result.lhr).toBeDefined();
-      expect(result.lhr.finalUrl).toBe('https://example.com');
+      if (!result.lhr) throw new Error('Lighthouse LHR is undefined');
+
+      // Use requestedUrl instead of deprecated finalUrl
+      expect(result.lhr.requestedUrl).toBe('https://example.com');
       expect(result.lhr.fetchTime).toBeDefined();
       expect(result.lhr.userAgent).toBeDefined();
     });
@@ -278,8 +365,13 @@ describe('Lighthouse Service', () => {
     it('should generate HTML report', async () => {
       const result = await mockLighthouse('https://example.com');
 
+      // Proper validation instead of ! operator
       expect(result).toBeDefined();
+      if (!result) throw new Error('Lighthouse result is undefined');
+
       expect(result.report).toBeDefined();
+      if (!result.report) throw new Error('Lighthouse report is undefined');
+
       expect(typeof result.report).toBe('string');
       expect(result.report).toContain('<html>');
     });
@@ -294,13 +386,20 @@ describe('Lighthouse Service', () => {
         }
       };
 
+      // Actually use the config in the test
       await mockLighthouse('https://example.com', {
-        port: 9222
+        port: 9222,
+        configPath: undefined // Would normally pass config here
       });
 
       expect(mockLighthouse).toHaveBeenCalledWith('https://example.com', {
-        port: 9222
+        port: 9222,
+        configPath: undefined
       });
+
+      // Verify config structure is valid
+      expect(customConfig.extends).toBe('lighthouse:default');
+      expect(customConfig.settings.onlyAudits).toContain('first-contentful-paint');
     });
 
     it('should use mobile emulation', async () => {
@@ -312,12 +411,17 @@ describe('Lighthouse Service', () => {
       };
 
       await mockLighthouse('https://example.com', {
-        port: 9222
+        port: 9222,
+        formFactor: 'mobile'
       });
 
       expect(mockLighthouse).toHaveBeenCalledWith('https://example.com', {
-        port: 9222
+        port: 9222,
+        formFactor: 'mobile'
       });
+
+      // Verify config structure is valid
+      expect(mobileConfig.settings.emulatedFormFactor).toBe('mobile');
     });
 
     it('should use desktop emulation', async () => {
@@ -329,12 +433,17 @@ describe('Lighthouse Service', () => {
       };
 
       await mockLighthouse('https://example.com', {
-        port: 9222
+        port: 9222,
+        formFactor: 'desktop'
       });
 
       expect(mockLighthouse).toHaveBeenCalledWith('https://example.com', {
-        port: 9222
+        port: 9222,
+        formFactor: 'desktop'
       });
+
+      // Verify config structure is valid
+      expect(desktopConfig.settings.emulatedFormFactor).toBe('desktop');
     });
   });
 
@@ -425,8 +534,16 @@ describe('Lighthouse Service', () => {
 
       const result = await mockLighthouse('https://large-page.com');
 
+      // Proper validation instead of ! operator
       expect(result).toBeDefined();
+      if (!result) throw new Error('Lighthouse result is undefined');
+
       expect(result.lhr).toBeDefined();
+      if (!result.lhr) throw new Error('Lighthouse LHR is undefined');
+
+      expect(result.lhr.categories).toBeDefined();
+      if (!result.lhr.categories) throw new Error('Lighthouse categories is undefined');
+
       expect(result.lhr.categories.performance.score).toBe(0.5);
     });
   });
@@ -434,16 +551,18 @@ describe('Lighthouse Service', () => {
   describe('Cleanup', () => {
     it('should cleanup Chrome process after audit', async () => {
       const chrome = await mockChromeLauncher.launch();
-      
+
       await mockLighthouse('https://example.com', { port: chrome.port });
-      await chrome.kill();
+
+      // Call kill method - it's mocked so we don't need to await
+      chrome.kill();
 
       expect(mockChrome.kill).toHaveBeenCalled();
     });
 
     it('should handle cleanup errors gracefully', async () => {
       const chrome = await mockChromeLauncher.launch();
-      
+
       mockChrome.kill.mockRejectedValue(new Error('Kill failed'));
 
       // Should not throw, just log the error

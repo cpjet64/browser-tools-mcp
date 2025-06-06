@@ -17,17 +17,18 @@ describe('Screenshot API', () => {
     mockWebSocketConnection = createMockWebSocketConnection();
     
     // Mock screenshot endpoint
-    app.post('/capture-screenshot', (req: express.Request, res: express.Response) => {
+    app.post('/capture-screenshot', (req: express.Request, res: express.Response): void => {
       // Simulate checking for active connections
       if (!mockWebSocketConnection || mockWebSocketConnection.readyState !== 1) {
-        return res.status(503).json({
+        res.status(503).json({
           error: 'No active WebSocket connections',
           success: false
         });
+        return;
       }
 
       // Simulate successful screenshot capture
-      return res.json({
+      res.json({
         success: true,
         file: 'screenshot_20240101_120000.png',
         timestamp: new Date().toISOString(),
@@ -64,10 +65,10 @@ describe('Screenshot API', () => {
     });
 
     it('should handle screenshot with custom options', async () => {
-      app.post('/capture-screenshot', (req: express.Request, res: express.Response) => {
+      app.post('/capture-screenshot', (req: express.Request, res: express.Response): void => {
         const { fullPage, quality, format } = req.body;
 
-        return res.json({
+        res.json({
           success: true,
           file: `screenshot_custom.${format || 'png'}`,
           timestamp: new Date().toISOString(),
@@ -96,11 +97,11 @@ describe('Screenshot API', () => {
     });
 
     it('should handle element screenshot', async () => {
-      app.post('/capture-screenshot', (req: express.Request, res: express.Response) => {
+      app.post('/capture-screenshot', (req: express.Request, res: express.Response): void => {
         const { selector, clip } = req.body;
 
         if (selector || clip) {
-          return res.json({
+          res.json({
             success: true,
             file: 'element_screenshot.png',
             timestamp: new Date().toISOString(),
@@ -108,8 +109,9 @@ describe('Screenshot API', () => {
             selector: selector,
             clip: clip
           });
+          return;
         } else {
-          return res.json({
+          res.json({
             success: true,
             file: 'fullpage_screenshot.png',
             timestamp: new Date().toISOString(),
@@ -133,26 +135,28 @@ describe('Screenshot API', () => {
     });
 
     it('should validate screenshot parameters', async () => {
-      app.post('/capture-screenshot', (req: express.Request, res: express.Response) => {
+      app.post('/capture-screenshot', (req: express.Request, res: express.Response): void => {
         const { quality, format } = req.body;
 
         // Validate quality
         if (quality !== undefined && (quality < 0 || quality > 100)) {
-          return res.status(400).json({
+          res.status(400).json({
             error: 'Quality must be between 0 and 100',
             success: false
           });
+          return;
         }
 
         // Validate format
         if (format && !['png', 'jpeg', 'webp'].includes(format)) {
-          return res.status(400).json({
+          res.status(400).json({
             error: 'Format must be png, jpeg, or webp',
             success: false
           });
+          return;
         }
 
-        return res.json({ success: true, file: 'valid_screenshot.png' });
+        res.json({ success: true, file: 'valid_screenshot.png' });
       });
 
       // Test invalid quality
@@ -181,7 +185,7 @@ describe('Screenshot API', () => {
     });
 
     it('should handle screenshot timeout', async () => {
-      app.post('/capture-screenshot', (req, res) => {
+      app.post('/capture-screenshot', (req: express.Request, res: express.Response): void => {
         // Simulate timeout
         setTimeout(() => {
           res.status(408).json({
@@ -202,7 +206,7 @@ describe('Screenshot API', () => {
     });
 
     it('should handle WebSocket communication errors', async () => {
-      app.post('/capture-screenshot', (req, res) => {
+      app.post('/capture-screenshot', (req: express.Request, res: express.Response): void => {
         // Simulate WebSocket send error
         res.status(500).json({
           error: 'Failed to send screenshot request to extension',
@@ -221,7 +225,7 @@ describe('Screenshot API', () => {
     });
 
     it('should handle extension errors', async () => {
-      app.post('/capture-screenshot', (req, res) => {
+      app.post('/capture-screenshot', (req: express.Request, res: express.Response): void => {
         // Simulate extension returning error
         res.status(500).json({
           error: 'Extension failed to capture screenshot',
@@ -240,7 +244,7 @@ describe('Screenshot API', () => {
     });
 
     it('should include metadata in response', async () => {
-      app.post('/capture-screenshot', (req, res) => {
+      app.post('/capture-screenshot', (req: express.Request, res: express.Response): void => {
         res.json({
           success: true,
           file: 'screenshot_with_metadata.png',
@@ -268,8 +272,8 @@ describe('Screenshot API', () => {
 
     it('should handle concurrent screenshot requests', async () => {
       let requestCount = 0;
-      
-      app.post('/capture-screenshot', (req: express.Request, res: express.Response) => {
+
+      app.post('/capture-screenshot', (req: express.Request, res: express.Response): void => {
         requestCount++;
 
         // Simulate processing time
@@ -299,14 +303,14 @@ describe('Screenshot API', () => {
     });
 
     it('should measure screenshot performance', async () => {
-      app.post('/capture-screenshot', (req, res) => {
+      app.post('/capture-screenshot', (req: express.Request, res: express.Response): void => {
         const startTime = Date.now();
-        
+
         // Simulate screenshot processing
         setTimeout(() => {
           const endTime = Date.now();
           const duration = endTime - startTime;
-          
+
           res.json({
             success: true,
             file: 'performance_screenshot.png',
@@ -331,7 +335,7 @@ describe('Screenshot API', () => {
     });
 
     it('should handle large screenshot files', async () => {
-      app.post('/capture-screenshot', (req, res) => {
+      app.post('/capture-screenshot', (req: express.Request, res: express.Response): void => {
         // Simulate large screenshot
         res.json({
           success: true,
@@ -358,19 +362,20 @@ describe('Screenshot API', () => {
   describe('Error Recovery', () => {
     it('should retry on temporary failures', async () => {
       let attemptCount = 0;
-      
-      app.post('/capture-screenshot', (req, res) => {
+
+      app.post('/capture-screenshot', (req: express.Request, res: express.Response): void => {
         attemptCount++;
-        
+
         if (attemptCount === 1) {
           // First attempt fails
-          return res.status(500).json({
+          res.status(500).json({
             error: 'Temporary failure',
             success: false,
             retry: true
           });
+          return;
         }
-        
+
         // Second attempt succeeds
         res.json({
           success: true,
