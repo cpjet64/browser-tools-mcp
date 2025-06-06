@@ -40,6 +40,7 @@ jobs:
             npm install
           fi
           echo "✅ MCP dependencies installed successfully"
+        shell: bash
 
       - name: 🔧 Install dependencies (Server)
         run: |
@@ -52,12 +53,14 @@ jobs:
             npm install
           fi
           echo "✅ Server dependencies installed successfully"
+        shell: bash
 
       - name: 🔧 Install root dependencies
         run: |
           echo "📦 Installing root dependencies..."
           npm ci --prefer-offline
           echo "✅ Root dependencies installed successfully"
+        shell: bash
 
       - name: 🏗️ Build MCP Server
         run: |
@@ -72,6 +75,7 @@ jobs:
             exit 1
           fi
           echo "✅ Build artifacts verified"
+        shell: bash
 
       - name: 🏗️ Build WebAI Server
         run: |
@@ -153,6 +157,7 @@ jobs:
           "
 
           echo "✅ Package integrity tests passed"
+        shell: bash
 
       - name: 📋 Validate Chrome Extension
         run: |
@@ -204,6 +209,7 @@ jobs:
           fi
 
           echo "✅ Chrome Extension validation passed"
+        shell: bash
 
       - name: 📊 Test Summary
         run: |
@@ -227,6 +233,7 @@ jobs:
           echo "- Architecture: ${{ runner.arch }}" >> $GITHUB_STEP_SUMMARY
           echo "- Node.js: $(node --version)" >> $GITHUB_STEP_SUMMARY
           echo "- NPM: $(npm --version)" >> $GITHUB_STEP_SUMMARY
+        shell: bash
 
   lint:
     runs-on: ubuntu-latest
@@ -253,6 +260,7 @@ jobs:
           echo "✅ MCP dependencies installed"
           echo "📦 Verifying @types installation..."
           ls -la node_modules/@types/ || echo "❌ @types directory still missing"
+        shell: bash
 
       - name: 🔧 Install dependencies (Server)
         run: |
@@ -264,6 +272,7 @@ jobs:
           echo "✅ Server dependencies installed"
           echo "📦 Verifying @types installation..."
           ls -la node_modules/@types/ || echo "❌ @types directory still missing"
+        shell: bash
 
       - name: 🧹 TypeScript Check (MCP)
         run: |
@@ -277,6 +286,7 @@ jobs:
           # Test if the build process works (this is what matters for releases)
           npm run build && echo "✅ MCP build successful - TypeScript compilation works" || echo "❌ Build failed - TypeScript compilation error"
           echo "✅ MCP TypeScript checks completed"
+        shell: bash
 
       - name: 🧹 TypeScript Check (Server)
         run: |
@@ -290,6 +300,7 @@ jobs:
           # Test if the build process works (this is what matters for releases)
           npm run build && echo "✅ Server build successful - TypeScript compilation works" || echo "❌ Build failed - TypeScript compilation error"
           echo "✅ Server TypeScript checks completed"
+        shell: bash
 
       - name: 🔍 ESLint Check (if available)
         run: |
@@ -313,6 +324,7 @@ jobs:
             echo "ℹ️ No ESLint config found for WebAI Server"
           fi
         continue-on-error: true
+        shell: bash
 
       - name: 📋 Code Quality Summary
         run: |
@@ -330,3 +342,4 @@ jobs:
           echo "- ✅ Type safety validated" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Compilation successful" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Code standards checked" >> $GITHUB_STEP_SUMMARY
+        shell: bash
