@@ -1,0 +1,58 @@
+{
+  "localStorage": {
+    "user_preferences": "{\"theme\":\"dark\",\"language\":\"en\"}",
+    "session_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "cart_items": "[{\"id\":1,\"name\":\"Product A\",\"price\":29.99}]",
+    "last_visit": "2024-01-01T10:00:00.000Z",
+    "feature_flags": "{\"newUI\":true,\"betaFeatures\":false}"
+  },
+  "sessionStorage": {
+    "current_page": "dashboard",
+    "scroll_position": "150",
+    "form_data": "{\"name\":\"John Doe\",\"email\":\"john@example.com\"}",
+    "temp_id": "temp_12345",
+    "navigation_history": "[\"home\",\"products\",\"dashboard\"]"
+  },
+  "cookies": [
+    {
+      "name": "session_id",
+      "value": "abc123def456",
+      "domain": ".example.com",
+      "path": "/",
+      "expires": "2024-12-31T23:59:59.000Z",
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Strict"
+    },
+    {
+      "name": "user_id",
+      "value": "user_789",
+      "domain": "example.com",
+      "path": "/",
+      "expires": "2024-06-01T00:00:00.000Z",
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "analytics_id",
+      "value": "ga_xyz789",
+      "domain": ".example.com",
+      "path": "/",
+      "expires": "2026-01-01T00:00:00.000Z",
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "None"
+    },
+    {
+      "name": "preferences",
+      "value": "theme%3Ddark%26lang%3Den",
+      "domain": "example.com",
+      "path": "/",
+      "expires": null,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Strict"
+    }
+  ]
+}

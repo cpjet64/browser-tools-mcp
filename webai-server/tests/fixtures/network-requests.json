@@ -1,0 +1,67 @@
+[
+  {
+    "url": "https://api.example.com/users",
+    "method": "GET",
+    "status": 200,
+    "timestamp": "2024-01-01T10:00:00.000Z",
+    "responseHeaders": {
+      "content-type": "application/json",
+      "cache-control": "max-age=3600",
+      "x-ratelimit-remaining": "99"
+    },
+    "requestHeaders": {
+      "user-agent": "Chrome/120.0.0.0",
+      "accept": "application/json",
+      "authorization": "Bearer token123"
+    },
+    "responseSize": 1024,
+    "duration": 150
+  },
+  {
+    "url": "https://cdn.example.com/styles.css",
+    "method": "GET",
+    "status": 200,
+    "timestamp": "2024-01-01T10:00:01.000Z",
+    "responseHeaders": {
+      "content-type": "text/css",
+      "cache-control": "max-age=86400",
+      "etag": "\"abc123\""
+    },
+    "requestHeaders": {
+      "user-agent": "Chrome/120.0.0.0",
+      "accept": "text/css"
+    },
+    "responseSize": 2048,
+    "duration": 75
+  },
+  {
+    "url": "https://api.example.com/data",
+    "method": "POST",
+    "status": 404,
+    "timestamp": "2024-01-01T10:00:02.000Z",
+    "responseHeaders": {
+      "content-type": "application/json"
+    },
+    "requestHeaders": {
+      "user-agent": "Chrome/120.0.0.0",
+      "content-type": "application/json"
+    },
+    "responseSize": 256,
+    "duration": 200
+  },
+  {
+    "url": "https://api.example.com/upload",
+    "method": "POST",
+    "status": 500,
+    "timestamp": "2024-01-01T10:00:03.000Z",
+    "responseHeaders": {
+      "content-type": "application/json"
+    },
+    "requestHeaders": {
+      "user-agent": "Chrome/120.0.0.0",
+      "content-type": "multipart/form-data"
+    },
+    "responseSize": 128,
+    "duration": 5000
+  }
+]

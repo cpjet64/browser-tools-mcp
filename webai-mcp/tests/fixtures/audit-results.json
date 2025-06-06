@@ -1,0 +1,95 @@
+{
+  "performance": {
+    "score": 0.85,
+    "title": "Performance",
+    "description": "Overall performance score",
+    "audits": {
+      "first-contentful-paint": {
+        "score": 0.9,
+        "displayValue": "1.2s",
+        "description": "First Contentful Paint marks the time at which the first text or image is painted."
+      },
+      "largest-contentful-paint": {
+        "score": 0.8,
+        "displayValue": "2.1s",
+        "description": "Largest Contentful Paint marks the time at which the largest text or image is painted."
+      },
+      "cumulative-layout-shift": {
+        "score": 0.95,
+        "displayValue": "0.05",
+        "description": "Cumulative Layout Shift measures the movement of visible elements within the viewport."
+      },
+      "total-blocking-time": {
+        "score": 0.7,
+        "displayValue": "150ms",
+        "description": "Sum of all time periods between FCP and Time to Interactive."
+      }
+    }
+  },
+  "accessibility": {
+    "score": 0.92,
+    "title": "Accessibility",
+    "description": "Overall accessibility score",
+    "audits": {
+      "color-contrast": {
+        "score": 1.0,
+        "displayValue": "All text has sufficient color contrast",
+        "description": "Background and foreground colors have a sufficient contrast ratio."
+      },
+      "image-alt": {
+        "score": 0.8,
+        "displayValue": "4 images missing alt text",
+        "description": "Informative elements should aim for short, descriptive alternate text."
+      },
+      "heading-order": {
+        "score": 1.0,
+        "displayValue": "Heading elements are in a logical order",
+        "description": "Properly ordered headings convey the semantic structure of the page."
+      }
+    }
+  },
+  "best-practices": {
+    "score": 0.88,
+    "title": "Best Practices",
+    "description": "Overall best practices score",
+    "audits": {
+      "uses-https": {
+        "score": 1.0,
+        "displayValue": "Uses HTTPS",
+        "description": "All origins are served over HTTPS."
+      },
+      "no-vulnerable-libraries": {
+        "score": 0.5,
+        "displayValue": "2 vulnerable libraries detected",
+        "description": "Some third-party scripts may contain known security vulnerabilities."
+      },
+      "csp-xss": {
+        "score": 0.0,
+        "displayValue": "No CSP found",
+        "description": "Content Security Policy is an effective defense against XSS attacks."
+      }
+    }
+  },
+  "seo": {
+    "score": 0.95,
+    "title": "SEO",
+    "description": "Overall SEO score",
+    "audits": {
+      "meta-description": {
+        "score": 1.0,
+        "displayValue": "Document has a meta description",
+        "description": "Meta descriptions may be included in search results."
+      },
+      "document-title": {
+        "score": 1.0,
+        "displayValue": "Document has a title element",
+        "description": "The title gives screen reader users an overview of the page."
+      },
+      "robots-txt": {
+        "score": 0.8,
+        "displayValue": "robots.txt is valid but has minor issues",
+        "description": "If your robots.txt file is malformed, crawlers may not be able to understand how you want your website to be crawled or indexed."
+      }
+    }
+  }
+}

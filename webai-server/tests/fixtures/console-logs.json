@@ -1,0 +1,47 @@
+[
+  {
+    "level": "info",
+    "message": "Application started successfully",
+    "timestamp": "2024-01-01T10:00:00.000Z",
+    "source": "console-api",
+    "url": "https://example.com",
+    "lineNumber": 42,
+    "columnNumber": 15
+  },
+  {
+    "level": "warn",
+    "message": "Deprecated API usage detected",
+    "timestamp": "2024-01-01T10:01:00.000Z",
+    "source": "console-api",
+    "url": "https://example.com/app.js",
+    "lineNumber": 128,
+    "columnNumber": 8
+  },
+  {
+    "level": "error",
+    "message": "Failed to load resource: net::ERR_NETWORK_CHANGED",
+    "timestamp": "2024-01-01T10:02:00.000Z",
+    "source": "network",
+    "url": "https://api.example.com/data",
+    "lineNumber": null,
+    "columnNumber": null
+  },
+  {
+    "level": "debug",
+    "message": "User interaction: button clicked",
+    "timestamp": "2024-01-01T10:03:00.000Z",
+    "source": "console-api",
+    "url": "https://example.com",
+    "lineNumber": 256,
+    "columnNumber": 12
+  },
+  {
+    "level": "log",
+    "message": "Data fetched successfully",
+    "timestamp": "2024-01-01T10:04:00.000Z",
+    "source": "console-api",
+    "url": "https://example.com/utils.js",
+    "lineNumber": 89,
+    "columnNumber": 20
+  }
+]

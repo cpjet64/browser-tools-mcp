@@ -1,8 +1,0 @@
-Tool: getSessionStorage_webai
-Command: getSessionStorage_webai()
-Parameters: None
-
-Output:
-{}
-
-Description: Retrieves all sessionStorage items from the browser. Returns an empty object when no sessionStorage items exist, or an object with key-value pairs of stored session data.
