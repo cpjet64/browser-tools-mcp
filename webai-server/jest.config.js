@@ -19,7 +19,7 @@ export default {
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
-  // setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
+  setupFilesAfterEnv: ['<rootDir>/tests/test-setup.ts'],
   testTimeout: 15000,
   coverageThreshold: {
     global: {

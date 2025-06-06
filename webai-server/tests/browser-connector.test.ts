@@ -38,7 +38,7 @@ describe('Browser Connector', () => {
     app.use(express.json());
     
     // Setup basic routes for testing
-    app.get('/.identity', (req: express.Request, res: express.Response) => {
+    app.get('/.identity', (req: express.Request, res: express.Response): void => {
       res.json({
         name: 'WebAI Server',
         version: '1.5.0',
@@ -47,15 +47,15 @@ describe('Browser Connector', () => {
       });
     });
 
-    app.get('/console-logs', (req: express.Request, res: express.Response) => {
+    app.get('/console-logs', (req: express.Request, res: express.Response): void => {
       res.json([mockConsoleLog]);
     });
 
-    app.get('/network-errors', (req: express.Request, res: express.Response) => {
+    app.get('/network-errors', (req: express.Request, res: express.Response): void => {
       res.json([mockNetworkRequest]);
     });
 
-    app.post('/capture-screenshot', (req: express.Request, res: express.Response) => {
+    app.post('/capture-screenshot', (req: express.Request, res: express.Response): void => {
       res.json({
         success: true,
         file: 'screenshot.png',
@@ -77,7 +77,7 @@ describe('Browser Connector', () => {
     });
 
     it('should include server capabilities in identity', async () => {
-      app.get('/.identity', (req, res) => {
+      app.get('/.identity', (req: express.Request, res: express.Response): void => {
         res.json({
           name: 'WebAI Server',
           version: '1.5.0',
@@ -117,7 +117,7 @@ describe('Browser Connector', () => {
     });
 
     it('should filter console logs by level', async () => {
-      app.get('/console-logs', (req: express.Request, res: express.Response) => {
+      app.get('/console-logs', (req: express.Request, res: express.Response): void => {
         const level = req.query.level as string;
         const logs = [mockConsoleLog].filter(log =>
           !level || log.level === level
@@ -134,7 +134,7 @@ describe('Browser Connector', () => {
     });
 
     it('should return console errors only', async () => {
-      app.get('/console-errors', (req: express.Request, res: express.Response) => {
+      app.get('/console-errors', (req: express.Request, res: express.Response): void => {
         const errorLog = { ...mockConsoleLog, level: 'error' };
         res.json([errorLog]);
       });
@@ -148,7 +148,7 @@ describe('Browser Connector', () => {
     });
 
     it('should handle empty console logs', async () => {
-      app.get('/console-logs', (req: express.Request, res: express.Response) => {
+      app.get('/console-logs', (req: express.Request, res: express.Response): void => {
         res.json([]);
       });
 
@@ -175,7 +175,7 @@ describe('Browser Connector', () => {
     });
 
     it('should return all network requests', async () => {
-      app.get('/all-xhr', (req: express.Request, res: express.Response) => {
+      app.get('/all-xhr', (req: express.Request, res: express.Response): void => {
         res.json([mockNetworkRequest]);
       });
 
@@ -188,7 +188,7 @@ describe('Browser Connector', () => {
     });
 
     it('should return successful network requests', async () => {
-      app.get('/network-success', (req, res) => {
+      app.get('/network-success', (req: express.Request, res: express.Response): void => {
         const successRequest = { ...mockNetworkRequest, status: 200 };
         res.json([successRequest]);
       });
@@ -213,7 +213,7 @@ describe('Browser Connector', () => {
     });
 
     it('should handle screenshot failure when no extension connected', async () => {
-      app.post('/capture-screenshot', (req, res) => {
+      app.post('/capture-screenshot', (req: express.Request, res: express.Response): void => {
         res.status(503).json({
           error: 'No active WebSocket connections',
           success: false
@@ -229,7 +229,7 @@ describe('Browser Connector', () => {
     });
 
     it('should handle screenshot timeout', async () => {
-      app.post('/capture-screenshot', (req, res) => {
+      app.post('/capture-screenshot', (req: express.Request, res: express.Response): void => {
         setTimeout(() => {
           res.status(408).json({
             error: 'Screenshot request timed out',
@@ -248,7 +248,7 @@ describe('Browser Connector', () => {
 
   describe('Storage Endpoints', () => {
     it('should get cookies', async () => {
-      app.get('/cookies', (req, res) => {
+      app.get('/cookies', (req: express.Request, res: express.Response): void => {
         res.json([
           {
             name: 'session_id',
@@ -271,7 +271,7 @@ describe('Browser Connector', () => {
     });
 
     it('should get localStorage', async () => {
-      app.get('/local-storage', (req: express.Request, res: express.Response) => {
+      app.get('/local-storage', (req: express.Request, res: express.Response): void => {
         res.json({
           user_preferences: '{"theme":"dark"}',
           session_token: 'token123'
@@ -287,7 +287,7 @@ describe('Browser Connector', () => {
     });
 
     it('should get sessionStorage', async () => {
-      app.get('/session-storage', (req: express.Request, res: express.Response) => {
+      app.get('/session-storage', (req: express.Request, res: express.Response): void => {
         res.json({
           current_page: 'dashboard',
           scroll_position: '150'
@@ -303,7 +303,7 @@ describe('Browser Connector', () => {
     });
 
     it('should handle storage access errors', async () => {
-      app.get('/cookies', (req, res) => {
+      app.get('/cookies', (req: express.Request, res: express.Response): void => {
         res.status(500).json({
           error: 'Failed to access cookies',
           success: false
@@ -321,7 +321,7 @@ describe('Browser Connector', () => {
 
   describe('Element Interaction Endpoints', () => {
     it('should click element by selector', async () => {
-      app.post('/click-element', (req: express.Request, res: express.Response) => {
+      app.post('/click-element', (req: express.Request, res: express.Response): void => {
         const { selector } = req.body;
         res.json({
           success: true,
@@ -343,7 +343,7 @@ describe('Browser Connector', () => {
     });
 
     it('should fill input field', async () => {
-      app.post('/fill-input', (req: express.Request, res: express.Response) => {
+      app.post('/fill-input', (req: express.Request, res: express.Response): void => {
         const { selector, text } = req.body;
         res.json({
           success: true,
@@ -365,7 +365,7 @@ describe('Browser Connector', () => {
     });
 
     it('should select option from dropdown', async () => {
-      app.post('/select-option', (req, res) => {
+      app.post('/select-option', (req: express.Request, res: express.Response): void => {
         const { selector, value } = req.body;
         res.json({
           success: true,
@@ -387,7 +387,7 @@ describe('Browser Connector', () => {
     });
 
     it('should submit form', async () => {
-      app.post('/submit-form', (req, res) => {
+      app.post('/submit-form', (req: express.Request, res: express.Response): void => {
         const { formSelector } = req.body;
         res.json({
           success: true,
@@ -406,7 +406,7 @@ describe('Browser Connector', () => {
     });
 
     it('should handle element not found errors', async () => {
-      app.post('/click-element', (req, res) => {
+      app.post('/click-element', (req: express.Request, res: express.Response): void => {
         res.status(404).json({
           error: 'Element not found',
           success: false,
@@ -426,7 +426,7 @@ describe('Browser Connector', () => {
 
   describe('Audit Endpoints', () => {
     it('should run performance audit', async () => {
-      app.post('/run-performance-audit', (req, res) => {
+      app.post('/run-performance-audit', (req: express.Request, res: express.Response): void => {
         res.json({
           success: true,
           data: mockAuditResult,
@@ -444,7 +444,7 @@ describe('Browser Connector', () => {
     });
 
     it('should run accessibility audit', async () => {
-      app.post('/run-accessibility-audit', (req, res) => {
+      app.post('/run-accessibility-audit', (req: express.Request, res: express.Response): void => {
         res.json({
           success: true,
           data: { ...mockAuditResult, title: 'Accessibility' },
@@ -462,7 +462,7 @@ describe('Browser Connector', () => {
     });
 
     it('should handle audit failures', async () => {
-      app.post('/run-performance-audit', (req, res) => {
+      app.post('/run-performance-audit', (req: express.Request, res: express.Response): void => {
         res.status(500).json({
           error: 'Failed to run performance audit',
           success: false,
@@ -492,7 +492,7 @@ describe('Browser Connector', () => {
     });
 
     it('should handle missing required parameters', async () => {
-      app.post('/click-element', (req: express.Request, res: express.Response) => {
+      app.post('/click-element', (req: express.Request, res: express.Response): void => {
         if (!req.body.selector && !req.body.coordinates) {
           res.status(400).json({
             error: 'Either selector or coordinates must be provided',
@@ -512,7 +512,7 @@ describe('Browser Connector', () => {
     });
 
     it('should handle server errors gracefully', async () => {
-      app.get('/console-logs', (req: express.Request, res: express.Response) => {
+      app.get('/console-logs', (req: express.Request, res: express.Response): void => {
         throw new Error('Internal server error');
       });
 
@@ -549,7 +549,7 @@ describe('Browser Connector', () => {
     });
 
     it('should handle OPTIONS requests', async () => {
-      app.options('*', (req, res) => {
+      app.options('*', (req: express.Request, res: express.Response): void => {
         res.header('Access-Control-Allow-Origin', '*');
         res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
         res.sendStatus(200);
