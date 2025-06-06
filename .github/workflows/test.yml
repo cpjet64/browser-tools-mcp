@@ -64,17 +64,17 @@ jobs:
 
           # Install and build MCP
           cd webai-mcp
-          npm ci --prefer-offline || npm install
+          npm ci --prefer-offline || (rm -f package-lock.json && npm install)
           npm run build
 
           # Install and build Server
           cd ../webai-server
-          npm ci --prefer-offline || npm install
+          npm ci --prefer-offline || (rm -f package-lock.json && npm install)
           npm run build
 
           # Install root dependencies
           cd ..
-          npm ci --prefer-offline
+          npm ci --prefer-offline || (rm -f package-lock.json && npm install)
 
           # Verify builds
           if [ ! -f "webai-mcp/dist/mcp-server.js" ]; then
@@ -317,7 +317,7 @@ jobs:
           # Test browser automation compatibility
           echo "🤖 Testing browser automation setup..."
           cd webai-server
-          npm ci --prefer-offline || npm install
+          npm ci --prefer-offline || (rm -f package-lock.json && npm install)
           npm run build
 
           # Test that our browser connector can initialize
@@ -416,12 +416,12 @@ jobs:
         run: |
           # Install and lint MCP
           cd webai-mcp
-          npm ci --prefer-offline || npm install
+          npm ci --prefer-offline || (rm -f package-lock.json && npm install)
           npm run build
 
           # Install and lint Server
           cd ../webai-server
-          npm ci --prefer-offline || npm install
+          npm ci --prefer-offline || (rm -f package-lock.json && npm install)
           npm run build
 
           echo "✅ Code quality checks passed"

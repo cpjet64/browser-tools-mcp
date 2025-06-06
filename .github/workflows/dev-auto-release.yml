@@ -102,15 +102,15 @@ jobs:
       - name: 🔧 Install dependencies (MCP)
         run: |
           cd webai-mcp
-          npm install
+          npm ci --prefer-offline || (rm -f package-lock.json && npm install)
 
       - name: 🔧 Install dependencies (Server)
         run: |
           cd webai-server
-          npm install
+          npm ci --prefer-offline || (rm -f package-lock.json && npm install)
 
       - name: 🔧 Install root dependencies (for changelog automation)
-        run: npm ci
+        run: npm ci --prefer-offline || (rm -f package-lock.json && npm install)
 
       - name: 🏗️ Build packages
         run: |
