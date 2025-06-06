@@ -25,6 +25,10 @@ WebAI-MCP is a comprehensive browser automation and monitoring solution that ena
 
 ## 🚀 Installation Methods
 
+> **📖 For detailed setup, troubleshooting, and advanced usage, see [COMPLETE_USER_GUIDE.md](./COMPLETE_USER_GUIDE.md)**
+>
+> **🔧 For development and contribution info, see [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)**
+
 Choose the installation method that best fits your workflow:
 
 ### **Method 1: Temporary Download & Run (Recommended for Testing)**
@@ -472,9 +476,10 @@ Once installed, you can use natural language commands with your MCP client:
 
 ## 📚 Documentation
 
-- **Setup Guide**: [Release Setup Documentation](./docs/RELEASE_SETUP.md)
-- **Chinese Documentation**: [简体中文文档](./docs/i18n/README_CN.md)
-- **Original Docs**: [BrowserTools MCP Docs](https://browsertools.agentdesk.ai/)
+- **📖 Complete User Guide**: [COMPLETE_USER_GUIDE.md](./COMPLETE_USER_GUIDE.md) - Installation, setup, troubleshooting, and usage
+- **🔧 Developer Guide**: [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md) - Development workflows, project structure, and contribution guidelines
+- **🌐 Chinese Documentation**: [简体中文文档](./docs/i18n/README_CN.md)
+- **📋 MCP Protocol Reference**: [docs/mcp.md](./docs/mcp.md)
 
 ## 🔄 Migration from Browser Tools MCP
 
