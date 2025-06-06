@@ -1,9 +1,9 @@
 import WebSocket from 'ws';
-import { 
+import {
   createMockWebSocketConnection,
   mockConsoleLog,
-  mockNetworkRequest 
-} from '../setup';
+  mockNetworkRequest
+} from '../setup.js';
 
 describe('Chrome Extension Integration', () => {
   let mockWebSocketServer: any;

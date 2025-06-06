@@ -1,10 +1,10 @@
 import request from 'supertest';
 import express from 'express';
-import { 
+import {
   createMockWebSocketConnection,
   createMockRequest,
-  createMockResponse 
-} from '../setup';
+  createMockResponse
+} from '../setup.js';
 
 describe('Screenshot API', () => {
   let app: express.Application;
@@ -17,7 +17,7 @@ describe('Screenshot API', () => {
     mockWebSocketConnection = createMockWebSocketConnection();
     
     // Mock screenshot endpoint
-    app.post('/capture-screenshot', (req, res) => {
+    app.post('/capture-screenshot', (req: express.Request, res: express.Response) => {
       // Simulate checking for active connections
       if (!mockWebSocketConnection || mockWebSocketConnection.readyState !== 1) {
         return res.status(503).json({
@@ -27,7 +27,7 @@ describe('Screenshot API', () => {
       }
 
       // Simulate successful screenshot capture
-      res.json({
+      return res.json({
         success: true,
         file: 'screenshot_20240101_120000.png',
         timestamp: new Date().toISOString(),
@@ -64,10 +64,10 @@ describe('Screenshot API', () => {
     });
 
     it('should handle screenshot with custom options', async () => {
-      app.post('/capture-screenshot', (req, res) => {
+      app.post('/capture-screenshot', (req: express.Request, res: express.Response) => {
         const { fullPage, quality, format } = req.body;
-        
-        res.json({
+
+        return res.json({
           success: true,
           file: `screenshot_custom.${format || 'png'}`,
           timestamp: new Date().toISOString(),
@@ -133,9 +133,9 @@ describe('Screenshot API', () => {
     });
 
     it('should validate screenshot parameters', async () => {
-      app.post('/capture-screenshot', (req, res) => {
+      app.post('/capture-screenshot', (req: express.Request, res: express.Response) => {
         const { quality, format } = req.body;
-        
+
         // Validate quality
         if (quality !== undefined && (quality < 0 || quality > 100)) {
           return res.status(400).json({
@@ -143,7 +143,7 @@ describe('Screenshot API', () => {
             success: false
           });
         }
-        
+
         // Validate format
         if (format && !['png', 'jpeg', 'webp'].includes(format)) {
           return res.status(400).json({
@@ -151,8 +151,8 @@ describe('Screenshot API', () => {
             success: false
           });
         }
-        
-        res.json({ success: true, file: 'valid_screenshot.png' });
+
+        return res.json({ success: true, file: 'valid_screenshot.png' });
       });
 
       // Test invalid quality

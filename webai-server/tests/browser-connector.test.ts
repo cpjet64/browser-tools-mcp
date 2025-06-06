@@ -1,13 +1,13 @@
 import request from 'supertest';
 import express from 'express';
-import { 
+import {
   createMockWebSocketConnection,
   createMockRequest,
   createMockResponse,
   mockConsoleLog,
   mockNetworkRequest,
   mockAuditResult
-} from './setup';
+} from './setup.js';
 
 // Mock the browser-connector module
 const mockBrowserConnector = {
@@ -492,14 +492,14 @@ describe('Browser Connector', () => {
     });
 
     it('should handle missing required parameters', async () => {
-      app.post('/click-element', (req, res) => {
+      app.post('/click-element', (req: express.Request, res: express.Response) => {
         if (!req.body.selector && !req.body.coordinates) {
           return res.status(400).json({
             error: 'Either selector or coordinates must be provided',
             success: false
           });
         }
-        res.json({ success: true });
+        return res.json({ success: true });
       });
 
       const response = await request(app)

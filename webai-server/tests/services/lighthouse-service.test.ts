@@ -1,6 +1,6 @@
 import lighthouse from 'lighthouse';
-import chromeLauncher from 'chrome-launcher';
-import auditResultsFixture from '../fixtures/audit-results.json';
+import * as chromeLauncher from 'chrome-launcher';
+import auditResultsFixture from '../fixtures/audit-results.json' with { type: 'json' };
 
 // Mock lighthouse and chrome-launcher
 jest.mock('lighthouse');
@@ -110,8 +110,8 @@ describe('Lighthouse Service', () => {
       const result = await mockLighthouse(url, options);
 
       expect(mockLighthouse).toHaveBeenCalledWith(url, options);
-      expect(result.lhr.categories.performance.score).toBe(0.85);
-      expect(result.lhr.audits['first-contentful-paint'].score).toBe(0.9);
+      expect(result?.lhr.categories.performance.score).toBe(0.85);
+      expect(result?.lhr.audits['first-contentful-paint'].score).toBe(0.9);
     });
 
     it('should validate performance metrics', async () => {
@@ -119,8 +119,8 @@ describe('Lighthouse Service', () => {
         onlyCategories: ['performance']
       });
 
-      const performance = result.lhr.categories.performance;
-      const audits = result.lhr.audits;
+      const performance = result?.lhr.categories.performance;
+      const audits = result?.lhr.audits;
 
       expect(performance.score).toBeGreaterThanOrEqual(0);
       expect(performance.score).toBeLessThanOrEqual(1);
