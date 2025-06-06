@@ -122,18 +122,18 @@ describe('Lighthouse Service', () => {
       const performance = result?.lhr.categories.performance;
       const audits = result?.lhr.audits;
 
-      expect(performance.score).toBeGreaterThanOrEqual(0);
-      expect(performance.score).toBeLessThanOrEqual(1);
-      
+      expect(performance?.score).toBeGreaterThanOrEqual(0);
+      expect(performance?.score).toBeLessThanOrEqual(1);
+
       // Check Core Web Vitals
-      expect(audits['first-contentful-paint']).toBeDefined();
-      expect(audits['largest-contentful-paint']).toBeDefined();
-      expect(audits['cumulative-layout-shift']).toBeDefined();
-      
+      expect(audits?.['first-contentful-paint']).toBeDefined();
+      expect(audits?.['largest-contentful-paint']).toBeDefined();
+      expect(audits?.['cumulative-layout-shift']).toBeDefined();
+
       // Validate metric values
-      expect(audits['first-contentful-paint'].displayValue).toBe('1.2s');
-      expect(audits['largest-contentful-paint'].displayValue).toBe('2.1s');
-      expect(audits['cumulative-layout-shift'].displayValue).toBe('0.05');
+      expect(audits?.['first-contentful-paint']?.displayValue).toBe('1.2s');
+      expect(audits?.['largest-contentful-paint']?.displayValue).toBe('2.1s');
+      expect(audits?.['cumulative-layout-shift']?.displayValue).toBe('0.05');
     });
 
     it('should handle performance audit failure', async () => {
@@ -169,12 +169,12 @@ describe('Lighthouse Service', () => {
       const audits = result.lhr.audits;
 
       // Check for perfect accessibility practices
-      expect(audits['color-contrast'].score).toBe(1.0);
-      expect(audits['color-contrast'].displayValue).toBe('All text has sufficient color contrast');
+      expect(audits?.['color-contrast']?.score).toBe(1.0);
+      expect(audits?.['color-contrast']?.displayValue).toBe('All text has sufficient color contrast');
 
       // Check for accessibility issues
-      expect(audits['image-alt'].score).toBe(0.8);
-      expect(audits['image-alt'].displayValue).toBe('4 images missing alt text');
+      expect(audits?.['image-alt']?.score).toBe(0.8);
+      expect(audits?.['image-alt']?.displayValue).toBe('4 images missing alt text');
     });
 
     it('should validate accessibility audit structure', async () => {
@@ -209,8 +209,8 @@ describe('Lighthouse Service', () => {
       const audits = result.lhr.audits;
 
       // Check essential SEO elements
-      expect(audits['meta-description'].score).toBe(1.0);
-      expect(audits['meta-description'].displayValue).toBe('Document has a meta description');
+      expect(audits?.['meta-description']?.score).toBe(1.0);
+      expect(audits?.['meta-description']?.displayValue).toBe('Document has a meta description');
     });
   });
 
@@ -232,8 +232,8 @@ describe('Lighthouse Service', () => {
       const audits = result.lhr.audits;
 
       // Check security practices
-      expect(audits['uses-https'].score).toBe(1.0);
-      expect(audits['uses-https'].displayValue).toBe('Uses HTTPS');
+      expect(audits?.['uses-https']?.score).toBe(1.0);
+      expect(audits?.['uses-https']?.displayValue).toBe('Uses HTTPS');
     });
   });
 

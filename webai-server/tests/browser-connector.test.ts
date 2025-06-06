@@ -38,8 +38,8 @@ describe('Browser Connector', () => {
     app.use(express.json());
     
     // Setup basic routes for testing
-    app.get('/.identity', (req, res) => {
-      res.json({
+    app.get('/.identity', (req: express.Request, res: express.Response) => {
+      return res.json({
         name: 'WebAI Server',
         version: '1.5.0',
         status: 'running',
@@ -47,16 +47,16 @@ describe('Browser Connector', () => {
       });
     });
 
-    app.get('/console-logs', (req, res) => {
-      res.json([mockConsoleLog]);
+    app.get('/console-logs', (req: express.Request, res: express.Response) => {
+      return res.json([mockConsoleLog]);
     });
 
-    app.get('/network-errors', (req, res) => {
-      res.json([mockNetworkRequest]);
+    app.get('/network-errors', (req: express.Request, res: express.Response) => {
+      return res.json([mockNetworkRequest]);
     });
 
-    app.post('/capture-screenshot', (req, res) => {
-      res.json({
+    app.post('/capture-screenshot', (req: express.Request, res: express.Response) => {
+      return res.json({
         success: true,
         file: 'screenshot.png',
         timestamp: new Date().toISOString()
@@ -117,12 +117,12 @@ describe('Browser Connector', () => {
     });
 
     it('should filter console logs by level', async () => {
-      app.get('/console-logs', (req, res) => {
+      app.get('/console-logs', (req: express.Request, res: express.Response) => {
         const level = req.query.level as string;
-        const logs = [mockConsoleLog].filter(log => 
+        const logs = [mockConsoleLog].filter(log =>
           !level || log.level === level
         );
-        res.json(logs);
+        return res.json(logs);
       });
 
       const response = await request(app)
@@ -175,8 +175,8 @@ describe('Browser Connector', () => {
     });
 
     it('should return all network requests', async () => {
-      app.get('/all-xhr', (req, res) => {
-        res.json([mockNetworkRequest]);
+      app.get('/all-xhr', (req: express.Request, res: express.Response) => {
+        return res.json([mockNetworkRequest]);
       });
 
       const response = await request(app)
@@ -271,8 +271,8 @@ describe('Browser Connector', () => {
     });
 
     it('should get localStorage', async () => {
-      app.get('/local-storage', (req, res) => {
-        res.json({
+      app.get('/local-storage', (req: express.Request, res: express.Response) => {
+        return res.json({
           user_preferences: '{"theme":"dark"}',
           session_token: 'token123'
         });
@@ -287,8 +287,8 @@ describe('Browser Connector', () => {
     });
 
     it('should get sessionStorage', async () => {
-      app.get('/session-storage', (req, res) => {
-        res.json({
+      app.get('/session-storage', (req: express.Request, res: express.Response) => {
+        return res.json({
           current_page: 'dashboard',
           scroll_position: '150'
         });
@@ -511,7 +511,7 @@ describe('Browser Connector', () => {
     });
 
     it('should handle server errors gracefully', async () => {
-      app.get('/console-logs', (req, res) => {
+      app.get('/console-logs', (req: express.Request, res: express.Response) => {
         throw new Error('Internal server error');
       });
 

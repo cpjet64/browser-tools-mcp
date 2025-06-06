@@ -96,11 +96,11 @@ describe('Screenshot API', () => {
     });
 
     it('should handle element screenshot', async () => {
-      app.post('/capture-screenshot', (req, res) => {
+      app.post('/capture-screenshot', (req: express.Request, res: express.Response) => {
         const { selector, clip } = req.body;
-        
+
         if (selector || clip) {
-          res.json({
+          return res.json({
             success: true,
             file: 'element_screenshot.png',
             timestamp: new Date().toISOString(),
@@ -109,7 +109,7 @@ describe('Screenshot API', () => {
             clip: clip
           });
         } else {
-          res.json({
+          return res.json({
             success: true,
             file: 'fullpage_screenshot.png',
             timestamp: new Date().toISOString(),
@@ -269,9 +269,9 @@ describe('Screenshot API', () => {
     it('should handle concurrent screenshot requests', async () => {
       let requestCount = 0;
       
-      app.post('/capture-screenshot', (req, res) => {
+      app.post('/capture-screenshot', (req: express.Request, res: express.Response) => {
         requestCount++;
-        
+
         // Simulate processing time
         setTimeout(() => {
           res.json({
