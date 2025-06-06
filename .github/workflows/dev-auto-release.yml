@@ -15,7 +15,7 @@ on:
 
 jobs:
   publish-dev:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, webai]
     # Only run if tests passed OR manual dispatch with skip_tests=true
     if: ${{ github.event.workflow_run.conclusion == 'success' || (github.event_name == 'workflow_dispatch' && github.event.inputs.skip_tests == 'true') }}
     permissions:
