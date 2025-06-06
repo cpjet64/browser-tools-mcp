@@ -134,9 +134,9 @@ describe('Browser Connector', () => {
     });
 
     it('should return console errors only', async () => {
-      app.get('/console-errors', (req, res) => {
+      app.get('/console-errors', (req: express.Request, res: express.Response) => {
         const errorLog = { ...mockConsoleLog, level: 'error' };
-        res.json([errorLog]);
+        return res.json([errorLog]);
       });
 
       const response = await request(app)
@@ -148,8 +148,8 @@ describe('Browser Connector', () => {
     });
 
     it('should handle empty console logs', async () => {
-      app.get('/console-logs', (req, res) => {
-        res.json([]);
+      app.get('/console-logs', (req: express.Request, res: express.Response) => {
+        return res.json([]);
       });
 
       const response = await request(app)
@@ -321,9 +321,9 @@ describe('Browser Connector', () => {
 
   describe('Element Interaction Endpoints', () => {
     it('should click element by selector', async () => {
-      app.post('/click-element', (req, res) => {
+      app.post('/click-element', (req: express.Request, res: express.Response) => {
         const { selector } = req.body;
-        res.json({
+        return res.json({
           success: true,
           message: `Clicked element: ${selector}`,
           element: {
@@ -343,9 +343,9 @@ describe('Browser Connector', () => {
     });
 
     it('should fill input field', async () => {
-      app.post('/fill-input', (req, res) => {
+      app.post('/fill-input', (req: express.Request, res: express.Response) => {
         const { selector, text } = req.body;
-        res.json({
+        return res.json({
           success: true,
           message: `Filled input ${selector} with: ${text}`,
           element: {
@@ -533,7 +533,7 @@ describe('Browser Connector', () => {
 
   describe('CORS and Headers', () => {
     it('should include CORS headers', async () => {
-      app.use((req, res, next) => {
+      app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
         res.header('Access-Control-Allow-Origin', '*');
         res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
         res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
