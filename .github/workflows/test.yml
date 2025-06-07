@@ -44,7 +44,7 @@ jobs:
     name: ${{ matrix.test-name }}
 
     steps:
-      - name: � Checkout
+      - name: "📥 Checkout"
         uses: actions/checkout@v4
 
       - name: 📦 Setup Node.js ${{ matrix.node-version }}
@@ -99,7 +99,7 @@ jobs:
           echo "📦 Setting up test environment..."
 
           # Test 1: Basic Node.js and platform detection
-          echo "� Testing platform detection..."
+          echo "🔍 Testing platform detection..."
           node -e "
             const path = require('path');
             const os = require('os');
