@@ -4,7 +4,7 @@
  * Browser Tools MCP Diagnostic Tool
  *
  * Comprehensive diagnostic tool to identify and troubleshoot common issues
- * with browser-tools-mcp setup and connectivity.
+ * with webai-mcp setup and connectivity.
  */
 
 import { execSync, spawn } from 'child_process';
@@ -118,7 +118,7 @@ class DiagnosticTool {
           this.log('Browser Tools packages found globally', 'green', ICONS.success);
         } else {
           this.log('Browser Tools packages not installed globally', 'yellow', ICONS.warning);
-          this.recommendations.push('Consider installing globally: npm install -g @cpjet64/browser-tools-mcp @cpjet64/browser-tools-server');
+          this.recommendations.push('Consider installing globally: npm install -g @cpjet64/webai-mcp @cpjet64/webai-server');
         }
       } catch (error) {
         this.log('Could not check global packages', 'yellow', ICONS.warning);
@@ -185,7 +185,7 @@ class DiagnosticTool {
       } else {
         this.log('No browser-tools processes found', 'yellow', ICONS.warning);
         this.results.processes = { status: 'none', count: 0 };
-        this.recommendations.push('Start the browser-tools-server: npx @cpjet64/browser-tools-server');
+        this.recommendations.push('Start the webai-server: npx @cpjet64/webai-server');
       }
 
     } catch (error) {
@@ -256,8 +256,8 @@ class DiagnosticTool {
 
     try {
       // Check if dist directories exist
-      const mcpDistPath = path.join(process.cwd(), 'browser-tools-mcp', 'dist');
-      const serverDistPath = path.join(process.cwd(), 'browser-tools-server', 'dist');
+      const mcpDistPath = path.join(process.cwd(), 'webai-mcp', 'dist');
+      const serverDistPath = path.join(process.cwd(), 'webai-server', 'dist');
 
       const mcpBuilt = fs.existsSync(mcpDistPath);
       const serverBuilt = fs.existsSync(serverDistPath);
@@ -266,14 +266,14 @@ class DiagnosticTool {
         this.log('MCP Server build artifacts found', 'green', ICONS.success);
       } else {
         this.log('MCP Server not built', 'red', ICONS.error);
-        this.issues.push('MCP Server needs to be built. Run: cd browser-tools-mcp && npm run build');
+        this.issues.push('MCP Server needs to be built. Run: cd webai-mcp && npm run build');
       }
 
       if (serverBuilt) {
         this.log('Browser Tools Server build artifacts found', 'green', ICONS.success);
       } else {
-        this.log('Browser Tools Server not built', 'red', ICONS.error);
-        this.issues.push('Browser Tools Server needs to be built. Run: cd browser-tools-server && npm run build');
+        this.log('WebAI Server not built', 'red', ICONS.error);
+        this.issues.push('WebAI Server needs to be built. Run: cd webai-server && npm run build');
       }
 
       this.results.buildStatus = {
@@ -326,8 +326,8 @@ class DiagnosticTool {
     }
 
     if (!serverFound) {
-      this.log('No Browser Tools Server found', 'red', ICONS.error);
-      this.issues.push('Browser Tools Server is not running. Start it with: npx @cpjet64/browser-tools-server');
+      this.log('No WebAI Server found', 'red', ICONS.error);
+      this.issues.push('WebAI Server is not running. Start it with: npx @cpjet64/webai-server');
       this.results.connectivity = { status: 'no_server' };
     } else {
       this.results.connectivity = { status: 'connected', server: serverDetails };
@@ -412,7 +412,7 @@ class DiagnosticTool {
     const hasRecommendations = this.recommendations.length > 0;
 
     if (!hasErrors && !hasRecommendations) {
-      this.log('All checks passed! Your browser-tools-mcp setup looks good.', 'green', ICONS.success);
+      this.log('All checks passed! Your webai-mcp setup looks good.', 'green', ICONS.success);
     } else if (hasErrors) {
       this.log(`Found ${this.issues.length} issue(s) that need attention:`, 'red', ICONS.error);
       this.issues.forEach((issue, index) => {
@@ -435,13 +435,13 @@ class DiagnosticTool {
 
       if (!this.results.buildStatus?.mcpBuilt || !this.results.buildStatus?.serverBuilt) {
         this.log('1. Build the packages:', 'cyan', ICONS.tools);
-        this.log('   cd browser-tools-mcp && npm install && npm run build', 'blue', '   ');
-        this.log('   cd ../browser-tools-server && npm install && npm run build', 'blue', '   ');
+        this.log('   cd webai-mcp && npm install && npm run build', 'blue', '   ');
+        this.log('   cd ../webai-server && npm install && npm run build', 'blue', '   ');
       }
 
       if (this.results.connectivity?.status === 'no_server') {
         this.log('2. Start the server:', 'cyan', ICONS.tools);
-        this.log('   npx @cpjet64/browser-tools-server', 'blue', '   ');
+        this.log('   npx @cpjet64/webai-server', 'blue', '   ');
       }
 
       if (this.results.chromeExtension?.status === 'ready') {

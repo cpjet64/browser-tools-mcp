@@ -198,8 +198,8 @@ class SetupTool {
     this.logSection('Building Packages');
 
     const packages = [
-      { name: 'MCP Server', path: 'browser-tools-mcp' },
-      { name: 'Browser Tools Server', path: 'browser-tools-server' }
+      { name: 'MCP Server', path: 'webai-mcp' },
+      { name: 'WebAI Server', path: 'webai-server' }
     ];
 
     for (const pkg of packages) {
@@ -347,7 +347,7 @@ class SetupTool {
 
     console.log();
     this.log('Next steps:', 'cyan', ICONS.info);
-    this.log('1. Start the server: npx @cpjet64/browser-tools-server', 'blue', '  ');
+    this.log('1. Start the server: npx @cpjet64/webai-server', 'blue', '  ');
     this.log('2. Install the Chrome extension from the chrome-extension folder', 'blue', '  ');
     this.log('3. Configure your MCP client (Cursor, Claude Desktop, etc.)', 'blue', '  ');
     console.log();

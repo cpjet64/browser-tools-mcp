@@ -174,9 +174,9 @@ export class ErrorHandler {
     switch (type) {
       case 'connection':
         solutions.push({
-          title: 'Start Browser Tools Server',
+          title: 'Start WebAI Server',
           description: 'The most common cause is that the server is not running.',
-          commands: ['npx @cpjet64/browser-tools-server'],
+          commands: ['npx @cpjet64/webai-server'],
           priority: 'high'
         });
 
@@ -301,8 +301,8 @@ export class ErrorHandler {
       title: 'Get Help',
       description: 'If the issue persists, check the documentation or report the issue.',
       links: [
-        'https://github.com/cpjet64/browser-tools-mcp/issues',
-        'https://github.com/cpjet64/browser-tools-mcp/blob/main/README.md'
+        'https://github.com/cpjet64/webai-mcp/issues',
+        'https://github.com/cpjet64/webai-mcp/blob/main/README.md'
       ],
       priority: 'low'
     });

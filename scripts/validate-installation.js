@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 /**
- * Installation Validation Script for Browser Tools MCP
+ * Installation Validation Script for WebAI-MCP
  *
- * Comprehensive validation of the entire Browser Tools MCP setup
+ * Comprehensive validation of the entire WebAI-MCP setup
  * including dependencies, builds, configuration, and functionality.
  */
 
@@ -12,7 +12,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import DiagnosticTool from './diagnose.js';
-import { VersionChecker } from '../browser-tools-mcp/version-checker.js';
+import { VersionChecker } from '../webai-mcp/version-checker.js';
 
 const COLORS = {
   reset: '\x1b[0m',
@@ -74,7 +74,7 @@ class InstallationValidator {
   }
 
   async runValidation() {
-    this.log('Browser Tools MCP Installation Validator', 'bright', ICONS.rocket);
+    this.log('WebAI-MCP Installation Validator', 'bright', ICONS.rocket);
     this.log(`Platform: ${os.platform()} ${os.arch()}`, 'blue', ICONS.info);
     this.log(`Node.js: ${process.version}`, 'blue', ICONS.info);
     console.log();
@@ -228,8 +228,8 @@ class InstallationValidator {
 
     // Check for build artifacts
     const buildDirs = [
-      'browser-tools-mcp/dist',
-      'browser-tools-server/dist'
+      'webai-mcp/dist',
+      'webai-server/dist'
     ];
 
     for (const buildDir of buildDirs) {
@@ -288,8 +288,8 @@ class InstallationValidator {
     this.logSection('Build Validation');
 
     const packages = [
-      { name: 'MCP Server', path: 'browser-tools-mcp' },
-      { name: 'Browser Tools Server', path: 'browser-tools-server' }
+      { name: 'MCP Server', path: 'webai-mcp' },
+      { name: 'WebAI Server', path: 'webai-server' }
     ];
 
     for (const pkg of packages) {
@@ -405,7 +405,7 @@ class InstallationValidator {
       if (response.ok) {
         const identity = await response.json();
         if (identity.signature === 'mcp-browser-connector-24x7') {
-          this.recordResult('functionality', 'pass', 'Browser Tools Server is running and responding');
+          this.recordResult('functionality', 'pass', 'WebAI Server is running and responding');
         } else {
           this.recordResult('functionality', 'warn', 'Server running but wrong signature');
         }
@@ -413,8 +413,8 @@ class InstallationValidator {
         this.recordResult('functionality', 'warn', 'Server running but not responding correctly');
       }
     } catch (error) {
-      this.recordResult('functionality', 'warn', 'Browser Tools Server not running');
-      this.recommendations.push('Start the server: npx @cpjet64/browser-tools-server');
+      this.recordResult('functionality', 'warn', 'WebAI Server not running');
+      this.recommendations.push('Start the server: npx @cpjet64/webai-server');
     }
   }
 
