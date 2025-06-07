@@ -607,4 +607,4 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-**Made with ❤️ by cpjet64** | **Independent Project** | **v1.4.1** | **Fully Integrated**
+**Made with ❤️ by cpjet64** | **Independent Project** | **v1.5.1-dev.3** | **Fully Integrated**

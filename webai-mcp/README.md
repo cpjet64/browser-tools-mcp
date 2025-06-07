@@ -116,4 +116,4 @@ MIT License - see [LICENSE](https://github.com/cpjet64/WebAI-MCP/blob/main/LICEN
 
 ---
 
-**Made with ❤️ by cpjet64** | **v1.4.1** | **Independent Project**
+**Made with ❤️ by cpjet64** | **v1.5.1-dev.3** | **Independent Project**

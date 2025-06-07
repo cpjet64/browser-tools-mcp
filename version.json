@@ -1,14 +1,19 @@
 {
-  "version": "1.4.2",
-  "components": {
-    "extension": "1.4.2",
-    "server": "1.4.2",
-    "mcp": "1.4.2"
+  "version": "1.5.1-dev.3",
+  "lastUpdated": "2025-01-15T10:30:00.000Z",
+  "track": "development",
+  "packages": {
+    "webai-mcp": "1.5.1-dev.3",
+    "webai-server": "1.5.1-dev.3",
+    "chrome-extension": "1.5.1"
   },
-  "buildDate": "2025-05-26",
+  "buildDate": "2025-01-15",
   "description": "Unified version configuration for WebAI-MCP components",
   "features": {
-    "refreshBrowser": "1.4.2",
-    "phaseOneImplementation": "partial"
+    "refreshBrowser": "1.5.1",
+    "phaseOneImplementation": "complete",
+    "autoversioning": "enabled",
+    "crossPlatformTesting": "enabled",
+    "enhancedErrorHandling": "enabled"
   }
 }

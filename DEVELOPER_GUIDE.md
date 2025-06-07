@@ -407,7 +407,7 @@ webai-mcp/
 ├── mcp-server.ts           # TypeScript source files
 ├── version-checker.ts
 ├── error-handler.ts
-└── build/                  # Compiled output (generated)
+└── dist/                   # Compiled output (generated)
     ├── mcp-server.js
     ├── mcp-server.d.ts
     ├── mcp-server.js.map
@@ -430,7 +430,7 @@ webai-server/
 │   ├── seo.ts
 │   ├── best-practices.ts
 │   └── types.ts
-└── build/                  # Compiled output (generated)
+└── dist/                   # Compiled output (generated)
     ├── browser-connector.js
     ├── browser-connector.d.ts
     ├── browser-connector.js.map
@@ -490,8 +490,8 @@ npm run install:all
 npm run build:all
 
 # 3. Verify build success
-ls webai-mcp/build/
-ls webai-server/build/
+ls webai-mcp/dist/
+ls webai-server/dist/
 ```
 
 #### **Development Cycle**
@@ -507,15 +507,15 @@ cd webai-server && npm run build:watch &
 #### **Build Verification**
 ```bash
 # Check build artifacts exist
-test -f webai-mcp/build/mcp-server.js && echo "MCP build OK"
-test -f webai-server/build/browser-connector.js && echo "Server build OK"
+test -f webai-mcp/dist/mcp-server.js && echo "MCP build OK"
+test -f webai-server/dist/browser-connector.js && echo "Server build OK"
 
 # Verify TypeScript declarations
-test -f webai-mcp/build/mcp-server.d.ts && echo "MCP types OK"
-test -f webai-server/build/browser-connector.d.ts && echo "Server types OK"
+test -f webai-mcp/dist/mcp-server.d.ts && echo "MCP types OK"
+test -f webai-server/dist/browser-connector.d.ts && echo "Server types OK"
 
 # Check lighthouse module build
-test -f webai-server/build/lighthouse/index.js && echo "Lighthouse build OK"
+test -f webai-server/dist/lighthouse/index.js && echo "Lighthouse build OK"
 ```
 
 ### **CI/CD Build Integration**
@@ -531,9 +531,9 @@ test -f webai-server/build/lighthouse/index.js && echo "Lighthouse build OK"
 
 - name: ✅ Verify build artifacts
   run: |
-    test -f webai-mcp/build/mcp-server.js
-    test -f webai-server/build/browser-connector.js
-    test -f webai-server/build/lighthouse/index.js
+    test -f webai-mcp/dist/mcp-server.js
+    test -f webai-server/dist/browser-connector.js
+    test -f webai-server/dist/lighthouse/index.js
     echo "Build verification successful"
 ```
 
@@ -984,6 +984,27 @@ tests/
 ```
 
 ## 📦 NPM Package Management
+
+### 🚀 Production Releases
+- **Workflow**: `main-auto-release.yml` automates cross-component releases
+- **Changelog**: generated with `auto-changelog` and included in each release
+
+### 📈 Version Tracking
+- **version.json**: central version configuration
+- **CHANGELOG.md**: auto-generated from conventional commits
+- **GitHub Releases**: published automatically with Chrome extension packages
+
+### 🏗️ Build Process Documentation
+- **TypeScript Compilation**: `tsc` outputs to the `dist/` directory
+- **Package Publishing**: automated NPM publishing with proper tags
+- **Chrome Extension Packaging**: automated ZIP creation for releases
+- **Documentation Updates**: version references updated automatically
+
+### ✅ Testing Integration
+- **Unit Tests**: Jest with TypeScript support
+- **Integration Tests**: cross-component compatibility
+- **Build Verification**: automated artifact validation
+- **Cross-Platform Testing**: Windows, macOS, Linux compatibility
 
 ### **Package Configuration**
 
