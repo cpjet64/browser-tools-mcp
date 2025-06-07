@@ -62,7 +62,7 @@ const mcpLog = {
 };
 
 // Get version from package.json
-let packageVersion = "1.4.0"; // fallback version
+let packageVersion = "1.5.1-dev.3"; // fallback version
 try {
   const packagePath = path.join(__dirname, "..", "package.json");
   if (fs.existsSync(packagePath)) {

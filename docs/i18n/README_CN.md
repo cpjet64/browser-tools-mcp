@@ -6,7 +6,7 @@
 
 WebAI-MCP是一个强大的浏览器监控和交互工具，通过Anthropic的Model Context Protocol (MCP) 使AI应用程序能够通过Chrome扩展程序捕获和分析浏览器数据。
 
-## 🚀 此版本的新功能 (v1.4.0)
+## 🚀 此版本的新功能 (v1.5.1)
 
 此版本包含**所有社区贡献**和主要增强功能，具有**完整功能集成**：
 
@@ -237,15 +237,15 @@ MCP服务器提供了运行当前页面审计的工具。以下是触发它们�
 
 Model Context Protocol (MCP) 是Anthropic AI模型支持的一种能力，允许创建自定义工具供兼容的客户端使用。MCP客户端如Claude Desktop、Cursor、Cline或Zed可以运行MCP服务器，这些服务器为客户端"教授"新的工具。
 
-这些工具可以调用外部API，但在本案例中，**所有日志都仅存储在本地**机器上，绝不会发送到任何第三方服务或API。BrowserTools MCP运行一个本地的NodeJS API服务器，与Chrome扩展程序通信。
+这些工具可以调用外部API，但在本案例中，**所有日志都仅存储在本地**机器上，绝不会发送到任何第三方服务或API。WebAI-MCP运行一个本地的NodeJS API服务器，与Chrome扩展程序通信。
 
-所有BrowserTools MCP服务器的使用者都可以通过相同的NodeJS API和Chrome扩展程序进行交互。
+所有WebAI-MCP服务器的使用者都可以通过相同的NodeJS API和Chrome扩展程序进行交互。
 
 #### Chrome扩展程序
 
 - 监控XHR请求/响应和控制台日志
 - 跟踪选择的DOM元素
-- 将日志和当前元素发送到BrowserTools连接器
+- 将日志和当前元素发送到WebAI连接器
 - 通过Websocket服务器连接以捕获/发送截图
 - 允许用户配置分词/截断限制和截图文件夹路径
 
@@ -268,7 +268,7 @@ Model Context Protocol (MCP) 是Anthropic AI模型支持的一种能力，允许
 
 安装步骤可在文档中找到：
 
-- [BrowserTools MCP文档](https://browsertools.agentdesk.ai/)
+- [WebAI-MCP文档](https://browsertools.agentdesk.ai/)
 
 ## 使用
 

@@ -18,16 +18,16 @@ npm install -g @cpjet64/webai-server
 webai-server
 ```
 
-The server will start on `http://localhost:3000` by default.
+The server will start on `http://localhost:3025` by default.
 
 ### Verify Installation
 
 ```bash
 # Check server status
-curl http://localhost:3000/.identity
+curl http://localhost:3025/.identity
 
 # Expected response:
-# {"signature": "mcp-browser-connector-24x7", "version": "1.4.1"}
+# {"signature": "mcp-browser-connector-24x7", "version": "1.5.1-dev.3"}
 ```
 
 ## 🛠️ Features
@@ -47,13 +47,13 @@ curl http://localhost:3000/.identity
 
 ```bash
 # Server configuration
-PORT=3000                    # Server port (default: 3000)
+PORT=3025                    # Server port (default: 3025)
 HOST=localhost              # Server host (default: localhost)
 
 # Network configuration
 NETWORK_TIMEOUT=30000       # Request timeout in ms
 NETWORK_RETRIES=3           # Number of retry attempts
-USER_AGENT=WebAI-MCP/1.4.1  # Custom user agent
+USER_AGENT=WebAI-MCP/1.5.1-dev.3  # Custom user agent
 
 # Proxy configuration (optional)
 PROXY_HOST=proxy.example.com
@@ -157,10 +157,10 @@ const proxyManager = new ProxyManager({
 npx @cpjet64/webai-server --diagnose
 
 # Test server connectivity
-curl -f http://localhost:3000/.identity || echo "Server not running"
+curl -f http://localhost:3025/.identity || echo "Server not running"
 
 # Check Chrome extension connection
-curl http://localhost:3000/extension-status
+curl http://localhost:3025/extension-status
 ```
 
 ## 📚 Documentation
@@ -180,4 +180,4 @@ MIT License - see [LICENSE](https://github.com/cpjet64/WebAI-MCP/blob/main/LICEN
 
 ---
 
-**Made with ❤️ by cpjet64** | **v1.4.1** | **Independent Project**
+**Made with ❤️ by cpjet64** | **v1.5.1-dev.3** | **Independent Project**

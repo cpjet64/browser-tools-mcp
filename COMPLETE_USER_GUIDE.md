@@ -57,7 +57,7 @@ npm run build:all
 
 # 4. Run locally
 cd webai-server && npm start
-# Configure IDE with: node /path/to/webai-mcp/webai-mcp/build/index.js
+# Configure IDE with: node /path/to/webai-mcp/webai-mcp/dist/mcp-server.js
 ```
 
 ## 🔧 Chrome Extension Setup
