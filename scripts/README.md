@@ -156,7 +156,7 @@ npm run validate
 - `scripts/macos/start-server.sh` - Start server shell script
 
 ### Linux
-- `scripts/linux/browser-tools.service` - Systemd service file
+- `scripts/linux/webai-server.service` - Systemd service file
 
 ## Troubleshooting
 
